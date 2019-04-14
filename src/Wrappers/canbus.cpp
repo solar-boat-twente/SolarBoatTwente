@@ -10,7 +10,7 @@
 #include <chrono>
 #include <algorithm>
 
-#include "../Colors.h"
+#include "../../include/easy_debugging.hpp"
 
 using namespace MIO;
 using namespace std;
@@ -39,39 +39,40 @@ int CANbus::read(unsigned long msg_id, canmsg_t* buffer){
       *buffer = *message.msg;
       if(message.FIRST_READER){
         message.FIRST_READER = false;
+        M_OK<<"SUCCESSFULLY READ MESSAGE WITH ID: "<<msg_id;
         return 1;
       } else{
+        M_WARN<<"TRIED TO READ MESSAGE WITH ID: "<<msg_id<<" TWICE";
         return 0;
       }
     }
   }
-  fprintf(stderr,  ERR("ERROR: INVALID CAN ID: 0x%x\n"), msg_id);
+  M_ERR<<"INVALID CAN ID:"<<msg_id;
   return -1;
 }
 
 int CANbus::write(canmsg_t* const msg, bool force_send){
-  std::cout<<INFO("INFO: WRITTEN MESSAGE WITH ID: ")<<"0x"<<hex<<msg->id<<INFO(" AND DATA: ");
+  M_DEBUG<<"WRITTEN MESSAGE WITH ID: "<<msg->id<<" AND DATA: ";
   for(int i = 0; i<msg->length;i++){
     cout<<+msg->data[i]<<" ";
   }
-  cout<<dec<<endl;
   return 1;
 } 
 
+//TODO(sander): Make sure that canbus cannot be started twice!
 int CANbus::start(short int delay){
-  std::cout<<INFO("INFO: CANBUS STARTED WITH DEVICE: ")<<can_status->device<<std::endl;
   //Making a thread 
   m_thread = std::thread(&CANbus::_read_CAN_thread, this, delay);
   can_status->status = true;
+  M_INFO<<"CANBUS STARTED WITH DEVICE: "<<can_status->device;
   return 1;
 }
 
-
+//TODO(sander): Make sure that canbus cannot be stopped twice!
 int CANbus::stop(){
-  std::cout<<"CANbus in stopped for device: "<<can_status->device<<std::endl;
- 
   can_status->status = false;
   m_thread.join();
+  M_INFO<<"CANBUS STARTED WITH DEVICE: "<<can_status->device;
   return 1;
 }
 
@@ -88,14 +89,14 @@ int CANbus::add_message_(canmsg_t* const message){
 }
 
 int CANbus::_read_CAN(){
-  //Fakes making a simple message with id 12548 and data a a a
+  //Fakes making a simple message with id STD_ID and data STD_DATA
   canmsg_t *rx = new canmsg_t;
   rx->length = STANDARD_LENGTH;
   for(int i =0; i<STANDARD_LENGTH; i++){
     rx->data[i] = STANDARD_MESSAGE[i];
   }
   rx->id = STD_ID;
-  printf("Constructed message with data: %s and id: %i\n", rx->data, (int)rx->id);
+  M_INFO<<"CONSTRUCTED MESSAGE WITH DATA: "<<rx->data<<" AND ID: "<<rx->id;
   return _add_message(rx);
 }
 
@@ -107,7 +108,7 @@ int CANbus::_add_message(canmsg_t* rx){
       delete message.msg;
       message.msg = rx;
       message.FIRST_READER = true;
-      printf("Updated message with data: %s and id: %i\n", message.msg->data, (int)message.msg->id);
+      M_INFO<<"UPDATED MESSAGE WITH DATA: "<<message.msg->data<<" AND ID: "<<rx->id;
       return 0;
     }
   }
@@ -117,7 +118,7 @@ int CANbus::_add_message(canmsg_t* rx){
   new_message.FIRST_READER = true;
   new_message.msg = rx;
   received_message.push_back(new_message);
-  std::cout<<INFO("INFO: ADDED NEW MESSAGE TO VECTOR WITH ID: ")<< "0x"<<hex<<new_message.msg->id<<dec<<std::endl;
+  M_INFO<<"ADDED NEW MESSAGE TO VECTOR WITH ID: "<<new_message.msg->id;
   return 1;
 }
 

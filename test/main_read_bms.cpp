@@ -10,7 +10,6 @@
  *
  * Created on April 9, 2019, 7:22 PM
  */
-
 #include <cstdlib>
 #include <stdio.h>
 #include <vector>
@@ -21,7 +20,9 @@
 #include "../src/Battery_Magagement_System/BMS.h"
 #include "../src/Battery_Magagement_System/BMS_CANIDs.h"
 
-#include "../src/Colors.h"
+#include "../include/easy_debugging.hpp"
+
+
 
 using namespace std;
 using namespace MIO;
@@ -29,16 +30,18 @@ using namespace MIO;
  * 
  */
 int main(){
-  CANbus * const canbus = new CANbus("can1");
-  structures::PowerOutput * power_output = new structures::PowerOutput;
-  power_output->balancing_control = 6;
-  power_output->contractor_control = 5;
-  PowerElectronics::BMS *bms = new PowerElectronics::BMS(canbus);
-  bms->start_writing(power_output);
-  this_thread::sleep_for(chrono::milliseconds(3000));
-  bms->stop_writing();
+  char variable = 0x59;
+  M_INFO<<"Hello";
+  M_INFO<<"INFO MESSAGE";
+  M_ERR<<"ERROR MESSAGE";
+  M_WARN<<"WARNING "<<CANID_BMS_RESPONSE1<<variable;
+  M_OK<<"OK MESSAGE";
   
-  
+  CANbus * canbus = new CANbus("can0");
+  structures::PowerInput * power_input = new structures::PowerInput;
+  PowerElectronics::BMS * bms = new PowerElectronics::BMS(canbus);
+  canbus->start(10000);
+  bms->start_reading(power_input);
   return 0;
 }
 
