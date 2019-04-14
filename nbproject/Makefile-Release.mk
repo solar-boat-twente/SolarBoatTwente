@@ -35,8 +35,9 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 
 # Object Files
 OBJECTFILES= \
+	${OBJECTDIR}/src/Battery_Magagement_System/BMS.o \
 	${OBJECTDIR}/src/Wrappers/canbus.o \
-	${OBJECTDIR}/test/main.o
+	${OBJECTDIR}/test/main_read_bms.o
 
 
 # C Compiler Flags
@@ -65,15 +66,20 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libsolarboattwente.a: ${OBJECTFILES}
 	${AR} -rv ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libsolarboattwente.a ${OBJECTFILES} 
 	$(RANLIB) ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libsolarboattwente.a
 
+${OBJECTDIR}/src/Battery_Magagement_System/BMS.o: src/Battery_Magagement_System/BMS.cpp
+	${MKDIR} -p ${OBJECTDIR}/src/Battery_Magagement_System
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Battery_Magagement_System/BMS.o src/Battery_Magagement_System/BMS.cpp
+
 ${OBJECTDIR}/src/Wrappers/canbus.o: src/Wrappers/canbus.cpp
 	${MKDIR} -p ${OBJECTDIR}/src/Wrappers
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Wrappers/canbus.o src/Wrappers/canbus.cpp
 
-${OBJECTDIR}/test/main.o: test/main.cpp
+${OBJECTDIR}/test/main_read_bms.o: test/main_read_bms.cpp
 	${MKDIR} -p ${OBJECTDIR}/test
 	${RM} "$@.d"
-	$(COMPILE.cc) -O2 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/test/main.o test/main.cpp
+	$(COMPILE.cc) -O2 -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/test/main_read_bms.o test/main_read_bms.cpp
 
 # Subprojects
 .build-subprojects:
