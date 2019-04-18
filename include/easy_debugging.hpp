@@ -19,8 +19,8 @@
 #include <iostream>
 #include <typeinfo>
 #include <stdint.h>
+#include <stdlib.h>
 
-namespace debug{
 
 #define RST   "\x1B[0m"
 #define KRED  "\x1B[31m"
@@ -31,25 +31,28 @@ namespace debug{
 #define KCYN  "\x1B[36m"
 #define KWHT  "\x1B[37m"
 
+#define BOLD  "\e[1m"
+
 #define ERR(x) KRED x RST
 #define WARN(x) KYEL x RST
 #define INFO(x) KBLU x RST
 #define OK(x)   KGRN x RST
 
 #define INFO_STR "INFO"
-#define WARN_STR "WARN"
-#define ERR_STR "ERR"
+#define WARN_STR "WARNING"
+#define ERR_STR "ERROR"
 #define DEBUG_STR "DEBUG"
 #define OK_STR "OK"
 
-#define DEBUG_INFO  false
+#define DEBUG_INFO  true
 #define DEBUG_WARN  true
 #define DEBUG_ERR  true
-#define DEBUG_DEBUG  false
+#define DEBUG_DEBUG  true
 #define DEBUG_OK  true
 
+#define PRETTY_PRINT
 
-
+namespace debug{
 
 class Debug
 {
@@ -91,6 +94,7 @@ class Debug
  private:
   bool DEBUG_ON = false;
 };
+
 //typedef  debug::Debug(__FUNCTION__, "HELLO: ", "INFO", true) MY_INFO;
 }
 #ifdef PRETTY_PRINT
@@ -106,5 +110,6 @@ class Debug
 #define M_DEBUG debug::Debug(__FUNCTION__, KWHT, DEBUG_STR, DEBUG_DEBUG)
 #define M_OK debug::Debug(__FUNCTION__, KGRN, OK_STR, DEBUG_OK)
 #endif
+
 #endif /* EASY_DEBUGGING_HPP */
 

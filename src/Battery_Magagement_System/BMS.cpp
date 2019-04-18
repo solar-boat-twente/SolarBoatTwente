@@ -28,7 +28,7 @@ using namespace std;
 
 /*PUBLIC METHODS: */
 BMS::BMS(CANbus * const m_canbus):canbus_(m_canbus) {
-  CanStatus * can_status = canbus_->status();
+  CANbus::CanStatus * can_status = canbus_->status();
   if(!can_status->status){
     M_WARN<<"CANBUS NOT RUNNING!";
   } else {
@@ -99,10 +99,10 @@ int BMS::stop_writing() {
 
 
 int BMS::write(canmsg_t * const msg) {
-  return canbus_->write(msg);
+  return canbus_->write_can(msg);
 }
 
-BmsStatus* BMS::status() {
+BMS::BmsStatus* BMS::status() {
   return bms_status;
 }
 
@@ -119,7 +119,7 @@ int BMS::get_data_(structures::PowerInput* power_input){
   std::vector<uint8_t> *data = new std::vector<uint8_t>;
 
   //gets data from response 1 and writes to data
-  if(canbus_->read(CANID_BMS_RESPONSE1, buffer)!=-1){
+  if(canbus_->read_can(CANID_BMS_RESPONSE1, buffer)!=-1){
     //fills the data vector with data from the canmsg_t
     for(int i = 0; i<buffer->length;i++){
       data->push_back(buffer->data[i]);
@@ -133,7 +133,7 @@ int BMS::get_data_(structures::PowerInput* power_input){
   }
   
   //get data from response 2
-  if(canbus_->read(CANID_BMS_RESPONSE2, buffer)!=-1){
+  if(canbus_->read_can(CANID_BMS_RESPONSE2, buffer)!=-1){
     std::cout<<"Buffer length: "<<buffer->length<<endl;
     //short int length = buffer->length;
     for(int i = 0; i<buffer->length;i++){
@@ -152,7 +152,7 @@ int BMS::get_data_(structures::PowerInput* power_input){
   short int cells_remaining = MAX_CELLS;
   short int counter = 0;
   while(cells_remaining>0) {
-    if(canbus_->read(CANID_BMS_CELL_VOLTAGE_START+counter, buffer)!=-1) {
+    if(canbus_->read_can(CANID_BMS_CELL_VOLTAGE_START+counter, buffer)!=-1) {
       //short int length = buffer->length;
       for(int i=0; i<buffer->length;i++) {
         data->push_back(buffer->data[i]);

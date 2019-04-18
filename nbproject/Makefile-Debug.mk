@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/src/Battery_Magagement_System/BMS.o \
+	${OBJECTDIR}/src/Steering_Wheel/Serial.o \
 	${OBJECTDIR}/src/Wrappers/canbus.o \
 	${OBJECTDIR}/test/main_read_bms.o
 
@@ -44,8 +45,8 @@ OBJECTFILES= \
 CFLAGS=
 
 # CC Compiler Flags
-CCFLAGS=-pthread -std=c++11 -g
-CXXFLAGS=-pthread -std=c++11 -g
+CCFLAGS=-pthread -std=c++11 -g -w
+CXXFLAGS=-pthread -std=c++11 -g -w
 
 # Fortran Compiler Flags
 FFLAGS=
@@ -68,6 +69,11 @@ ${OBJECTDIR}/src/Battery_Magagement_System/BMS.o: src/Battery_Magagement_System/
 	${MKDIR} -p ${OBJECTDIR}/src/Battery_Magagement_System
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Battery_Magagement_System/BMS.o src/Battery_Magagement_System/BMS.cpp
+
+${OBJECTDIR}/src/Steering_Wheel/Serial.o: src/Steering_Wheel/Serial.cpp
+	${MKDIR} -p ${OBJECTDIR}/src/Steering_Wheel
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Steering_Wheel/Serial.o src/Steering_Wheel/Serial.cpp
 
 ${OBJECTDIR}/src/Wrappers/canbus.o: src/Wrappers/canbus.cpp
 	${MKDIR} -p ${OBJECTDIR}/src/Wrappers

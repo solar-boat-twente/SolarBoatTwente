@@ -26,16 +26,18 @@ namespace PowerElectronics{
 const short int MAX_CELLS = 8;
 
 
-struct BmsStatus{
-  char can_device[20];
-  
-  bool read_state;
-  
-  bool write_state;
-};
+
 
 class BMS {
+ public: 
+  struct BmsStatus{
+    char can_device[20];
 
+    bool read_state;
+
+    bool write_state;
+    };
+    
   static const int STD_BMS_READ_DELAY = 500;
   static const int STD_BMS_WRITE_DELAY = 500;
   

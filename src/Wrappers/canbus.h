@@ -16,9 +16,9 @@
 
 #include <vector>
 #include "../../include/can4linux.h"
-#include <stdio.h>
+//#include <stdio.h>
 #include <thread>
-
+#include <fcntl.h>
 
 
 namespace MIO {
@@ -29,7 +29,28 @@ namespace MIO {
 #define STD_ID 257752
 
 
-struct CanStatus {
+
+/*
+ * Class wrapping all the CAN data for one line. 
+Example:
+   *  CANbus * const canbus = new canbus("can0", 100);
+   *  canbus->start;
+   *  canmsg_t receive_message;
+   *  canbus->read(12458, receive_message);
+   * 
+   *  canmsg_t transmit_message;
+   *  transmit_message.data[0] = 'a';
+   *  transmit_message.data[1] = 'b'; \\etcetera
+   *  transmit_message.id = 12548;
+   *  transmit_message.length = 2;
+   *  canbus->write(transmit_message);
+   * 
+   *  canbus->close(); 
+ */
+class CANbus {
+  
+ public:
+  struct CanStatus {
   // Baudrate of the CANbus in bits so 250kb/s is 250000
   unsigned int baudrate;
 
@@ -50,25 +71,9 @@ struct CanStatus {
 
   // True if the CANbus is currently running, false otherwise
   bool status;
-};
-/*
- * Class wrapping all the CAN data for one line. 
-Example:
-   *  CANbus * const canbus = new canbus("can0", 100);
-   *  canbus->start;
-   *  canmsg_t receive_message;
-   *  canbus->read(12458, receive_message);
-   * 
-   *  canmsg_t transmit_message;
-   *  transmit_message.data[0] = 'a';
-   *  transmit_message.data[1] = 'b'; \\etcetera
-   *  transmit_message.id = 12548;
-   *  transmit_message.length = 2;
-   *  canbus->write(transmit_message);
-   * 
-   *  canbus->close(); 
- */
-class CANbus {
+  
+  int file_descriptor = -1;
+  };
 
   const char STANDARD_MESSAGE[5] = {'c', 'p', 'l', '2', '5'}; //'vo
   
@@ -76,7 +81,7 @@ class CANbus {
   
   struct m_canmsg_t {
     // The can message
-    canmsg_t* msg;
+    canmsg_t * msg;
 
     // Flag whether the message has been read before..
     // TRUE means it has not yet been read.
@@ -96,9 +101,13 @@ class CANbus {
    * 
    *  
    */
-  CANbus(char device_name[20], unsigned int buffer_size = STD_BUFFER, unsigned int baudrate = STD_BAUD);
-
-
+  CANbus(const char device_name[20], unsigned int buffer_size = STD_BUFFER, unsigned int baudrate = STD_BAUD);
+  
+  
+  int open_can(int flag = O_RDWR);
+  
+  int close_can();
+  
   /*
    * Looks in received messages if there is a message with that id.
    * If that it is the case writes that message to msg. 
@@ -112,7 +121,7 @@ class CANbus {
    *  0: when the message has been read before
    *  1: when read
    */
-  int read(unsigned long msg_id, canmsg_t * const buffer);
+  int read_can(unsigned long msg_id, canmsg_t * const buffer);
 
 
   /*
@@ -127,7 +136,7 @@ class CANbus {
    *  0: Nothing written
    *  1: Success
    */
-  int write(canmsg_t * const message, bool force_send = false);
+  int write_can(canmsg_t * const message, bool force_send = false);
 
 
   /*
@@ -157,6 +166,8 @@ class CANbus {
 
   int add_message_(canmsg_t * const message);
 
+  
+  
  private:
 
   int _read_CAN();
@@ -171,8 +182,13 @@ class CANbus {
 
   CanStatus *can_status = new CanStatus;  
   
+  int file_descriptor = -1;
+  
   std::thread m_thread;
 };
+
+int print_canmsg(canmsg_t * const msg);
+
 
 
 }

@@ -8,16 +8,17 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
-#include <algorithm>
+#include <fcntl.h>
+#include <unistd.h>
 
 #include "../../include/easy_debugging.hpp"
 
 using namespace MIO;
 using namespace std;
 /*public: */
-CANbus::CANbus(char device_name[], unsigned int buffer_size, unsigned int baudrate) {
+CANbus::CANbus(char const device_name[], unsigned int buffer_size, unsigned int baudrate) {
   //Filling the can_status structure
-  char device[20];
+  char device[20] = "/dev/";
   int len = sprintf(device, "/dev/%s", device_name);
   for(int i=0; i<len;i++){
     can_status->device[i] = device[i];
@@ -31,9 +32,25 @@ CANbus::CANbus(char device_name[], unsigned int buffer_size, unsigned int baudra
   //Starting the background thread
   //start();
     
- }
+}
 
-int CANbus::read(unsigned long msg_id, canmsg_t* buffer){
+int CANbus::open_can(int flag) {
+  file_descriptor = open(can_status->device, flag);
+  if(file_descriptor<0){
+    M_ERR<<"UNABLE TO OPEN CAN DEVICE: "<<can_status->device;
+    return -1;
+  } else{
+    M_OK<<"CANBUS WAS OPENED";
+    return 1;
+  }
+}
+
+int CANbus::close_can() {
+  M_INFO<<"CLOSING CAN";
+  return close(file_descriptor);
+}
+
+int CANbus::read_can(unsigned long msg_id, canmsg_t* buffer){
   for(CANbus::m_canmsg_t &message: received_message){
     if (message.msg->id == msg_id){
       *buffer = *message.msg;
@@ -51,12 +68,16 @@ int CANbus::read(unsigned long msg_id, canmsg_t* buffer){
   return -1;
 }
 
-int CANbus::write(canmsg_t* const msg, bool force_send){
-  M_DEBUG<<"WRITTEN MESSAGE WITH ID: "<<msg->id<<" AND DATA: ";
-  for(int i = 0; i<msg->length;i++){
-    cout<<+msg->data[i]<<" ";
-  }
-  return 1;
+int CANbus::write_can(canmsg_t * const msg, bool force_send){
+  canmsg_t msg_array[1];
+  msg_array[0] = *msg;
+  return write(file_descriptor, &msg_array, 1);
+  
+//  M_DEBUG<<"WRITTEN MESSAGE WITH ID: "<<msg->id<<" AND DATA: ";
+//  for(int i = 0; i<msg->length;i++){
+//    cout<<+msg->data[i]<<" ";
+//  }
+//  return 1;
 } 
 
 //TODO(sander): Make sure that canbus cannot be started twice!
@@ -77,7 +98,7 @@ int CANbus::stop(){
 }
 
 
-CanStatus* CANbus::status(){
+CANbus::CanStatus * CANbus::status(){
   return can_status;
 }
 
@@ -90,6 +111,17 @@ int CANbus::add_message_(canmsg_t* const message){
 
 int CANbus::_read_CAN(){
   //Fakes making a simple message with id STD_ID and data STD_DATA
+  M_INFO<<"Trying to read CAN";
+  canmsg_t * rx = new canmsg_t;
+  int got = read(file_descriptor, rx, can_status->total_buffer);
+  M_INFO<<"GOT "<<got<<" MESSAGE";
+  
+  for(int i = 0; i<got; i++){
+    _add_message(rx);
+  }
+  
+  return got;
+  /*
   canmsg_t *rx = new canmsg_t;
   rx->length = STANDARD_LENGTH;
   for(int i =0; i<STANDARD_LENGTH; i++){
@@ -98,6 +130,7 @@ int CANbus::_read_CAN(){
   rx->id = STD_ID;
   M_INFO<<"CONSTRUCTED MESSAGE WITH DATA: "<<rx->data<<" AND ID: "<<rx->id;
   return _add_message(rx);
+   * */
 }
 
 /*Private:*/
@@ -127,6 +160,16 @@ void CANbus::_read_CAN_thread(short int delay){
     _read_CAN();    
     std::this_thread::sleep_for(std::chrono::milliseconds(delay));
    }
-  
-  
+}
+
+int MIO::print_canmsg(canmsg_t * const msg){
+  int id = msg->id;
+  short int length = msg->length;
+  M_DEBUG<<"CAN_MESSAGE RECEIVED | ID: "<<id<<" LENGTH: "<<msg->length;
+  std::cout<<"DATA: ";
+  for(int i = 0; i<length; i++){
+    std::cout<<(int)msg->data[i]<<" ";
+  }
+  std::cout<<std::endl;
+  return 0;
 }
