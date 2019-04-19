@@ -36,6 +36,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/src/Battery_Magagement_System/BMS.o \
+	${OBJECTDIR}/src/Genasun_Watt_Sensor/MPPT.o \
 	${OBJECTDIR}/src/Steering_Wheel/Serial.o \
 	${OBJECTDIR}/src/Wrappers/canbus.o \
 	${OBJECTDIR}/test/main_read_bms.o
@@ -69,6 +70,11 @@ ${OBJECTDIR}/src/Battery_Magagement_System/BMS.o: src/Battery_Magagement_System/
 	${MKDIR} -p ${OBJECTDIR}/src/Battery_Magagement_System
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Battery_Magagement_System/BMS.o src/Battery_Magagement_System/BMS.cpp
+
+${OBJECTDIR}/src/Genasun_Watt_Sensor/MPPT.o: src/Genasun_Watt_Sensor/MPPT.cpp
+	${MKDIR} -p ${OBJECTDIR}/src/Genasun_Watt_Sensor
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -std=c++11 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/src/Genasun_Watt_Sensor/MPPT.o src/Genasun_Watt_Sensor/MPPT.cpp
 
 ${OBJECTDIR}/src/Steering_Wheel/Serial.o: src/Steering_Wheel/Serial.cpp
 	${MKDIR} -p ${OBJECTDIR}/src/Steering_Wheel

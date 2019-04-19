@@ -72,7 +72,11 @@ class CANbus {
   // True if the CANbus is currently running, false otherwise
   bool status;
   
+  // The standard file descriptor
   int file_descriptor = -1;
+  
+  // True if the canbus has been succesfully opened
+  bool open;
   };
 
   const char STANDARD_MESSAGE[5] = {'c', 'p', 'l', '2', '5'}; //'vo
@@ -82,7 +86,6 @@ class CANbus {
   struct m_canmsg_t {
     // The can message
     canmsg_t * msg;
-
     // Flag whether the message has been read before..
     // TRUE means it has not yet been read.
     bool FIRST_READER;

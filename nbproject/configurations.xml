@@ -6,6 +6,8 @@
                    projectFiles="true">
       <itemPath>src/Battery_Magagement_System/BMS.h</itemPath>
       <itemPath>src/Battery_Magagement_System/BMS_CANIDs.h</itemPath>
+      <itemPath>src/Genasun_Watt_Sensor/MPPT.h</itemPath>
+      <itemPath>src/Genasun_Watt_Sensor/MPPT_CANIDs.hpp</itemPath>
       <itemPath>src/Steering_Wheel/Serial.h</itemPath>
       <itemPath>src/Wrappers/canbus.h</itemPath>
       <itemPath>include/easy_debugging.hpp</itemPath>
@@ -20,6 +22,7 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>src/Battery_Magagement_System/BMS.cpp</itemPath>
+      <itemPath>src/Genasun_Watt_Sensor/MPPT.cpp</itemPath>
       <itemPath>src/Steering_Wheel/Serial.cpp</itemPath>
       <itemPath>src/Wrappers/canbus.cpp</itemPath>
       <itemPath>test/main_read_bms.cpp</itemPath>
@@ -68,6 +71,15 @@
             flavor2="0">
       </item>
       <item path="src/Battery_Magagement_System/BMS_CANIDs.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/Genasun_Watt_Sensor/MPPT.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/Genasun_Watt_Sensor/MPPT.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/Genasun_Watt_Sensor/MPPT_CANIDs.hpp"
             ex="false"
             tool="3"
             flavor2="0">
@@ -123,6 +135,15 @@
             flavor2="0">
       </item>
       <item path="src/Battery_Magagement_System/BMS_CANIDs.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/Genasun_Watt_Sensor/MPPT.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/Genasun_Watt_Sensor/MPPT.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src/Genasun_Watt_Sensor/MPPT_CANIDs.hpp"
             ex="false"
             tool="3"
             flavor2="0">

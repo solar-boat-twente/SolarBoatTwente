@@ -22,6 +22,9 @@
 #include "../include/easy_debugging.hpp"
 #include "../src/Steering_Wheel/Serial.h"
 #include "../src/Wrappers/canbus.h"
+#include "../src/structures.h"
+#include "../src/Battery_Magagement_System/BMS.h"
+
 
 using namespace std;
 using namespace MIO;
@@ -29,39 +32,64 @@ using namespace MIO;
 
 int MAX = 500;
 
+//int main(){
+//  cout<<sizeof(CANbus)<<endl;
+//  cout<<sizeof(CANbus*)<<endl;
+//  
+//  
+//}
+
 int main(){
-  CANbus * m_canbus = new CANbus("can0");
-  CANbus * receive_canbus = new CANbus("can1",1);
-  receive_canbus->open_can(O_RDONLY);
-  m_canbus->open_can();
+  canmsg_t * tx = new canmsg_t;
   
-  receive_canbus->start(5);
-  canmsg_t m_tx[50];
-  char standard_can[8] = {3, 5, 8, 9 , 10, 11, 12, 16};
-  for(int i=0; i<50; i++){
-    m_tx[i].id = 500+i;
-    m_tx[i].length = 7;
-    memcpy(&m_tx[i].data[0],&standard_can[0], 7);
+  for(int i = 0; i<8; i++){
+    tx->data[i] = 12+i;
   }
-  M_INFO<<"CONSTRUCTED 50 MESSAGES!";
-  for(int i = 0; i<50; i++){
-    m_canbus->write_can(&m_tx[i]);
+  for(int i =0; i<8; i++){
+    //int temp = tx->data[i];
+    cout<<showbase<<hex<<(int)tx->data[i]<<" "<<dec;
   }
-  this_thread::sleep_for(chrono::milliseconds(1000));
-  m_canbus->close_can();
-  canmsg_t message;
-
-  for(int i = 10; i<40; i++){
-    receive_canbus->read_can(500+i, &message);
-    print_canmsg(&message);
-  }
-
-  this_thread::sleep_for(chrono::milliseconds(5000));
-  receive_canbus->close_can();
+  //cout<<tx->data<<endl;
   
-   return 0;
- 
-};
+  
+}
+
+
+//
+//int main(){
+//  CANbus * m_canbus = new CANbus("can0");
+//  CANbus * receive_canbus = new CANbus("can1",1);
+//  receive_canbus->open_can(O_RDONLY);
+//  m_canbus->open_can();
+//  
+//  
+//  receive_canbus->start(5);
+//  canmsg_t m_tx[50];
+//  char standard_can[8] = {3, 5, 8, 9 , 10, 11, 12, 16};
+//  for(int i=0; i<50; i++){
+//    m_tx[i].id = 500+i;
+//    m_tx[i].length = 7;
+//    memcpy(&m_tx[i].data[0],&standard_can[0], 7);
+//  }
+//  M_INFO<<"CONSTRUCTED 50 MESSAGES!";
+//  for(int i = 0; i<50; i++){
+//    m_canbus->write_can(&m_tx[i]);
+//  }
+//  this_thread::sleep_for(chrono::milliseconds(1000));
+//  m_canbus->close_can();
+//  canmsg_t message;
+//
+//  for(int i = 10; i<40; i++){
+//    receive_canbus->read_can(500+i, &message);
+//    print_canmsg(&message);
+//  }
+//
+//  this_thread::sleep_for(chrono::milliseconds(5000));
+//  receive_canbus->close_can();
+//  
+//   return 0;
+// 
+//};
 
 
 //int main(){
@@ -166,47 +194,56 @@ int main(){
 
 
 /*
+
 int main(int argc, char** argv) {
-  char response1[] = {80, 97, 168, 0, 0, 178, 2, 5};
-  char response2[] = {60,30,1,0,1};
-  char response3[] = {11, 184, 15, 160, 19, 136, 23, 112};
+//  char response1[] = {80, 97, 168, 0, 0, 178, 2, 5};
+//  char response2[] = {60,30,1,0,1};
+//  char response3[] = {11, 184, 15, 160, 19, 136, 23, 112};
   
-  CANbus * const canbus = new CANbus("can1");
+  CANbus * const canbus = new CANbus("can0", 1);
   structures::PowerInput * const power_input = new structures::PowerInput;
-  canmsg_t *message1 = new canmsg_t;
-  canmsg_t *message2 = new canmsg_t;
-  canmsg_t *message3 = new canmsg_t;
-  canmsg_t *message4 = new canmsg_t;
-  message1->id = CANID_BMS_RESPONSE1;
-  message1->length = 8;
-  for(int i=0; i<message1->length;i++){
-    message1->data[i] = response1[i];
-  }
+  structures::PowerOutput * const power_output = new structures::PowerOutput;
   
-  message2->id = CANID_BMS_RESPONSE2;
-  message2->length = 5;
-  for(int i=0; i<message2->length; i++){
-    message2->data[i] = response2[i];
-  }
-      
-  message3->id = CANID_BMS_CELL_VOLTAGE_START;
-  message3->length = 8;
-  for(int i=0; i<message3->length;i++){
-    message3->data[i] = response3[i];
-  }
   
-  *message4 = *message3;
   
-  message4->id=CANID_BMS_CELL_VOLTAGE_START+1;
-  
-  canbus->add_message_(message1);
-  canbus->add_message_(message2);
-  canbus->add_message_(message3);
-  canbus->add_message_(message4);
-  
+//  canmsg_t *message1 = new canmsg_t;
+//  canmsg_t *message2 = new canmsg_t;
+//  canmsg_t *message3 = new canmsg_t;
+//  canmsg_t *message4 = new canmsg_t;
+//  message1->id = CANID_BMS_RESPONSE1;
+//  message1->length = 8;
+//  for(int i=0; i<message1->length;i++){
+//    message1->data[i] = response1[i];
+//  }
+//  
+//  message2->id = CANID_BMS_RESPONSE2;
+//  message2->length = 5;
+//  for(int i=0; i<message2->length; i++){
+//    message2->data[i] = response2[i];
+//  }
+//      
+//  message3->id = CANID_BMS_CELL_VOLTAGE_START;
+//  message3->length = 8;
+//  for(int i=0; i<message3->length;i++){
+//    message3->data[i] = response3[i];
+//  }
+//  
+//  *message4 = *message3;
+//  
+//  message4->id=CANID_BMS_CELL_VOLTAGE_START+1;
+//  
+//  canbus->add_message_(message1);
+//  canbus->add_message_(message2);
+//  canbus->add_message_(message3);
+//  canbus->add_message_(message4);
+ 
+  power_output->contractor_control = 1;
+  canbus->start(10);
   PowerElectronics::BMS * const bms = new PowerElectronics::BMS(canbus);
+  this_thread::sleep_for(chrono::milliseconds(2000));
   bms->start_reading(power_input);
   this_thread::sleep_for(chrono::milliseconds(3000));
+  bms->start_writing(power_output);
   
   cout<<INFO("\n============================================= OUTPUT DATA ==========================================")<<endl;
   fprintf(stderr,INFO("soc: %f\tvoltage: %f\tcurrent: %f\terror: %i\t error_loc: %i\n"),
@@ -222,7 +259,10 @@ int main(int argc, char** argv) {
     }
   }    
   cout<<INFO("====================================================================================================")<<endl;
-
+  
+  this_thread::sleep_for(chrono::seconds(5));
+  
   return 0;
-}*/
+}
+ * */
 

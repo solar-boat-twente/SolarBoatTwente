@@ -30,9 +30,9 @@ using namespace std;
 BMS::BMS(CANbus * const m_canbus):canbus_(m_canbus) {
   CANbus::CanStatus * can_status = canbus_->status();
   if(!can_status->status){
-    M_WARN<<"CANBUS NOT RUNNING!";
+    M_WARN<<"CANBUS NOT RUNNING! ( ̵˃﹏˂̵ )";
   } else {
-    M_OK<<"BMS SUCCESSFULLY INITIATED";
+    M_OK<<"BMS SUCCESSFULLY INITIATED _へ__(‾◡◝ )>";
   }
  }
 
@@ -42,16 +42,16 @@ int BMS::start_reading(structures::PowerInput* power_input){
   if(canbus_->status()->status){
     if(!bms_status->read_state){
       bms_status->read_state = true;
-      M_INFO<<"BMS WAS STARTED";
+      M_OK<<"BMS WAS STARTED ( ◞･౪･)";
       short int delay = STD_BMS_READ_DELAY;
       m_reading_thread_ = thread(&BMS::reading_thread_, this, power_input, delay);
       return 1;
     } else{
-      M_WARN<<"BMS READING WAS ALREADY STARTED";
+      M_WARN<<"BMS READING WAS ALREADY STARTED (¬_¬)";
       return -1;
     }
   } else {
-      M_ERR<<"CANNOT START READING BECAUSE CANBUS NOT RUNNING";
+      M_ERR<<"CANNOT START READING BECAUSE CANBUS NOT RUNNING (╯•﹏•╰)";
       return -1;
   }
 }
@@ -62,10 +62,10 @@ int BMS::stop_reading(){
   if(bms_status->read_state){
     bms_status->read_state = false;
     m_reading_thread_.join();
-    M_INFO<<"BMS STOPPED READING";
+    M_OK<<"BMS STOPPED READING (ﾉ･ｪ･)ﾉ";
     return 1;
   } else{
-    M_WARN<<"BMS READING HAS NOT YET STARTED";
+    M_WARN<<"BMS READING HAS NOT YET STARTED (>_<)";
     return -1;
   }
 }
@@ -74,12 +74,12 @@ int BMS::start_writing(structures::PowerOutput* power_output) {
   //Tests if the BMS has started writing, if not yet started it starts writing.
   if(!bms_status->write_state){
     bms_status->write_state = true;
-    M_INFO<<"INFO: BMS STARTED WRITING";
+    M_OK<<"BMS STARTED WRITING ( ͡° ͜ʖ ͡°)";
     short int delay = STD_BMS_WRITE_DELAY;
     m_writing_thread_ = thread(&BMS::writing_thread_, this, power_output, delay);
     return 1;
   } else{
-    M_WARN<<"BMS WRITING WAS ALREADY STARTED";
+    M_WARN<<"BMS WRITING WAS ALREADY STARTED (>_<)";
     return -1;
   }
 }
@@ -125,7 +125,7 @@ int BMS::get_data_(structures::PowerInput* power_input){
       data->push_back(buffer->data[i]);
     }
     //Sends the data to the parser and clears data buffer.
-    M_OK<<"READING RESPONSE 1 SUCCESSFUL!";
+    //M_OK<<"READING RESPONSE 1 SUCCESSFUL!";
     success_response1 = parse_response1_(data, power_input);
     data->clear();
   }else{
@@ -134,14 +134,12 @@ int BMS::get_data_(structures::PowerInput* power_input){
   
   //get data from response 2
   if(canbus_->read_can(CANID_BMS_RESPONSE2, buffer)!=-1){
-    std::cout<<"Buffer length: "<<buffer->length<<endl;
-    //short int length = buffer->length;
     for(int i = 0; i<buffer->length;i++){
       data->push_back(buffer->data[i]);
     }
 
     //Sending the data to the parser.
-    M_OK<<"READING RESPONSE 2 SUCCESSFUL!";
+    //M_OK<<"READING RESPONSE 2 SUCCESSFUL!";
     success_response2 = parse_response2_(data, power_input);
     data->clear();
   } else{
@@ -165,7 +163,7 @@ int BMS::get_data_(structures::PowerInput* power_input){
   }
   //Tests if all the required data as been read from all of the cells
   if(data->size()>=MAX_CELLS) {
-    M_OK<<"READING CELL VOLTAGES SUCCESSFUL!";
+    //M_OK<<"READING CELL VOLTAGES SUCCESSFUL!";
     success_response_cells = parse_cell_voltages(data, power_input);
   }
   
@@ -183,14 +181,17 @@ int BMS::get_data_(structures::PowerInput* power_input){
 
 int BMS::parse_response1_(std::vector<uint8_t> * bytes, structures::PowerInput* power_input) {
   if(bytes->size()==8) {
+    //Get all the values from the battery, look at REC API MANUAL.
     power_input->battery.state_of_charge = 0.5*(*bytes)[0];
     power_input->battery.total_voltage = (256*(*bytes)[1]+(*bytes)[2])*0.002;
     power_input->battery.total_current = (256*(*bytes)[3]+ (*bytes)[4])*0.020;
     power_input->battery.error_number = (*bytes)[6];
     power_input->battery.error_location = (*bytes)[7];
-    M_OK<<"PARSING RESPONSE 1 SUCCESSFUL!";
-    M_DEBUG<<"RESULT FROM RESPONSE 1 IS: \n"<<"soc: "<<power_input->battery.state_of_charge<< "tot_V: "<<power_input->battery.total_voltage<<
-        "tot_I: "<<power_input->battery.total_current<< "er_num: "<<power_input->battery.error_number<< "er_loc: "<<power_input->battery.error_location;
+    
+    //Fancy Printing
+    M_OK<<"READING AND PARSING RESPONSE 1 SUCCESSFUL! d(>_･ )";
+    M_DEBUG<<"RESULT FROM RESPONSE 1 IS: \n"<<" SOC: "<<power_input->battery.state_of_charge<< " | Total Voltage: "<<power_input->battery.total_voltage<<
+        " | Total Current: "<<power_input->battery.total_current<< "\n Error Number: "<<power_input->battery.error_number<< " | Error Location: "<<power_input->battery.error_location<<"\n";
     return 1;
   } else {
     M_ERR<<"INCORRECT MESSAGE SIZE FOR ID = "<<CANID_BMS_RESPONSE1<<" Size was equal to "<<bytes->size();
@@ -199,9 +200,10 @@ int BMS::parse_response1_(std::vector<uint8_t> * bytes, structures::PowerInput* 
 }
 
 int BMS::parse_response2_(std::vector<uint8_t> *bytes, structures::PowerInput* power_input) {
-  if(bytes->size()==5) {
-    power_input->battery.max_temp = (*bytes)[0]-127;
-    power_input->battery.min_temp = (*bytes)[1]-127;
+  if(bytes->size()==5) {    
+    //Get all the values from the battery, look at REC API MANUAL.
+    power_input->battery.max_temp = (*bytes)[0];
+    power_input->battery.min_temp = (*bytes)[1];
 
     if((*bytes)[2]==1) {
       power_input->battery.balance_state = true;
@@ -222,29 +224,34 @@ int BMS::parse_response2_(std::vector<uint8_t> *bytes, structures::PowerInput* p
     } else {
       power_input->battery.contactor_status = false;
     }
-    M_OK<<"PARSING RESPONSE 2 SUCCESSFULL";
-    M_DEBUG<<"RESULT FROM RESPONSE 2 IS: \n"<<"max_temp: "<<power_input->battery.max_temp<< "min_temp: "<<power_input->battery.min_temp<<
-        "bal_state: "<<power_input->battery.balance_state<< "cont_read: "<<power_input->battery.contactor_ready<< "cont_state: "<<power_input->battery.contactor_status;
-  } else {
+    
+    //Fancy Printing
+    M_OK<<"READIND AND PARSING RESPONSE 2 SUCCESSFULL d(>_･ )";
+    M_DEBUG<<" RESULT FROM RESPONSE 2 IS: \n"<<" Max Temp: "<<(int)power_input->battery.max_temp<< " | Min. Temp: "<<(int)power_input->battery.min_temp<<
+        " | Balance State: "<<power_input->battery.balance_state<< "\n Contactor Ready: "<<power_input->battery.contactor_ready<< " | Contactor State: "<<power_input->battery.contactor_status<<"\n";
+  } else { 
     M_ERR<<"INCORRECT MESSAGE SIZE FOR ID = "<<CANID_BMS_RESPONSE2<<" Size was equal to "<<bytes->size();
   }
   
 }
 
 int BMS::parse_cell_voltages(std::vector<uint8_t> *bytes, structures::PowerInput* power_input){
-  
+  //Get the cell voltages using the high byte, low byte method
   for(int i = 0; i<MAX_CELLS; i++) {
     power_input->battery.cel_voltages[i]=((*bytes)[2*i]*256+(*bytes)[2*i+1])*0.001;
   }
   
+  //fancy Printing and returning
+  M_OK<<"READIND AND PARSING RESPONSE 3 SUCCESSFULL d(>_･ )";
   M_DEBUG<<"RESULT FROM CELL VOLTAGES IS: ";
-  for(int i = 0; i<12; i++){
-    cout<<"Cell "<<i<<": "<<power_input->battery.cel_voltages[i];
+  for(int i = 0; i<MAX_CELLS; i++){
+    cout<<'\b'<<BOLD<<" Cell "<<i+1<<": "<<power_input->battery.cel_voltages[i];
     if(i%4==3){
-      cout<<endl;
+      cout<<"\n";
     }
+    cout<<RST<<endl<<endl;
   }    
-  
+  return 1;
 }
 
 void BMS::reading_thread_(structures::PowerInput * const power_input, short int delay) {

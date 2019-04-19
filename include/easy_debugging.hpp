@@ -50,13 +50,15 @@
 #define DEBUG_DEBUG  true
 #define DEBUG_OK  true
 
-#define PRETTY_PRINT
+//#define PRETTY_PRINT
 
 namespace debug{
+
 
 class Debug
 {
   static const bool DEBUG_MIO = false;
+  
   
  public:
   Debug(const std::string &funcName, const std::string &color, const std::string &type, const bool debugging)
@@ -85,12 +87,25 @@ class Debug
     }
     return *this;
   }
+
   
   ~Debug(){
     if(DEBUG_ON){
-      std::cout<<RST<<std::endl;
+      std::cout<<RST<<"\n";
     }
+    
+    
   }
+  
+  template<class M>
+  Debug& printArray(M arr[], int length){
+    for(int i = 0; i<length; i++){
+      printf("0x%x ",  arr[1]);
+    }
+    return *this;
+  }
+  
+  
  private:
   bool DEBUG_ON = false;
 };

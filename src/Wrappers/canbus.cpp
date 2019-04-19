@@ -10,6 +10,9 @@
 #include <chrono>
 #include <fcntl.h>
 #include <unistd.h>
+#include <errno.h>
+#include <cstring>
+
 
 #include "../../include/easy_debugging.hpp"
 
@@ -29,25 +32,39 @@ CANbus::CANbus(char const device_name[], unsigned int buffer_size, unsigned int 
   can_status->double_reads = 0;
   can_status->status = false;
   
+  //Opens the CANbus
+  open_can();
+  
   //Starting the background thread
   //start();
     
 }
 
 int CANbus::open_can(int flag) {
-  file_descriptor = open(can_status->device, flag);
-  if(file_descriptor<0){
-    M_ERR<<"UNABLE TO OPEN CAN DEVICE: "<<can_status->device;
+  //Tests if the canbus is not yet open. 
+  if(!can_status->open){
+    file_descriptor = open(can_status->device, flag);
+    if(file_descriptor<0){
+      M_ERR<<"UNABLE TO OPEN CAN DEVICE: "<<can_status->device;
+      return -1;
+    } else{
+      M_OK<<"CANBUS WAS OPENED (°‿↼)";
+      can_status->open = true;
+      return 1;
+    }
+  } else {
+    M_WARN<<"CANBUS HAS ALREADY BEEN OPENED, CLOSE THE CANBUS BEFORE REOPENING (╯°□°）╯︵ ┻━┻";
     return -1;
-  } else{
-    M_OK<<"CANBUS WAS OPENED";
-    return 1;
   }
 }
 
 int CANbus::close_can() {
-  M_INFO<<"CLOSING CAN";
-  return close(file_descriptor);
+  if(can_status->open){
+    M_INFO<<"CLOSING CAN (*＾▽＾)／";
+    return close(file_descriptor);
+  } else {
+    M_WARN<<"CANBUS HAS NOT YET BEEN OPENED, DON'T CLOSE A CLOSED CONNECTION! (='_' )";
+  }
 }
 
 int CANbus::read_can(unsigned long msg_id, canmsg_t* buffer){
@@ -56,23 +73,34 @@ int CANbus::read_can(unsigned long msg_id, canmsg_t* buffer){
       *buffer = *message.msg;
       if(message.FIRST_READER){
         message.FIRST_READER = false;
-        M_OK<<"SUCCESSFULLY READ MESSAGE WITH ID: "<<msg_id;
+        M_OK<<"SUCCESSFULLY READ MESSAGE WITH ID: "<<(short int)msg_id<<" (｡♥‿♥｡)";
         return 1;
       } else{
-        M_WARN<<"TRIED TO READ MESSAGE WITH ID: "<<msg_id<<" TWICE";
+        M_INFO<<"TRIED TO READ MESSAGE WITH ID: "<<(short int)msg_id<<" TWICE (-_-)";
         return 0;
       }
     }
   }
-  M_ERR<<"INVALID CAN ID:"<<msg_id;
+  M_ERR<<"INVALID CAN ID:"<<(short int)msg_id;
   return -1;
 }
 
 int CANbus::write_can(canmsg_t * const msg, bool force_send){
-  canmsg_t msg_array[1];
-  msg_array[0] = *msg;
-  return write(file_descriptor, &msg_array, 1);
-  
+  if(can_status->open){
+    canmsg_t msg_array[1];
+    msg_array[0] = *msg;
+    int success = write(file_descriptor, &msg_array, 1);
+    if(success<0){
+      M_ERR<<"ERROR WRITING: "<<strerror(errno);
+    } else if(success == 0){
+      M_WARN<<"NOTHING WAS WRITTEN ¯\\_(ツ)_/¯";
+    } else {
+      M_OK<<"WRITTEN A CAN MESSAGE WITH ID: "<<(short int)msg->id<<" ~(˘▾˘~)";
+    }
+    return success;
+  } else {
+    M_WARN<<"OPEN THE CANBUS BEFORE WRITING YOU FOOL! (╯°□°）╯︵ ┻━┻";
+  }
 //  M_DEBUG<<"WRITTEN MESSAGE WITH ID: "<<msg->id<<" AND DATA: ";
 //  for(int i = 0; i<msg->length;i++){
 //    cout<<+msg->data[i]<<" ";
@@ -83,18 +111,26 @@ int CANbus::write_can(canmsg_t * const msg, bool force_send){
 //TODO(sander): Make sure that canbus cannot be started twice!
 int CANbus::start(short int delay){
   //Making a thread 
-  m_thread = std::thread(&CANbus::_read_CAN_thread, this, delay);
-  can_status->status = true;
-  M_INFO<<"CANBUS STARTED WITH DEVICE: "<<can_status->device;
-  return 1;
+  if(!can_status->status){
+    m_thread = std::thread(&CANbus::_read_CAN_thread, this, delay);
+    can_status->status = true;
+    M_INFO<<"CANBUS STARTED WITH DEVICE: "<<can_status->device<<" (^～^)";
+    return 1;
+  } else {
+    M_WARN<<"YOU ALREADY STARTED THE CANBUS, YOU FOOL! (╯°□°）╯︵ ┻━┻";
+  }
 }
 
 //TODO(sander): Make sure that canbus cannot be stopped twice!
 int CANbus::stop(){
-  can_status->status = false;
-  m_thread.join();
-  M_INFO<<"CANBUS STARTED WITH DEVICE: "<<can_status->device;
-  return 1;
+  if(can_status->status){
+    can_status->status = false;
+    m_thread.join();
+    M_INFO<<"CANBUS STARTED WITH DEVICE: "<<can_status->device;
+    return 1;
+  } else {
+    M_WARN<<"YOU HAVE TO START THE CANBUS FIRST... (⁀⊙﹏☉⁀ )";
+  }
 }
 
 
@@ -110,27 +146,15 @@ int CANbus::add_message_(canmsg_t* const message){
 }
 
 int CANbus::_read_CAN(){
-  //Fakes making a simple message with id STD_ID and data STD_DATA
-  M_INFO<<"Trying to read CAN";
+  //Makes a new dynamic canmsg_t, this is deleted once the message is overwritten.
   canmsg_t * rx = new canmsg_t;
   int got = read(file_descriptor, rx, can_status->total_buffer);
-  M_INFO<<"GOT "<<got<<" MESSAGE";
   
   for(int i = 0; i<got; i++){
     _add_message(rx);
   }
   
   return got;
-  /*
-  canmsg_t *rx = new canmsg_t;
-  rx->length = STANDARD_LENGTH;
-  for(int i =0; i<STANDARD_LENGTH; i++){
-    rx->data[i] = STANDARD_MESSAGE[i];
-  }
-  rx->id = STD_ID;
-  M_INFO<<"CONSTRUCTED MESSAGE WITH DATA: "<<rx->data<<" AND ID: "<<rx->id;
-  return _add_message(rx);
-   * */
 }
 
 /*Private:*/
@@ -141,7 +165,11 @@ int CANbus::_add_message(canmsg_t* rx){
       delete message.msg;
       message.msg = rx;
       message.FIRST_READER = true;
-      M_INFO<<"UPDATED MESSAGE WITH DATA: "<<message.msg->data<<" AND ID: "<<rx->id;
+      M_INFO<<"UPDATED MESSAGE WITH ID: "<<(short int)rx->id<<" AND DATA: ";
+      for(int i = 0; i<rx->length; i++){
+        std::cout<<BOLD<<" "<<(int)rx->data[i]; 
+      }
+      std::cout<<"\n"<<endl;
       return 0;
     }
   }
@@ -151,7 +179,7 @@ int CANbus::_add_message(canmsg_t* rx){
   new_message.FIRST_READER = true;
   new_message.msg = rx;
   received_message.push_back(new_message);
-  M_INFO<<"ADDED NEW MESSAGE TO VECTOR WITH ID: "<<new_message.msg->id;
+  M_INFO<<"ADDED NEW MESSAGE TO VECTOR WITH ID: "<<(short int)new_message.msg->id<<"\n";
   return 1;
 }
 

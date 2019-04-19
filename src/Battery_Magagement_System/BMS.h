@@ -21,9 +21,10 @@
 
 
 namespace MIO{
+
 namespace PowerElectronics{
 
-const short int MAX_CELLS = 8;
+const short int MAX_CELLS = 10;
 
 
 
