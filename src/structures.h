@@ -50,8 +50,11 @@ struct PowerInput {
     //The cel_voltages in V
     float cel_voltages[12];
     
-    //The state of charge number between 0 and 100%
+    //The state of charge number between 0 and 100%, 0.5% precise
     float state_of_charge;
+    
+    //The state of health: number between 0 and 100%, 0.5% precies
+    float state_of_health;
     
     //The raw error_number from the BMS
     unsigned char error_number;
@@ -160,8 +163,8 @@ struct UserInput {
   };
 
   struct SteeringInput {
-    //raw value of the Throttle 0 till 255 (from the analog inputs)
-    unsigned char raw_throttle;
+    //raw value of the Throttle 0 till 1024 (from the analog inputs)
+    int raw_throttle;
     //values: NO_FLY, FLY, BRIDGE, SLALOM
     FlyMode fly_mode;
     bool reverse;

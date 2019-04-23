@@ -19,7 +19,15 @@ namespace PowerElectronics{
 
 const unsigned long CANID_MPPT_START_ADDRESS = 0x3D;
 const unsigned long CANID_MPPT_RELAY = 0x3F;
-  
+
+const short int STD_MPPT_DELAY = 50;
+
+const short int NUMBER_OF_MPPTS = 10;
+
+const float A_factor = 44.391;
+const float V_factor = 14.2;
+
+
 }
 }
 #endif /* MPPT_CANIDS_HPP */

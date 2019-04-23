@@ -14,11 +14,13 @@
 #ifndef MPPT_H
 #define MPPT_H
 
+
+#include <thread>
 #include <stdlib.h>
 #include <stdint.h>
 #include "../Wrappers/canbus.h"
 #include "MPPT_CANIDs.hpp"
-
+#include "../structures.h"
 
 namespace MIO{
 namespace PowerElectronics{
@@ -63,6 +65,9 @@ namespace PowerElectronics{
 class MPPT{
   
  public:
+  
+  friend class MPPT_Controller;
+  
   /**
    * Construct the MPPT object, you have to supply a canbus, all other parameters are already preset
    * @param canbus A pointer to a CANbus object, make sure that this canbus is opened/started before you try anything
@@ -150,7 +155,7 @@ class MPPT{
    * @return Returns 1 when success, 0 otherwise
    */
   int set_relay_from_address(bool state, unsigned long address);
-  int set_relay_from_address(bool state, unsigned long address[]);
+  int set_relay_from_address(bool state, unsigned long address[], int number_of_cells);
 
   /**
    * Sets the relay for a number. If you want to switch multiple relays please
@@ -161,7 +166,7 @@ class MPPT{
    * @return Returns 1 when success, 0 otherwise
    */
   int set_relay_from_number(bool state, int cell_number); 
-  int set_relay_from_number(bool state, int cell_number[]);
+  int set_relay_from_number(bool state, int cell_number[], int number_of_cells);
 
   /**
    * Switches all the relays into a certain state, 'all' is defined in the 
@@ -172,13 +177,27 @@ class MPPT{
    */
   int set_all_relay(bool state);
   
+  /**
+   * 
+   * @param state A array of booleans with different states for the different MPPTs
+   * the length of state should be less than number of mppts.
+   * @return 
+   */
+  int set_relay_from_array(bool state[]);
+  
+  int set_relay_states_from_number_(int cell_number, bool state);  
  private: 
+  
+  int set_relay_from_relay_states_();
   
   int get_int_(uint8_t high_byte, uint8_t low_byte);
   
   float get_A_float(uint8_t high_byte, uint8_t low_byte);
   
   float get_V_float(uint8_t high_byte, uint8_t low_byte);
+  
+
+
   
   unsigned long start_address_;
   
@@ -188,10 +207,46 @@ class MPPT{
   
   CANbus *  canbus_ = NULL;
   
+  uint8_t relay_states[2] = {0, 0};
   
   
 };
 
+
+class MPPT_Controller{
+  
+  
+ public:
+  MPPT_Controller(MPPT * const mppt, structures::PowerInput * power_input, structures::PowerOutput * const power_output);
+  
+  int start(const int delay = STD_MPPT_DELAY);
+  
+  int stop();
+  
+ private:
+  
+  int read_data_();
+  
+  int write_data_();
+  
+  int reading_thread_(const int delay);
+  
+  int writing_thread_(const int delay);
+  
+  MPPT * const mppt;
+  
+  structures::PowerInput * const power_input;
+  structures::PowerOutput * const power_output;
+  
+  bool reading_state;
+  bool writing_state;
+  
+  std::thread m_reading_thread_;
+  std::thread m_writing_thread_;
+  
+  
+  
+};
 
 }/*PowerElectronics*/
 } /*MIO*/

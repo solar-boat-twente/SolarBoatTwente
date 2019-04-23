@@ -41,7 +41,7 @@ class Serial {
     
     char port[20];
     
-    bool state;
+    bool status;
     
     int baudrate;
     
@@ -63,11 +63,6 @@ class Serial {
    */
   ~Serial();
       
-  /**
-   * Closes the Serial port
-   * @return result of the close function 1 for success, -1 for failure
-   */
-  int close();
   
   /**
    * Read a set number of bytes from the serial port
@@ -81,13 +76,18 @@ class Serial {
    * Reads the serial port until a certain stop byte
    * 
    * @param buf buffer in which the data will be written
-   * @param stop A string where the byte should stop
+   * @param stop A array!! of characters where the byte should stop, so not a single character and also not a literal string!
    * @param stop_length The length of this stop string
    * @param max_bytes The maximum number of bytes before it stops looking standard 500
-   * @return 
+   * @return number of received messages,, -1 if the stop bytes where not reached
    */
   int read_stop(uint8_t buf[], const char stop[],int stop_length, short int max_bytes = 500);
   
+  int write_byte(uint8_t byte);
+  
+  SerialStatus * status(){
+    return serial_status;
+  }
  private:
   int file_descriptor;
   

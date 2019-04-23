@@ -14,16 +14,7 @@
 #ifndef SOLARBOATTWENTE_H
 #define SOLARBOATTWENTE_H
 
-namespace top_level{
-class SolarBoatTwente{
- public:
-  SolarBoatTwente();
-  
-  int power_thread();
-  
-  int 
-};
-}
+
 
 #endif /* SOLARBOATTWENTE_H */
 

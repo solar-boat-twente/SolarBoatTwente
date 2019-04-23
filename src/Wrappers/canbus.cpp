@@ -5,6 +5,8 @@
  */
 
 #include "canbus.h"
+
+#include <sys/ioctl.h>
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -31,9 +33,13 @@ CANbus::CANbus(char const device_name[], unsigned int buffer_size, unsigned int 
   can_status->buffer_left = buffer_size;
   can_status->double_reads = 0;
   can_status->status = false;
+  can_status->open = false;
   
   //Opens the CANbus
-  open_can();
+  if(open_can()>0){
+    set_baudrate(baudrate);
+  };
+  
   
   //Starting the background thread
   //start();
@@ -76,7 +82,7 @@ int CANbus::read_can(unsigned long msg_id, canmsg_t* buffer){
         M_OK<<"SUCCESSFULLY READ MESSAGE WITH ID: "<<(short int)msg_id<<" (｡♥‿♥｡)";
         return 1;
       } else{
-        M_INFO<<"TRIED TO READ MESSAGE WITH ID: "<<(short int)msg_id<<" TWICE (-_-)";
+        M_WARN<<"TRIED TO READ MESSAGE WITH ID: "<<(short int)msg_id<<" TWICE (-_-)";
         return 0;
       }
     }
@@ -95,7 +101,12 @@ int CANbus::write_can(canmsg_t * const msg, bool force_send){
     } else if(success == 0){
       M_WARN<<"NOTHING WAS WRITTEN ¯\\_(ツ)_/¯";
     } else {
-      M_OK<<"WRITTEN A CAN MESSAGE WITH ID: "<<(short int)msg->id<<" ~(˘▾˘~)";
+      M_OK<<"WRITTEN A CAN MESSAGE WITH ID: "<<(short int)msg->id<<" ~(˘▾˘~) AND DATA: ";
+      for(int i = 0; i<msg->length; i++){
+        std::cout<<BOLD<<showbase<<hex<<" "<<(int)msg->data[i]; 
+      }
+      std::cout<<RST<<dec<<"\n"<<endl;
+      
     }
     return success;
   } else {
@@ -138,6 +149,25 @@ CANbus::CanStatus * CANbus::status(){
   return can_status;
 }
 
+int CANbus::set_baudrate(unsigned int baudrate) {
+  Config_par_t cfg;
+  volatile Command_par_t cmd;
+  
+  cmd.cmd = CMD_STOP;
+  ioctl(file_descriptor, CAN_IOCTL_COMMAND, &cmd);
+  
+  cfg.target = CONF_TIMING;
+  cfg.val1 = baudrate;
+  ioctl(file_descriptor, CAN_IOCTL_CONFIG, &cfg);
+  
+  cmd.cmd = CMD_START;
+  ioctl(file_descriptor, CAN_IOCTL_COMMAND, &cmd);
+  
+  M_INFO<<"CHANGED THE CAN BAUDRATE TO "<<baudrate<<" Kbps!";
+  return 1;
+ }
+
+
 
 int CANbus::add_message_(canmsg_t* const message){
   canmsg_t * new_message = new canmsg_t;
@@ -167,9 +197,9 @@ int CANbus::_add_message(canmsg_t* rx){
       message.FIRST_READER = true;
       M_INFO<<"UPDATED MESSAGE WITH ID: "<<(short int)rx->id<<" AND DATA: ";
       for(int i = 0; i<rx->length; i++){
-        std::cout<<BOLD<<" "<<(int)rx->data[i]; 
+        std::cout<<BOLD<<showbase<<hex<<" "<<(int)rx->data[i]; 
       }
-      std::cout<<"\n"<<endl;
+      std::cout<<RST<<dec<<"\n"<<endl;
       return 0;
     }
   }
@@ -179,7 +209,11 @@ int CANbus::_add_message(canmsg_t* rx){
   new_message.FIRST_READER = true;
   new_message.msg = rx;
   received_message.push_back(new_message);
-  M_INFO<<"ADDED NEW MESSAGE TO VECTOR WITH ID: "<<(short int)new_message.msg->id<<"\n";
+  M_INFO<<"ADDED NEW MESSAGE TO VECTOR WITH ID: "<<(short int)new_message.msg->id<<" AND DATA: ";
+  for(int i = 0; i<rx->length; i++){
+    std::cout<<BOLD<<showbase<<hex<<" "<<(int)rx->data[i]; 
+  }
+  std::cout<<RST<<dec<<"\n"<<endl;
   return 1;
 }
 

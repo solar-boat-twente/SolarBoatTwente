@@ -15,16 +15,15 @@
 #define CANBUS_H
 
 #include <vector>
-#include "../../include/can4linux.h"
-//#include <stdio.h>
 #include <thread>
 #include <fcntl.h>
 
+#include "../../include/can4linux.h"
 
 namespace MIO {
 
 #define STD_CAN_DELAY 500 //delay between can searches in ms
-#define STD_BAUD 250000 // standard baudrate
+#define STD_BAUD 250 // standard baudrate
 #define STD_BUFFER 100
 #define STD_ID 257752
 
@@ -51,7 +50,7 @@ class CANbus {
   
  public:
   struct CanStatus {
-  // Baudrate of the CANbus in bits so 250kb/s is 250000
+  // Baudrate of the CANbus in bits so 250kb/s is 250
   unsigned int baudrate;
 
   // Name of the device ex: "can0", "can1" 
@@ -167,9 +166,21 @@ class CANbus {
    */
   CanStatus * status();
 
+  /**
+   * Wrapper for the private function used for testing deprecated now
+   * 
+   * @param message message to add to internal vector
+   * @return returns 1 on success -1 on failure
+   */
   int add_message_(canmsg_t * const message);
 
-  
+  /**
+   * Uses IOCTL
+   * 
+   * @param baudrate
+   * @return 
+   */
+  int set_baudrate(unsigned int baudrate);
   
  private:
 

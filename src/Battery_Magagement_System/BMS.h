@@ -24,12 +24,13 @@ namespace MIO{
 
 namespace PowerElectronics{
 
-const short int MAX_CELLS = 10;
+const short int MAX_CELLS = 12;
 
 
 
 
 class BMS {
+  
  public: 
   struct BmsStatus{
     char can_device[20];
@@ -45,18 +46,19 @@ class BMS {
   
  public:
   /*
-   * CANbus * const canbus = new CANbus("can0");
-   * canbus->start();
-   * structures::PowerInput * const power_input = new structures::PowerInput;
-   * const BMS * bms = new BMS(canbus);
+   * Example: 
+   *  CANbus * const canbus = new CANbus("can0");
+   *  canbus->start();
+   *  structures::PowerInput * const power_input = new structures::PowerInput;
+   *  BMS * const bms = new BMS(canbus);
    * 
-   * BMS.read_data(power_input);
+   *  BMS.read_data(power_input);
    * 
-   * BMS.write_data(power_output);
+   *  BMS.write_data(power_output);
    * 
-   * BMS.stop_reading();
+   *  BMS.stop_reading();
    * 
-   * BMS.stop_writing();
+   *  BMS.stop_writing();
    *  
    */
   BMS(CANbus * const m_canbus);

@@ -14,53 +14,69 @@
 #include <fcntl.h>      // File control definitions
 #include <errno.h>      // Error number definitions
 #include <termios.h>    // POSIX terminal control definitions
+#include <iostream>
+
 
 #include "Serial.h"
-using namespace MIO;
 
+using namespace MIO;
+using namespace std;
 
 Serial::Serial(const char port[], int baudrate) {
   file_descriptor = open(port, O_FLAGS);
   
-  serial_status;
   
   //get the termios structure from the file_descriptor
   if(tcgetattr(file_descriptor, serial_status->tty)!=0){
     M_ERR<<errno<<" from tcgetattr: "<<strerror(errno);
   } else {
-    printf("before: %i",serial_status->tty->c_cc[VTIME]);
     make_settings_(serial_status->tty);
-    printf("after: %i",serial_status->tty->c_cc[VTIME]);
     apply_settings_();
-
-    
     M_INFO<<"OPENED SERIAL DEVICE WITH FILE DESCRIPTOR: "<<file_descriptor;
+    serial_status->status = true;
   }
 }
 
 Serial::~Serial(){
-  fprintf(stderr, "CLOSING THE SERIAL PORT");
   M_WARN<<"CLOSING THE SERIAL PORT";
+  serial_status->status = false;
 }
 
 int MIO::Serial::read_bytes(uint8_t buf[], short int max_bytes) {
   uint8_t m_buffer_ = '\0';
   int n_read = 0;
+  
+  if(max_bytes>1){
+    M_INFO<<"READING MESSAGE:";
+  }
+  
   for(int i = 0; i<max_bytes; i++){
     n_read = read(file_descriptor, &m_buffer_, 1);
     buf[i]=m_buffer_;
-    std::cout<<buf[i];
+    
+    if(max_bytes>1){
+      cout<<BOLD<<"\b\b\b\b\b\b\b\b\b\b\b\b\b\b"<<flush<<"MESSAGE: "<<i<<"/"<<max_bytes;
+    }
+    
     if (n_read<0){
       M_ERR<<"ERROR READING: "<<strerror(errno);
       break;
     }
   }
-  if(n_read>0){
-    M_INFO << "Response: ";
+  
+  if(max_bytes>1){
+    cout<<RST<<endl;
+  }
+  
+  if(n_read>1){
+    M_DEBUG << "SERIAL RESPONSE: ";
     for(int i = 0; i<max_bytes; i++){
-      printf("%i ", buf[i]);
+      std::cout<<BOLD<<showbase<<" "<<(int)buf[i]<<dec;
     } 
-    printf("\n");
+    std::cout<<RST<<endl;
+    return max_bytes;
+  } else if (n_read = 1){
+    M_DEBUG<<"SERIAL RESPONSE: "<<BOLD<<showbase<<(int)buf[0]<<dec;
     return max_bytes;
   } else if (n_read<0){
     return -1;
@@ -70,7 +86,6 @@ int MIO::Serial::read_bytes(uint8_t buf[], short int max_bytes) {
 }
 
 int Serial::read_stop(uint8_t buf[], const char stop[], int stop_length, short int max_bytes) {
-  M_INFO<<stop;
   uint8_t temp_buffer[max_bytes];
   uint8_t read_byte[1];
   for(int i = 0; i<max_bytes; i++){
@@ -85,13 +100,12 @@ int Serial::read_stop(uint8_t buf[], const char stop[], int stop_length, short i
       if(temp_buffer[i-(stop_length-j-1)]!=stop[j]){
         goto searching;
       } else{
-        M_OK<<"PASSED ROUND: "<<j<<"/"<<stop_length<<" OF THE CHECK";
+        M_OK<<"PASSED ROUND: "<<j+1<<"/"<<stop_length<<" OF THE CHECK";
       }
     }
     for(int k =0; k<i-(stop_length-1); k++){
       buf[k]= temp_buffer[k];
     }
-    M_OK<<"SUCCESFULL GOT A MESSAGE";
     return i-(stop_length-1);
     
     //Continue searching for the 
@@ -100,6 +114,13 @@ int Serial::read_stop(uint8_t buf[], const char stop[], int stop_length, short i
   M_WARN<<"DID NOT REACH THE STOP BYTES";
   return -1;
 }
+
+int Serial::write_byte(uint8_t byte) {
+  uint8_t bytes[1] = {byte};
+  write(file_descriptor, bytes, 1);
+  M_OK<<"WRITTEN A MESSAGE";
+}
+
 
 int Serial::make_settings_(termios * tty) {
     cfsetospeed(tty, (speed_t)B9600);

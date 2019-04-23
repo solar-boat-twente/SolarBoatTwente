@@ -20,11 +20,12 @@
 #include <termios.h>    // POSIX terminal control definitions
 
 #include "../include/easy_debugging.hpp"
-#include "../src/Steering_Wheel/Serial.h"
+#include "../src/Wrappers/Serial.h"
 #include "../src/Wrappers/canbus.h"
 #include "../src/structures.h"
 #include "../src/Battery_Magagement_System/BMS.h"
-
+#include "../src/Steering_Wheel/Control_Wheel.hpp"
+#include "../src/Genasun_Watt_Sensor/MPPT.h"
 
 using namespace std;
 using namespace MIO;
@@ -32,27 +33,52 @@ using namespace MIO;
 
 int MAX = 500;
 
-//int main(){
-//  cout<<sizeof(CANbus)<<endl;
-//  cout<<sizeof(CANbus*)<<endl;
-//  
-//  
-//}
-
 int main(){
-  canmsg_t * tx = new canmsg_t;
-  
-  for(int i = 0; i<8; i++){
-    tx->data[i] = 12+i;
-  }
-  for(int i =0; i<8; i++){
-    //int temp = tx->data[i];
-    cout<<showbase<<hex<<(int)tx->data[i]<<" "<<dec;
-  }
-  //cout<<tx->data<<endl;
+  Serial * m_serial = new Serial("/dev/ttyUSB0");
+  m_serial->write_byte(51);
+  m_serial->write_byte(10);
+  m_serial->write_byte(0);
+  uint8_t buffer[2];
+  m_serial->read_bytes(buffer, 2);
   
   
 }
+
+
+/*
+int main(){
+  CANbus * canbus = new CANbus("can1");
+  MIO::PowerElectronics::MPPT * mppt = new PowerElectronics::MPPT(canbus);
+  
+  mppt->set_relay_from_number(true, 5);
+  mppt->set_relay_from_number(true, 12);
+  mppt->set_relay_from_number(true, 9);
+  mppt->set_relay_from_number(true, 10);
+  mppt->set_relay_from_number(false, 9);
+
+
+}
+*/
+
+
+//
+//int main(){ 
+//  
+//  Serial * const m_serial = new Serial("/dev/ttyUSB0");
+//  uint8_t buffer[20];
+//  
+//  structures::UserInput * const user_input = new structures::UserInput;
+//  
+//  UI::ControlWheel * const control_wheel = new UI::ControlWheel(m_serial);
+//  control_wheel->start_reading(user_input);
+//  while(true){}
+//  this_thread::sleep_for(chrono::milliseconds(500));
+//  
+//  
+//  //m_serial->read_bytes(buffer, 20);
+//  delete m_serial;
+//}
+//
 
 
 //
@@ -192,9 +218,7 @@ int main(){
 //  
 //}
 
-
 /*
-
 int main(int argc, char** argv) {
 //  char response1[] = {80, 97, 168, 0, 0, 178, 2, 5};
 //  char response2[] = {60,30,1,0,1};
@@ -261,8 +285,12 @@ int main(int argc, char** argv) {
   cout<<INFO("====================================================================================================")<<endl;
   
   this_thread::sleep_for(chrono::seconds(5));
-  
+  bms->stop_reading();
+  bms->stop_writing();
+  canbus->stop();
+  canbus->close_can();
   return 0;
 }
- * */
+*/ 
+
 

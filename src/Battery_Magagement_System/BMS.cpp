@@ -74,7 +74,7 @@ int BMS::start_writing(structures::PowerOutput* power_output) {
   //Tests if the BMS has started writing, if not yet started it starts writing.
   if(!bms_status->write_state){
     bms_status->write_state = true;
-    M_OK<<"BMS STARTED WRITING ( ͡° ͜ʖ ͡°)";
+
     short int delay = STD_BMS_WRITE_DELAY;
     m_writing_thread_ = thread(&BMS::writing_thread_, this, power_output, delay);
     return 1;
@@ -89,10 +89,10 @@ int BMS::stop_writing() {
   if(bms_status->write_state){
     bms_status->write_state = false;
     m_writing_thread_.join();
-    M_INFO<<"BMS STOPPED WRITING";
+    M_INFO<<"BMS STOPPED WRITING  (ﾉ･ｪ･)ﾉ";
     return 1;
   } else{
-    M_WARN<<"BMS WRITING HAS NOT YET STARTED";
+    M_WARN<<"BMS WRITING HAS NOT YET STARTED (>_<)";
     return -1;
   }
  }
@@ -185,16 +185,18 @@ int BMS::parse_response1_(std::vector<uint8_t> * bytes, structures::PowerInput* 
     power_input->battery.state_of_charge = 0.5*(*bytes)[0];
     power_input->battery.total_voltage = (256*(*bytes)[1]+(*bytes)[2])*0.002;
     power_input->battery.total_current = (256*(*bytes)[3]+ (*bytes)[4])*0.020;
+    power_input->battery.state_of_health = (0.5*(*bytes)[5]);
     power_input->battery.error_number = (*bytes)[6];
     power_input->battery.error_location = (*bytes)[7];
     
     //Fancy Printing
-    M_OK<<"READING AND PARSING RESPONSE 1 SUCCESSFUL! d(>_･ )";
+    M_OK<<"READING AND PARSING BMS RESPONSE 1 SUCCESSFUL! d(>_･ )";
     M_DEBUG<<"RESULT FROM RESPONSE 1 IS: \n"<<" SOC: "<<power_input->battery.state_of_charge<< " | Total Voltage: "<<power_input->battery.total_voltage<<
-        " | Total Current: "<<power_input->battery.total_current<< "\n Error Number: "<<power_input->battery.error_number<< " | Error Location: "<<power_input->battery.error_location<<"\n";
+        " | Total Current: "<<power_input->battery.total_current<< "\n SOH: "<<power_input->battery.state_of_health<<
+        " | Error Number: "<<power_input->battery.error_number<< " | Error Location: "<<power_input->battery.error_location<<"\n";
     return 1;
   } else {
-    M_ERR<<"INCORRECT MESSAGE SIZE FOR ID = "<<CANID_BMS_RESPONSE1<<" Size was equal to "<<bytes->size();
+    M_ERR<<"INCORRECT MESSAGE SIZE FOR ID = "<<CANID_BMS_RESPONSE1<<" SIZE WAS EQUAL TO "<<bytes->size()<<" (　ﾟдﾟ)";
     return -1;
   }
 }
@@ -226,11 +228,11 @@ int BMS::parse_response2_(std::vector<uint8_t> *bytes, structures::PowerInput* p
     }
     
     //Fancy Printing
-    M_OK<<"READIND AND PARSING RESPONSE 2 SUCCESSFULL d(>_･ )";
-    M_DEBUG<<" RESULT FROM RESPONSE 2 IS: \n"<<" Max Temp: "<<(int)power_input->battery.max_temp<< " | Min. Temp: "<<(int)power_input->battery.min_temp<<
+    M_OK<<"READIND AND PARSING BMS RESPONSE 2 SUCCESSFULL d(>_･ )";
+    M_DEBUG<<"RESULT FROM RESPONSE 2 IS: \n"<<" Max Temp: "<<(int)power_input->battery.max_temp<< " | Min. Temp: "<<(int)power_input->battery.min_temp<<
         " | Balance State: "<<power_input->battery.balance_state<< "\n Contactor Ready: "<<power_input->battery.contactor_ready<< " | Contactor State: "<<power_input->battery.contactor_status<<"\n";
   } else { 
-    M_ERR<<"INCORRECT MESSAGE SIZE FOR ID = "<<CANID_BMS_RESPONSE2<<" Size was equal to "<<bytes->size();
+    M_ERR<<"INCORRECT MESSAGE SIZE FOR ID = "<<CANID_BMS_RESPONSE2<<" SIZE EQUAL TO: "<<bytes->size()<<" (　ﾟдﾟ)";
   }
   
 }
@@ -242,20 +244,22 @@ int BMS::parse_cell_voltages(std::vector<uint8_t> *bytes, structures::PowerInput
   }
   
   //fancy Printing and returning
-  M_OK<<"READIND AND PARSING RESPONSE 3 SUCCESSFULL d(>_･ )";
+  M_OK<<"READIND AND PARSING BMS RESPONSE 3 SUCCESSFULL d(>_･ )";
   M_DEBUG<<"RESULT FROM CELL VOLTAGES IS: ";
   for(int i = 0; i<MAX_CELLS; i++){
-    cout<<'\b'<<BOLD<<" Cell "<<i+1<<": "<<power_input->battery.cel_voltages[i];
+    cout<<BOLD<<" Cell "<<i+1<<": "<<power_input->battery.cel_voltages[i];
     if(i%4==3){
       cout<<"\n";
+    } else{
+      cout<<" |";
     }
-    cout<<RST<<endl<<endl;
-  }    
+  }
+  cout<<'\b'<<RST<<endl<<endl;
   return 1;
 }
 
 void BMS::reading_thread_(structures::PowerInput * const power_input, short int delay) {
-  M_INFO<<"READING THREAD HAS STARTED WITH DELAY: "<<delay;
+  M_INFO<<"READING THREAD HAS STARTED WITH DELAY: "<<(long)delay<<"ms ( ͡° ͜ʖ ͡°)";
   while(bms_status->read_state){
     get_data_(power_input);
     std::this_thread::sleep_for(chrono::milliseconds(delay));
@@ -277,7 +281,7 @@ int BMS::write_data_(structures::PowerOutput* power_output) {
 
 
 void BMS::writing_thread_(structures::PowerOutput* power_output, short int delay) {
-  M_INFO<<"WRITING THREAD WAS STARTED WITH DELAY: "<<delay;
+  M_INFO<<"BMS STARTS WRITING WITH DELAY: "<<(long)delay<<"ms ( ͡° ͜ʖ ͡°)";
   while(bms_status->write_state){
     write_data_(power_output);
     std::this_thread::sleep_for(chrono::milliseconds(delay));

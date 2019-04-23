@@ -6,9 +6,10 @@
                    projectFiles="true">
       <itemPath>src/Battery_Magagement_System/BMS.h</itemPath>
       <itemPath>src/Battery_Magagement_System/BMS_CANIDs.h</itemPath>
+      <itemPath>src/Steering_Wheel/Control_Wheel.hpp</itemPath>
       <itemPath>src/Genasun_Watt_Sensor/MPPT.h</itemPath>
       <itemPath>src/Genasun_Watt_Sensor/MPPT_CANIDs.hpp</itemPath>
-      <itemPath>src/Steering_Wheel/Serial.h</itemPath>
+      <itemPath>src/Wrappers/Serial.h</itemPath>
       <itemPath>src/Wrappers/canbus.h</itemPath>
       <itemPath>include/easy_debugging.hpp</itemPath>
       <itemPath>solarboattwente.h</itemPath>
@@ -22,8 +23,9 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>src/Battery_Magagement_System/BMS.cpp</itemPath>
+      <itemPath>src/Steering_Wheel/Control_Wheel.cpp</itemPath>
       <itemPath>src/Genasun_Watt_Sensor/MPPT.cpp</itemPath>
-      <itemPath>src/Steering_Wheel/Serial.cpp</itemPath>
+      <itemPath>src/Wrappers/Serial.cpp</itemPath>
       <itemPath>src/Wrappers/canbus.cpp</itemPath>
       <itemPath>test/main_read_bms.cpp</itemPath>
     </logicalFolder>
@@ -84,9 +86,19 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="src/Steering_Wheel/Serial.cpp" ex="false" tool="1" flavor2="0">
+      <item path="src/Steering_Wheel/Control_Wheel.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
       </item>
-      <item path="src/Steering_Wheel/Serial.h" ex="false" tool="3" flavor2="0">
+      <item path="src/Steering_Wheel/Control_Wheel.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/Wrappers/Serial.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/Wrappers/Serial.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/Wrappers/canbus.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -148,9 +160,19 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="src/Steering_Wheel/Serial.cpp" ex="false" tool="1" flavor2="0">
+      <item path="src/Steering_Wheel/Control_Wheel.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
       </item>
-      <item path="src/Steering_Wheel/Serial.h" ex="false" tool="3" flavor2="0">
+      <item path="src/Steering_Wheel/Control_Wheel.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src/Wrappers/Serial.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src/Wrappers/Serial.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src/Wrappers/canbus.cpp" ex="false" tool="1" flavor2="0">
       </item>
