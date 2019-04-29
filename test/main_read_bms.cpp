@@ -18,21 +18,22 @@
 #include <fcntl.h>      // File control definitions
 #include <errno.h>      // Error number definitions
 #include <termios.h>    // POSIX terminal control definitions
+#include <fstream>
 
-#include "../include/easy_debugging.hpp"
-#include "../src/Wrappers/Serial.h"
-#include "../src/Wrappers/canbus.h"
-#include "../src/structures.h"
-#include "../src/Battery_Magagement_System/BMS.h"
-#include "../src/Steering_Wheel/Control_Wheel.hpp"
-#include "../src/Genasun_Watt_Sensor/MPPT.h"
+#include "include/easy_debugging.hpp"
+#include "src/Wrappers/Serial.h"
+#include "src/Wrappers/canbus.h"
+#include "src/structures.h"
+#include "src/Battery_Magagement_System/BMS.h"
+#include "src/Steering_Wheel/Control_Wheel.hpp"
+#include "src/Genasun_Watt_Sensor/MPPT.h"
 
 using namespace std;
 using namespace MIO;
 
 
 int MAX = 500;
-
+/*
 int main(){
   Serial * m_serial = new Serial("/dev/ttyUSB0");
   m_serial->write_byte(51);
@@ -43,6 +44,7 @@ int main(){
   
   
 }
+ */ 
 
 
 /*
@@ -289,8 +291,13 @@ int main(int argc, char** argv) {
   bms->stop_writing();
   canbus->stop();
   canbus->close_can();
+  */
+int main(){
+  
+  ofstream myStream("../../TestMYMIO");
+  myStream.write("HELLO WORLD",12);
   return 0;
 }
-*/ 
+
 
 

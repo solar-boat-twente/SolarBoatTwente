@@ -137,7 +137,7 @@ int CANbus::stop(){
   if(can_status->status){
     can_status->status = false;
     m_thread.join();
-    M_INFO<<"CANBUS STARTED WITH DEVICE: "<<can_status->device;
+    M_INFO<<"CANBUS STOPPED FOR DEVICE: "<<can_status->device;
     return 1;
   } else {
     M_WARN<<"YOU HAVE TO START THE CANBUS FIRST... (⁀⊙﹏☉⁀ )";
