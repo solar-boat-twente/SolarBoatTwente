@@ -4,14 +4,81 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>solarboattwente.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
                    projectFiles="true">
+      <logicalFolder name="config" displayName="config" projectFiles="true">
+        <itemPath>config/control_data.conf</itemPath>
+        <itemPath>config/control_data_python.conf</itemPath>
+        <itemPath>config/telem_input.conf</itemPath>
+        <itemPath>config/telem_input_python.conf</itemPath>
+        <itemPath>config/user_power.conf</itemPath>
+        <itemPath>config/user_power_python.conf</itemPath>
+      </logicalFolder>
+      <logicalFolder name="logfiles" displayName="logfiles" projectFiles="true">
+        <itemPath>logfiles/ControlData.log</itemPath>
+        <itemPath>logfiles/PowerInput.log</itemPath>
+        <itemPath>logfiles/TelemetryInput.log</itemPath>
+        <itemPath>logfiles/UserPowerInput.log</itemPath>
+      </logicalFolder>
+      <logicalFolder name="pipes" displayName="pipes" projectFiles="true">
+        <itemPath>pipes/ControlDataToPython</itemPath>
+        <itemPath>pipes/TelemInputToPython</itemPath>
+        <itemPath>pipes/UserPowerToPython</itemPath>
+      </logicalFolder>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
+      <logicalFolder name="include-cpp" displayName="include-cpp" projectFiles="true">
+        <itemPath>include-cpp/can4linux.h</itemPath>
+        <itemPath>include-cpp/easylogging++.cc</itemPath>
+        <itemPath>include-cpp/easylogging++.h</itemPath>
+      </logicalFolder>
+      <logicalFolder name="lib-cpp" displayName="lib-cpp" projectFiles="true">
+        <logicalFolder name="Canbus" displayName="Canbus" projectFiles="true">
+          <itemPath>lib-cpp/Canbus/CANbus.md</itemPath>
+          <itemPath>lib-cpp/Canbus/canbus.cpp</itemPath>
+          <itemPath>lib-cpp/Canbus/canbus.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="Debugging" displayName="Debugging" projectFiles="true">
+          <itemPath>lib-cpp/Debugging/easy_debugging.hpp</itemPath>
+        </logicalFolder>
+        <logicalFolder name="Logging" displayName="Logging" projectFiles="true">
+          <itemPath>lib-cpp/Logging/logging.cpp</itemPath>
+          <itemPath>lib-cpp/Logging/logging.h</itemPath>
+          <itemPath>lib-cpp/Logging/thread.cpp</itemPath>
+          <itemPath>lib-cpp/Logging/thread.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="Serial" displayName="Serial" projectFiles="true">
+          <itemPath>lib-cpp/Serial/Serial.cpp</itemPath>
+          <itemPath>lib-cpp/Serial/Serial.h</itemPath>
+        </logicalFolder>
+      </logicalFolder>
+      <logicalFolder name="src-cpp" displayName="src-cpp" projectFiles="true">
+        <logicalFolder name="Battery_Magagement_System"
+                       displayName="Battery_Magagement_System"
+                       projectFiles="true">
+          <itemPath>src-cpp/Battery_Magagement_System/BMS.cpp</itemPath>
+          <itemPath>src-cpp/Battery_Magagement_System/BMS.h</itemPath>
+          <itemPath>src-cpp/Battery_Magagement_System/BMS_CANIDs.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="Control_Wheel"
+                       displayName="Control_Wheel"
+                       projectFiles="true">
+          <itemPath>src-cpp/Control_Wheel/Control_Wheel.cpp</itemPath>
+          <itemPath>src-cpp/Control_Wheel/Control_Wheel.hpp</itemPath>
+        </logicalFolder>
+        <logicalFolder name="Genasun_Watt_Sensor"
+                       displayName="Genasun_Watt_Sensor"
+                       projectFiles="true">
+          <itemPath>src-cpp/Genasun_Watt_Sensor/MPPT.cpp</itemPath>
+          <itemPath>src-cpp/Genasun_Watt_Sensor/MPPT.h</itemPath>
+          <itemPath>src-cpp/Genasun_Watt_Sensor/MPPT_CANIDs.hpp</itemPath>
+        </logicalFolder>
+      </logicalFolder>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -26,6 +93,9 @@
       <itemPath>Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>.</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="Debug" type="1">
@@ -39,7 +109,101 @@
           <standard>8</standard>
         </ccTool>
       </compileType>
+      <item path="config/control_data.conf" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="config/control_data_python.conf" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="config/telem_input.conf" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="config/telem_input_python.conf" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="config/user_power.conf" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="config/user_power_python.conf" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include-cpp/can4linux.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include-cpp/easylogging++.cc" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="include-cpp/easylogging++.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lib-cpp/Canbus/CANbus.md" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lib-cpp/Canbus/canbus.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="lib-cpp/Canbus/canbus.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lib-cpp/Debugging/easy_debugging.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="lib-cpp/Logging/logging.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="lib-cpp/Logging/logging.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lib-cpp/Logging/thread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="lib-cpp/Logging/thread.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lib-cpp/Serial/Serial.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="lib-cpp/Serial/Serial.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="logfiles/ControlData.log" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="logfiles/PowerInput.log" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="logfiles/TelemetryInput.log" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="logfiles/UserPowerInput.log" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="pipes/ControlDataToPython" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="pipes/TelemInputToPython" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="pipes/UserPowerToPython" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="solarboattwente.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Battery_Magagement_System/BMS.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Battery_Magagement_System/BMS.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Battery_Magagement_System/BMS_CANIDs.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_Wheel/Control_Wheel.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_Wheel/Control_Wheel.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Genasun_Watt_Sensor/MPPT.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Genasun_Watt_Sensor/MPPT.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Genasun_Watt_Sensor/MPPT_CANIDs.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="1">
@@ -63,7 +227,101 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="config/control_data.conf" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="config/control_data_python.conf" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="config/telem_input.conf" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="config/telem_input_python.conf" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="config/user_power.conf" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="config/user_power_python.conf" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include-cpp/can4linux.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="include-cpp/easylogging++.cc" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="include-cpp/easylogging++.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lib-cpp/Canbus/CANbus.md" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lib-cpp/Canbus/canbus.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="lib-cpp/Canbus/canbus.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lib-cpp/Debugging/easy_debugging.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="lib-cpp/Logging/logging.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="lib-cpp/Logging/logging.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lib-cpp/Logging/thread.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="lib-cpp/Logging/thread.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lib-cpp/Serial/Serial.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="lib-cpp/Serial/Serial.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="logfiles/ControlData.log" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="logfiles/PowerInput.log" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="logfiles/TelemetryInput.log" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="logfiles/UserPowerInput.log" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="pipes/ControlDataToPython" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="pipes/TelemInputToPython" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="pipes/UserPowerToPython" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="solarboattwente.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Battery_Magagement_System/BMS.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Battery_Magagement_System/BMS.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Battery_Magagement_System/BMS_CANIDs.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_Wheel/Control_Wheel.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_Wheel/Control_Wheel.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Genasun_Watt_Sensor/MPPT.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Genasun_Watt_Sensor/MPPT.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Genasun_Watt_Sensor/MPPT_CANIDs.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
     </conf>
   </confs>
