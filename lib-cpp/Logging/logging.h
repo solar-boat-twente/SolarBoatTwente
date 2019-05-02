@@ -13,11 +13,10 @@
 
 #ifndef LOGGING_H
 #define LOGGING_H
-#include "easylogging++.h"
+#include "../../include-cpp/easylogging++.h"
 #include <string>
 #include <array>
-#include "structures.h"
-#include "convert_power.h"
+#include "../../solarboattwente.h"
 
 class Logger { 
 public:
@@ -26,12 +25,13 @@ public:
     virtual ~Logger();
 
     void write_values(const std::string var1, const std::string var2);
-    void write_struct_user_power_to_log(const structures::PowerInput *power_input_ptr,const structures::PowerOutput *power_output_ptr, const structures::UserInput *user_input_ptr);
-    void write_struct_control_data_to_log(const structures::ControlData *control_data_ptr);
-    void write_struct_telemetry_input_to_log(const structures::TelemetryInput *telemetry_input_ptr);
+    void write_struct_user_power_to_log(const MIO::structures::PowerInput *power_input_ptr,const MIO::structures::PowerOutput *power_output_ptr, const MIO::structures::UserInput *user_input_ptr);
+    void write_struct_control_data_to_log(const MIO::structures::ControlData *control_data_ptr);
+    void write_struct_telemetry_input_to_log(const MIO::structures::TelemetryInput *telemetry_input_ptr);
 private:
 
 };
+
 
 #endif /* LOGGING_H */
 

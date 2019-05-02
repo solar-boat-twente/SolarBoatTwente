@@ -23,7 +23,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
-#include "structures.h"
+#include "../../solarboattwente.h"
 #include "logging.h" 
 #include <functional>
 
@@ -40,9 +40,9 @@ public:
     
     int CreateThreads();
     std::string getString();
-    void writeControlData(structures::ControlData *control_data_ptr, bool to_logfile, bool to_python);
-    void writeUserPower(structures::PowerInput *power_input_ptr, structures::PowerOutput *power_output_ptr, structures::UserInput *user_input_ptr, bool to_logfile, bool to_python);
-    void writeTelemInput(structures::TelemetryInput *telemetry_input_ptr, bool to_logfile, bool to_python);
+    void writeControlData(MIO::structures::ControlData *control_data_ptr, bool to_logfile, bool to_python);
+    void writeUserPower(MIO::structures::PowerInput *power_input_ptr, MIO::structures::PowerOutput *power_output_ptr, MIO::structures::UserInput *user_input_ptr, bool to_logfile, bool to_python);
+    void writeTelemInput(MIO::structures::TelemetryInput *telemetry_input_ptr, bool to_logfile, bool to_python);
     //int CreateThread(pthread_t thread, vFunctionCall func);
     int CreatePipe(const char *path_to_pipe);
     

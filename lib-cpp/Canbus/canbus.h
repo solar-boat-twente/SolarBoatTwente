@@ -18,7 +18,7 @@
 #include <thread>
 #include <fcntl.h>
 
-#include "../../include/can4linux.h"
+#include "../../include-cpp/can4linux.h"
 
 namespace MIO {
 

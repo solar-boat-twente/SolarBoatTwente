@@ -16,10 +16,10 @@
 
 #include <vector>
 #include <stdint.h>
-#include "../Wrappers/Serial.h"
+#include "../../lib-cpp/Serial/Serial.h"
 #include <thread>
 
-#include "../structures.h"
+#include "../../solarboattwente.h"
 
 namespace MIO{
 

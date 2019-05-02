@@ -16,7 +16,7 @@
 #include <cstring>
 
 
-#include "../../include/easy_debugging.hpp"
+#include "../Debugging/easy_debugging.hpp"
 
 using namespace MIO;
 using namespace std;

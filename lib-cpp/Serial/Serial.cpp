@@ -5,7 +5,7 @@
  */
 
 
-#include "../../include/easy_debugging.hpp"
+#include "../Debugging/easy_debugging.hpp"
 
 #include <stdio.h>      // standard input / output functions
 #include <stdlib.h>

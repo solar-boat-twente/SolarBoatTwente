@@ -1,5 +1,7 @@
-#include "headerfiles/logging.h"
+#include "logging.h"
 
+using namespace MIO;
+using namespace structures;
 
 Logger::Logger(const std::string PathToConfig)
 {
@@ -25,35 +27,6 @@ Logger::~Logger()
 INITIALIZE_EASYLOGGINGPP
 
 
-
-PowerHandler::PowerHandler(structures::PowerInput* power_input,
-                           structures::PowerOutput* power_output,
-                           structures::UserInput* user_input,
-                           structures::TelemetryInput* telemetry_input) {
-
-
-  PowerHandler::power_input = power_input;
-  PowerHandler::power_output = power_output;
-  PowerHandler::user_input = user_input;
-  PowerHandler::telemetry_input = telemetry_input;
-}
-
-/*
-std::string append_array_to_csv_format(const float array[]){
-//std::string append_array_to_csv_format(std:: array<const float, 5> array){
-    std::string string_to_append;
-    std::cout << "Nr of array elements:" << std::to_string(num_elements) << std::endl;
-    for (int i=0; i < num_elements; i++)
-    {
-        string_to_append.append(",");
-        string_to_append.append(std::to_string(array[i]));
-    }
-    
-    std::cout << "Testing string appending" << string_to_append << std::endl;
-    return string_to_append;
-    
-}
-*/
 void Logger::write_struct_user_power_to_log(const structures::PowerInput *power_input_ptr, const structures::PowerOutput *power_output_ptr, const structures::UserInput *user_input_ptr){
     //std::string testing_func;
     //testing_func = append_array_to_csv_format(power_input_ptr->battery.cel_voltages);
@@ -79,9 +52,9 @@ void Logger::write_struct_user_power_to_log(const structures::PowerInput *power_
            << ","<< power_output_ptr->solar_panel_states[7]<< ","<< power_output_ptr->solar_panel_states[8]<< ","<< power_output_ptr->solar_panel_states[9]
            << "," << power_output_ptr->throttle << "," << power_output_ptr->motor_state << "," << power_output_ptr->contractor_control 
            << ","<< power_output_ptr->balancing_control << "," << power_output_ptr->error 
-           << ","<< user_input_ptr->control.PID_state << "," << user_input_ptr->control.roll 
-           << ","<< user_input_ptr->buttons.battery_on << ","  << user_input_ptr->buttons.force_battery << "," << user_input_ptr->buttons.motor_on 
-           << ","<< user_input_ptr->buttons.deadmans_switch << "," << user_input_ptr->buttons.solar_on 
+           //<< ","<< user_input_ptr->control.PID_state << "," << user_input_ptr->control.roll 
+           //<< ","<< user_input_ptr->buttons.battery_on << ","  << user_input_ptr->buttons.force_battery << "," << user_input_ptr->buttons.motor_on 
+           //<< ","<< user_input_ptr->buttons.deadmans_switch << "," << user_input_ptr->buttons.solar_on 
            << ","<< user_input_ptr->steer.raw_throttle << "," << user_input_ptr->steer.fly_mode << "," << user_input_ptr->steer.reverse;
 }
 
@@ -94,7 +67,7 @@ void Logger::write_struct_control_data_to_log(const structures::ControlData *con
 }
 
 void Logger::write_struct_telemetry_input_to_log(const structures::TelemetryInput *telemetry_input_ptr){
-   LOG(INFO) << "," << telemetry_input_ptr->control.PID_telem.P  << "," << telemetry_input_ptr->control.PID_telem.I  << "," << telemetry_input_ptr->control.PID_telem.D  << "," << telemetry_input_ptr->control.PID_telem.N  << "," 
+   LOG(INFO) //<< "," << telemetry_input_ptr->control.PID_telem.P  << "," << telemetry_input_ptr->control.PID_telem.I  << "," << telemetry_input_ptr->control.PID_telem.D  << "," << telemetry_input_ptr->control.PID_telem.N  << "," 
            //<< telemetry_input_ptr->control.PID_height  << "," << telemetry_input_ptr->control.PID_roll  << "," << telemetry_input_ptr->control.PID_pitch  << ","
            << telemetry_input_ptr->control.overwrite  << ","
            << telemetry_input_ptr->solar_panel_states[0]  << "," << telemetry_input_ptr->solar_panel_states[1]  << ","<< telemetry_input_ptr->solar_panel_states[2]  << ","

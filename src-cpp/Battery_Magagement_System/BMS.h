@@ -16,8 +16,8 @@
 
 #include <thread>
 
-#include "../Wrappers/canbus.h"
-#include "../structures.h"
+#include "../../lib-cpp/Canbus/canbus.h"
+#include "../../solarboattwente.h"
 
 
 namespace MIO{

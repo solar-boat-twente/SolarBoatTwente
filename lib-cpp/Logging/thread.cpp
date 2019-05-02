@@ -11,11 +11,12 @@
  * Created on 23 mei 2018, 11:06
  */
 
-#include "headerfiles/thread.h"
+#include "thread.h"
 #define CONTROL_DATA_WRITE_CYCLE_TIME 13333
 #define USER_POWER_WRITE_CYCLE_TIME 200000
 #define TELEM_INPUT_WRITE_CYCLE_TIME 20000
 
+using namespace MIO;
 
 Thread::Thread()
 {
@@ -47,13 +48,13 @@ const char *pipe_control_data_to_python = "/home/solarboattwente/pipes/ControlDa
 const char *pipe_user_power_to_python = "/home/solarboattwente/pipes/UserPowerToPython";
 const char *pipe_telem_input_to_python = "/home/solarboattwente/pipes/TelemInputToPython";
 
-Logger control_data_logger("config/control_data.conf");
-Logger user_power_logger("config/user_power.conf");
-Logger telem_input_logger("config/telem_input.conf");
+Logger control_data_logger("../../config/control_data.conf");
+Logger user_power_logger("../../config/user_power.conf");
+Logger telem_input_logger("../../config/telem_input.conf");
 
-Logger control_data_pipe("config/control_data_python.conf");
-Logger user_power_pipe("config/user_power_python.conf");
-Logger telem_input_pipe("config/telem_input_python.conf");
+Logger control_data_pipe("../../config/control_data_python.conf");
+Logger user_power_pipe("../../config/user_power_python.conf");
+Logger telem_input_pipe("../../config/telem_input_python.conf");
 
 structures::ControlData *gl_control_data_ptr;
 structures::PowerInput *gl_power_input_ptr;

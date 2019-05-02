@@ -17,8 +17,8 @@
 #include <thread>
 #include <chrono>
 
-#include "../../include/can4linux.h"
-#include "../../include/easy_debugging.hpp"
+#include "../../include-cpp/can4linux.h"
+#include "../../lib-cpp/Debugging/easy_debugging.hpp"
 
 #include "BMS_CANIDs.h"
 

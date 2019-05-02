@@ -18,9 +18,9 @@
 #include <thread>
 #include <stdlib.h>
 #include <stdint.h>
-#include "../Wrappers/canbus.h"
+#include "../../lib-cpp/Canbus/canbus.h"
 #include "MPPT_CANIDs.hpp"
-#include "../structures.h"
+#include "../../solarboattwente.h"
 
 namespace MIO{
 namespace PowerElectronics{

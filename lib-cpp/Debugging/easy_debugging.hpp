@@ -76,9 +76,9 @@ class Debug
   {
     if(DEBUG_ON){
       if(typeid(v)==typeid(char)){
-        printf("0x%x",(v));
+        //printf("0x%x",(v));
       } else if(typeid(v)==typeid(short int)){
-        printf("0x%x",(v));
+        //printf("0x%x",(v));
       } else{ 
         std::cout<<v;
       }
