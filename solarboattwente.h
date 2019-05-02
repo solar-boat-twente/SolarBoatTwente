@@ -57,10 +57,10 @@ struct PowerInput {
     float state_of_health;
     
     //The raw error_number from the BMS
-    unsigned char error_number;
+    uint8_t error_number;
     
     //The cell number in which the error occured
-    unsigned char error_location;
+    uint8_t error_location;
     
     //The maximum temperature in the BMS in degC
     short int max_temp;
@@ -76,6 +76,10 @@ struct PowerInput {
     
     //Boolean wether the contactor is connected, True is connected
     bool contactor_status;
+    
+    //Two reserved variables
+    int reserved1;
+    int reserved2;
   };
 
   struct SolarInput {
@@ -83,6 +87,9 @@ struct PowerInput {
     float MPPT_power[10];
     //The power of the different solar panels in W
     float panel_power[10];
+    
+    //One reserved variable
+    int reserved1;
     
   };
 
@@ -96,7 +103,16 @@ struct PowerInput {
     //The state of the driver, true is on, false is freewheel
     bool driver_state;
     //Test wether the key is in the motor controller, true if motor controller is off
-    bool deadman_switch;
+    bool driver_on;
+    //Error number
+    bool error_word;
+    
+    //Low priority limiter (other type of error);
+    bool low_priority_limiter;
+    
+    //One reserved Variable;
+    int reserved1;
+    int reserved2;
   };
 
 
@@ -143,9 +159,9 @@ struct UserInput {
 
   struct ControlUserInput {
     //Predefined PID states, using an enumerate
-    PIDState PID_left;
-    PIDState PID_right;
-    PIDState PID_back;
+    PIDState PID_roll;
+    PIDState PID_pitch;
+    PIDState PID_height;
 
     //Roll given by the pedals saved as angle the boat should have
     float roll;
@@ -157,8 +173,8 @@ struct UserInput {
     // Bool stating whether the contactor and balancing of the battery should be forced
     bool force_battery; 
     // bool whether the button for the solar 
-    bool solar_on;
-    // States whether the system should debug, false on start-up, on true all the software is restarted
+    bool motor_on;
+    // States whether the system should debug, false on start-up, on true all the software should restart
     bool debug_on;
   };
 
@@ -167,6 +183,7 @@ struct UserInput {
     int raw_throttle;
     //values: NO_FLY, FLY, BRIDGE, SLALOM
     FlyMode fly_mode;
+    // If the boat should be in reverse
     bool reverse;
   };
 
@@ -175,6 +192,10 @@ struct UserInput {
   ButtonInput buttons;
 
   ControlUserInput control;
+  
+  //two reserved variables
+  int reserved1;
+  int reserved2;
 };
 
 /*
@@ -192,13 +213,26 @@ struct TelemetryInput {
     TelemetryPID PID_height;
     TelemetryPID PID_roll;
     TelemetryPID PID_pitch;
+    
     //Whether the Telemetry system should overwrite the PID values
     bool overwrite;
+    
+    //Two reserved variables
+    int reserved1;
+    int reserved2;
   };
 
   TelemetryControlInput control;
+  
   bool solar_panel_states[10];
   float advised_speed;
+  bool motor_on;
+  
+  //three reserved variables
+  int reserved1;
+  int reserved2;
+  int reserved3;
+  
 };
 
 /*
@@ -210,25 +244,24 @@ struct PowerOutput {
 
   // the throttle used by the Motor from -320000 to 320000
   signed short int throttle;
-
-  // The state of the motor true = on, false = freewheel
-  bool motor_state;
+  
+  // The real throttle in Amps.
+  float real_throttle;
+  
+  // The state of the motor 2 = current control mode, false = freewheel
+  uint8_t motor_state;
 
   // Control of the contractor:
   // 0 = off
   // 1 = On when BMS want it to be on
   // 2 = Force On
-  unsigned char contractor_control;
+  uint8_t contractor_control;
 
   // Control of the balancing:
   // 0 = regular balancing
   // 1 = force balancing
-  unsigned char balancing_control;
+  uint8_t balancing_control;
 
-  // Stores if there is any error in the motor:
-  // 0 = no error
-  // 1 = some error
-  unsigned char error;
 
   //TODO: make error divided into more sub sections.
 };
@@ -242,6 +275,9 @@ struct ControlData {
     float raw_pitch, raw_roll;
     float filtered_pitch, filtered_roll;
     float raw_z_acceleration;
+    float speed;
+    float latitude;
+    float longitude;
   };
 
   struct Vlotters {
@@ -252,12 +288,21 @@ struct ControlData {
     float force_roll, force_pitch, force_height;
     float angle_left, angle_right, angle_back;
   };
-
+  float current_P;
+  float current_I;
+  float current_D;
+  float current_N;
+  
   InputXSenseData xsens;
   Vlotters vlotters;
   ComputedControlData computed;
+  
   float real_height;
   float real_roll;
+  
+  //two reserved variables:
+  int reserved1;
+  int reserved2;
 };
 }/* structures */
 }/* top_level */

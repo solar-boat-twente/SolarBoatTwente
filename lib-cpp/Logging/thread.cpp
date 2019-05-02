@@ -44,17 +44,21 @@ Thread::~Thread()
     pthread_join(thread4, &temp);
 }
 
-const char *pipe_control_data_to_python = "/home/solarboattwente/pipes/ControlDataToPython";
-const char *pipe_user_power_to_python = "/home/solarboattwente/pipes/UserPowerToPython";
-const char *pipe_telem_input_to_python = "/home/solarboattwente/pipes/TelemInputToPython";
+//const char *pipe_control_data_to_python = "/root/SolarBoat 2019/SolarBoatTwente/pipes/ControlDataToPython";
+//const char *pipe_user_power_to_python = "/root/SolarBoat 2019/SolarBoatTwente/pipes/UserPowerToPython";
+//const char *pipe_telem_input_to_python = "/root/SolarBoat 2019/SolarBoatTwente/pipes/TelemInputToPython";
 
-Logger control_data_logger("../../config/control_data.conf");
-Logger user_power_logger("../../config/user_power.conf");
-Logger telem_input_logger("../../config/telem_input.conf");
+const char *pipe_control_data_to_python = "/root/SolarBoat2019/SolarBoatTwente/pipes/ControlDataToPython";
+const char *pipe_user_power_to_python = "/root/SolarBoat2019/SolarBoatTwente/pipes/UserPowerToPython";
+const char *pipe_telem_input_to_python = "/root/SolarBoat2019/SolarBoatTwente/pipes/TelemInputToPython";
 
-Logger control_data_pipe("../../config/control_data_python.conf");
-Logger user_power_pipe("../../config/user_power_python.conf");
-Logger telem_input_pipe("../../config/telem_input_python.conf");
+Logger control_data_logger("/root/SolarBoat2019/SolarBoatTwente/config/control_data.conf");
+Logger user_power_logger("/root/SolarBoat2019/SolarBoatTwente/config/user_power.conf");
+Logger telem_input_logger("/root/SolarBoat2019/SolarBoatTwente/config/telem_input.conf");
+
+Logger control_data_pipe("/root/SolarBoat2019/SolarBoatTwente/config/control_data_python.conf");
+Logger user_power_pipe("/root/SolarBoat2019/SolarBoatTwente/config/user_power_python.conf");
+Logger telem_input_pipe("/root/SolarBoat2019/SolarBoatTwente/config/telem_input_python.conf");
 
 structures::ControlData *gl_control_data_ptr;
 structures::PowerInput *gl_power_input_ptr;
@@ -136,7 +140,7 @@ int Thread::CreateThreads()
     }
     else
     {
-        std::cout << "Creating thread "<<pipe_control_data_to_python <<"  failed! Errno: " << errno << ": ";
+        std::cout << "Creating thread for "<<pipe_control_data_to_python <<"  failed! Errno: " << errno << ": ";
         std::cout << strerror(errno) << std::endl;
     }
     
@@ -147,7 +151,7 @@ int Thread::CreateThreads()
     }
     else
     {
-        std::cout << "Creating thread "<< pipe_user_power_to_python <<" failed! Errno: " << errno << ": ";
+        std::cout << "Creating thread for "<< pipe_user_power_to_python <<" failed! Errno: " << errno << ": ";
         std::cout << strerror(errno) << std::endl;
     }
     pthread_create(&thread4, NULL, ThreadWriteTelemInputData, NULL);
@@ -157,7 +161,7 @@ int Thread::CreateThreads()
     }
     else
     {
-        std::cout << "Creating thread "<< pipe_telem_input_to_python<< " failed! Errno: " << errno << ": ";
+        std::cout << "Creating thread for "<< pipe_telem_input_to_python<< " failed! Errno: " << errno << ": ";
         std::cout << strerror(errno) << std::endl;
     }
      
@@ -288,11 +292,18 @@ void *ThreadWriteControlData(void *ptr)
     {
         if (ControlDataToLogfile == 1) // only needs to write if the command is given
         {
-            pthread_mutex_lock(&mutex2);
-            control_data_logger.write_struct_control_data_to_log(gl_control_data_ptr);
+            //pthread_mutex_lock(&mutex2);
+            //std::cout << "Writing to  log now" << std::endl;
+            //freopen("/root/SolarBoat2019/SolarBoatTwente/logfiles/ControlData.log", "w", stdout);
+            //std::cout << "TESTESTETS" << std::endl;
+            control_data_logger.write_struct_control_data(gl_control_data_ptr);
+             //fclose(stdout);
+            //freopen("/root/SolarBoat2019/SolarBoatTwente/logfiles/ControlData.log", "w", stdout);
+            //std::cout << "JOEHOE" << std::endl;
+            //fclose(stdout);
             ControlDataToLogfile = 0;
            
-            pthread_mutex_unlock(&mutex2);
+            //pthread_mutex_unlock(&mutex2);
             if (errno == 0)
             {
                 std::cout << "Writing to log succesfully" << std::endl;
@@ -303,14 +314,17 @@ void *ThreadWriteControlData(void *ptr)
                 std::cout << strerror(errno) << std::endl;
             }
         }
+        
         if (ControlDataToPython == 1) // only needs to write if the command is given
         {
             pthread_mutex_lock(&mutex2);
             freopen(pipe_control_data_to_python, "w", stdout);
-            control_data_pipe.write_struct_control_data_to_log(gl_control_data_ptr);
+            control_data_pipe.write_struct_control_data(gl_control_data_ptr);
+            fclose(stdout);
             pthread_mutex_unlock(&mutex2);
             ControlDataToPython = 0;
         }
+         
         usleep(CONTROL_DATA_WRITE_CYCLE_TIME);
     }
 }
@@ -330,7 +344,7 @@ void *ThreadWriteUserPowerData(void *ptr)
             //strcpy(tempString, OutputString); // copies data from WriteString function
             pthread_mutex_lock(&mutex3);
          
-            user_power_logger.write_struct_user_power_to_log(gl_power_input_ptr, gl_power_output_ptr, gl_user_input_ptr);
+            user_power_logger.write_struct_user_power(gl_power_input_ptr, gl_power_output_ptr, gl_user_input_ptr);
             UserPowerToLogfile = 0;
            
             pthread_mutex_unlock(&mutex3);
@@ -348,7 +362,8 @@ void *ThreadWriteUserPowerData(void *ptr)
         {
             pthread_mutex_lock(&mutex3);
             freopen(pipe_user_power_to_python, "w", stdout);
-            user_power_pipe.write_struct_user_power_to_log(gl_power_input_ptr, gl_power_output_ptr, gl_user_input_ptr);
+            user_power_pipe.write_struct_user_power(gl_power_input_ptr, gl_power_output_ptr, gl_user_input_ptr);
+            fclose(stdout);
             UserPowerToPython = 0;
            
             pthread_mutex_unlock(&mutex3);
@@ -372,8 +387,9 @@ void *ThreadWriteTelemInputData(void *ptr)
             //strcpy(tempString, OutputString); // copies data from WriteString function
             pthread_mutex_lock(&mutex4);
          
-    
-            telem_input_logger.write_struct_telemetry_input_to_log(gl_telemetry_input_ptr);
+           
+            telem_input_logger.write_struct_telemetry_input(gl_telemetry_input_ptr);
+            //fclose(stdout);
             TelemInputToLogfile = 0;
            
             pthread_mutex_unlock(&mutex4);
@@ -391,7 +407,8 @@ void *ThreadWriteTelemInputData(void *ptr)
         {
             pthread_mutex_lock(&mutex4);
             freopen(pipe_telem_input_to_python, "w", stdout);
-            telem_input_pipe.write_struct_telemetry_input_to_log(gl_telemetry_input_ptr);
+            telem_input_pipe.write_struct_telemetry_input(gl_telemetry_input_ptr);
+            fclose(stdout);
             TelemInputToPython = 0;
            
             pthread_mutex_unlock(&mutex4);

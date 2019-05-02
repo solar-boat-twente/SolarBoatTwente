@@ -75,9 +75,11 @@ class Debug
   Debug &operator<<(const T &v)
   {
     if(DEBUG_ON){
-      if(typeid(v)==typeid(char)){
+      if(typeid(v)==typeid(uint8_t)){
+        std::cout<<std::hex<<std::showbase<<v<<std::dec;
         //printf("0x%x",(v));
       } else if(typeid(v)==typeid(short int)){
+        std::cout<<std::hex<<std::showbase<<v<<std::dec;
         //printf("0x%x",(v));
       } else{ 
         std::cout<<v;
@@ -100,6 +102,7 @@ class Debug
   template<class M>
   Debug& printArray(M arr[], int length){
     for(int i = 0; i<length; i++){
+      std::cout<<std::hex<<std::showbase<<arr[i]<<" "<<std::dec;
       printf("0x%x ",  arr[1]);
     }
     return *this;
