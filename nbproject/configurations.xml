@@ -107,7 +107,7 @@
       <compileType>
         <ccTool>
           <standard>8</standard>
-          <commandLine>-pthread --std=c++11</commandLine>
+          <commandLine>-pthread --std=c++11 -g</commandLine>
         </ccTool>
       </compileType>
       <item path="config/control_data.conf" ex="false" tool="3" flavor2="0">

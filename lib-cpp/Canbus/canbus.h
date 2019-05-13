@@ -54,7 +54,7 @@ class CANbus {
   unsigned int baudrate;
 
   // Name of the device ex: "can0", "can1" 
-  char device[20];
+  const char * device;
 
   // Amount of buffer left before max length of buffer is gone
   // TODO(Sander): Implement the use of this
@@ -103,7 +103,7 @@ class CANbus {
    * 
    *  
    */
-  CANbus(const char device_name[20], unsigned int buffer_size = STD_BUFFER, unsigned int baudrate = STD_BAUD);
+  CANbus(const char * device_name, unsigned int buffer_size = STD_BUFFER, unsigned int baudrate = STD_BAUD);
   
   
   int open_can(int flag = O_RDWR);

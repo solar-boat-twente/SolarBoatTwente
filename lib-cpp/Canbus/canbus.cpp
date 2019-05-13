@@ -21,12 +21,13 @@
 using namespace MIO;
 using namespace std;
 /*public: */
-CANbus::CANbus(char const device_name[], unsigned int buffer_size, unsigned int baudrate) {
+CANbus::CANbus( const char * device_name, unsigned int buffer_size, unsigned int baudrate) {
   //Filling the can_status structure
-  char device[20] = "/dev/";
-  int len = sprintf(device, "/dev/%s", device_name);
-  for(int i=0; i<len;i++){
-    can_status->device[i] = device[i];
+  //char device[20];
+  //int len = sprintf(device, "/dev/%s", device_name);
+  can_status->device = device_name;
+  for(int i=0; i<9; i++){
+    //can_status->device[i] = device[i];
   }
   can_status->total_buffer = buffer_size;
   can_status->baudrate = baudrate;
@@ -34,9 +35,8 @@ CANbus::CANbus(char const device_name[], unsigned int buffer_size, unsigned int 
   can_status->double_reads = 0;
   can_status->status = false;
   can_status->open = false;
-  
   //Opens the CANbus
-  if(open_can()>0){
+  if(open_can(O_RDWR)>0){
     set_baudrate(baudrate);
   };
   
@@ -50,6 +50,7 @@ int CANbus::open_can(int flag) {
   //Tests if the canbus is not yet open. 
   if(!can_status->open){
     file_descriptor = open(can_status->device, flag);
+    std::cout<<file_descriptor;
     if(file_descriptor<0){
       M_ERR<<"UNABLE TO OPEN CAN DEVICE: "<<can_status->device;
       return -1;
@@ -67,6 +68,7 @@ int CANbus::open_can(int flag) {
 int CANbus::close_can() {
   if(can_status->open){
     M_INFO<<"CLOSING CAN (*＾▽＾)／";
+    can_status->open =false;
     return close(file_descriptor);
   } else {
     M_WARN<<"CANBUS HAS NOT YET BEEN OPENED, DON'T CLOSE A CLOSED CONNECTION! (='_' )";
