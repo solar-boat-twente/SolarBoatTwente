@@ -35,7 +35,7 @@ using namespace structures;
 int main(int argc, const char** argv) {
   close(10);
   close(11);
-  Serial * serial_wheel = new Serial("/dev/ttyUSB0");
+  Serial * serial_wheel = new Serial("/dev/steer");
   PowerInput * power_input = new PowerInput;
   PowerOutput * power_output = new PowerOutput;
   UserInput * user_input = new UserInput;
