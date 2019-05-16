@@ -323,6 +323,7 @@ void *ThreadWriteControlData(void *ptr)
             fclose(stdout);
             pthread_mutex_unlock(&mutex2);
             ControlDataToPython = 0;
+            std::cout<<"Write to control Pipe"<<std::endl;
         }
          
         usleep(CONTROL_DATA_WRITE_CYCLE_TIME);
