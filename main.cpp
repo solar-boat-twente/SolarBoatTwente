@@ -83,12 +83,16 @@
 #include <string>
 #include <fcntl.h>
 #include <unistd.h> 
+#include <fstream>
+#include <sstream>
+
 #include "solarboattwente.h"
 //#include "lib-cpp/Logging/thread.h"
 //#include "lib-cpp/Logging/logging.h"
 #include "src-cpp/Battery_Magagement_System/BMS.h"
 #include "src-cpp/Battery_Magagement_System/BMS_CANIDs.h"
 #include "src-cpp/Control_Wheel/Control_Wheel.hpp"
+#include "lib-cpp/Logging/thread.h"
 //#include "lib-cpp/Logging/easylogging++.h"
 
 
@@ -100,25 +104,32 @@ using namespace structures;
 
 
 int main(int argc, const char** argv) {
-  close(10);
-  close(11);
+  //Open up the data acquisition parts
   Serial * serial_wheel = new Serial("/dev/steer");
+  CANbus * canbus_bms = new CANbus("/dev/can0", 1);
+  CANbus * canbus_driver = new CANbus("/dev/can1", 1);
+  
+  
+  //Open up the global structures
   PowerInput * power_input = new PowerInput;
   PowerOutput * power_output = new PowerOutput;
   UserInput * user_input = new UserInput;
-  user_input->steer.raw_throttle = 0;
-  //std::cout<<open("/dev/can0", O_RDWR);
-  CANbus * canbus_bms = new CANbus("/dev/can0", 1);
-  CANbus * canbus_driver = new CANbus("/dev/can1", 1);
-  canbus_driver->close_can();
-  canbus_driver->open_can(O_RDWR|O_NONBLOCK);
+  ControlData * control_data = new ControlData;
+  
+  //Starting with reading from the CANbus
+  canbus_bms->start(100);
+  canbus_driver->start(100);
+  
+  //Start the Steering Wheel
   UI::ControlWheel * control_wheel = new UI::ControlWheel(serial_wheel);
   control_wheel->start_reading(user_input, 50);
   
+  //Start up the screen
+  Thread threads;
+  threads.CreateThreads();
   
   
   //canbus_driver->start(100);
-  canbus_bms->start(100);
   BMS * m_bms = new BMS(canbus_bms);
   m_bms->start_reading(power_input);
   
@@ -141,8 +152,13 @@ int main(int argc, const char** argv) {
   
   short int CORRECTION_FACTOR = 100; //value between 0 and 1, set correct for max current.
   
+  int counter = 0;
+  
+  ofstream file;
+  file.open("/root/logfiles/log210519.log", std::ios::app);
   
   while (true){
+    counter++;
     real_speed = 32 * user_input->steer.raw_throttle * CORRECTION_FACTOR/100;
     std::cout<<real_speed<<std::endl;
     if (user_input->steer.reverse){
@@ -157,6 +173,14 @@ int main(int argc, const char** argv) {
     this_thread::sleep_for(chrono::milliseconds(100));
     canbus_driver->write_can(driver_tx);
     
+    //threads.writeUserPower(power_input, power_output, user_input, 0, 1);
+    //threads.writeControlData(control_data, 0 ,1);
+    std::cout<<"WRITTEN TO PIPES";
+    if (counter%5 == 1){
+      file<<counter<<power_input->battery.max_temp << ","<<power_input->battery.total_current << ","<<power_input->battery.total_voltage << ","
+          <<power_input->battery.state_of_charge << ","<<user_input->steer.raw_throttle<<"\n";
+      file<<flush;
+    }  
     
   }
   
