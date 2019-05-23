@@ -31,8 +31,8 @@
 #include "PID_caller.h"
 #include "Force_to_wing_angle.h"
 #include "Daan_Test1_maxon.h"
-#include "canbus.h"
-#include "structures.h"
+#include "../../lib-cpp/Canbus/canbus.h"
+//#include "structures.h"
 
 //DigitalIn button(USER_BUTTON);
 using namespace std;

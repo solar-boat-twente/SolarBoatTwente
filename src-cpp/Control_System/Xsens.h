@@ -12,8 +12,8 @@
  */
 #ifndef XSENS_H
 #define XSENS_H
-#include "Serial.h"
-#include "structures.h"
+#include "../../lib-cpp/Serial/Serial.h"
+//#include "structures.h"
 #include "DataStore.h"
 
 namespace MIO{

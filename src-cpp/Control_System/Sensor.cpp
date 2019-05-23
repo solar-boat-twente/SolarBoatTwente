@@ -8,9 +8,9 @@
 #include <string>
 #include <stdio.h>
 #include "Sensor.h"
-#include "Serial.h"
-#include "canbus.h"
-#include "structures.h"
+#include "../../lib-cpp/Serial/Serial.h"
+#include "../../lib-cpp/Canbus/canbus.h"
+//#include "structures.h"
 #include <math.h>
 #include "Xsens.h"
 #include <iostream>

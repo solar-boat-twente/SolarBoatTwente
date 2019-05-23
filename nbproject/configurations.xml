@@ -81,18 +81,12 @@
           <itemPath>src-cpp/Control_System/PID_caller.h</itemPath>
           <itemPath>src-cpp/Control_System/Sensor.cpp</itemPath>
           <itemPath>src-cpp/Control_System/Sensor.h</itemPath>
-          <itemPath>src-cpp/Control_System/Serial.cpp</itemPath>
-          <itemPath>src-cpp/Control_System/Serial.h</itemPath>
           <itemPath>src-cpp/Control_System/Xsens.cpp</itemPath>
           <itemPath>src-cpp/Control_System/Xsens.h</itemPath>
-          <itemPath>src-cpp/Control_System/canbus.cpp</itemPath>
-          <itemPath>canbus.h</itemPath>
           <itemPath>src-cpp/Control_System/control_main.cpp</itemPath>
           <itemPath>src-cpp/Control_System/daan_maxon.cpp</itemPath>
-          <itemPath>src-cpp/Control_System/easy_debugging.hpp</itemPath>
           <itemPath>src-cpp/Control_System/pid.cpp</itemPath>
           <itemPath>src-cpp/Control_System/pid.h</itemPath>
-          <itemPath>src-cpp/Control_System/structures.h</itemPath>
         </logicalFolder>
         <logicalFolder name="Control_Wheel"
                        displayName="Control_Wheel"
@@ -156,8 +150,6 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
-      <item path="canbus.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="config/control_data.conf" ex="false" tool="3" flavor2="0">
       </item>
       <item path="config/control_data_python.conf" ex="false" tool="3" flavor2="0">
@@ -292,15 +284,9 @@
       </item>
       <item path="src-cpp/Control_System/Sensor.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Serial.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/Serial.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="src-cpp/Control_System/Xsens.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src-cpp/Control_System/Xsens.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/canbus.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src-cpp/Control_System/control_main.cpp"
             ex="false"
@@ -312,19 +298,9 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/easy_debugging.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="src-cpp/Control_System/pid.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src-cpp/Control_System/pid.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/structures.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
       </item>
       <item path="src-cpp/Control_Wheel/Control_Wheel.cpp"
             ex="false"
@@ -370,8 +346,6 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
-      <item path="canbus.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="config/control_data.conf" ex="false" tool="3" flavor2="0">
       </item>
       <item path="config/control_data_python.conf" ex="false" tool="3" flavor2="0">
@@ -506,15 +480,9 @@
       </item>
       <item path="src-cpp/Control_System/Sensor.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Serial.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/Serial.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="src-cpp/Control_System/Xsens.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src-cpp/Control_System/Xsens.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/canbus.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src-cpp/Control_System/control_main.cpp"
             ex="false"
@@ -526,19 +494,9 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/easy_debugging.hpp"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="src-cpp/Control_System/pid.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src-cpp/Control_System/pid.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/structures.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
       </item>
       <item path="src-cpp/Control_Wheel/Control_Wheel.cpp"
             ex="false"

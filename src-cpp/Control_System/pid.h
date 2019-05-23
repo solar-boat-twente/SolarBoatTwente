@@ -8,7 +8,8 @@
 #ifndef _PID_H_
 #define _PID_H_
 #include "DataStore.h"
-#include "structures.h"
+#include "../../../SolarBoatTwente/solarboattwente.h"
+//#include "structures.h"
 
 namespace control{
 using namespace MIO;

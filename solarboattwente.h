@@ -11,6 +11,8 @@
  * Created on April 9, 2019, 11:37 AM
  */
 
+#include <stdint.h>
+
 #ifndef SOLARBOATTWENTE_H
 #define SOLARBOATTWENTE_H
 

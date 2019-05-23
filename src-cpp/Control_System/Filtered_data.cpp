@@ -6,7 +6,7 @@
 #include <iostream>
 #include <math.h>
 #include "Filtered_data.h"
-#include "Serial.h"
+#include "../../lib-cpp/Serial/Serial.h"
 #include "Xsens.h"
 
 

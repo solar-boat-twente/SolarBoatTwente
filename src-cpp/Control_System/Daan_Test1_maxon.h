@@ -1,8 +1,8 @@
+#ifndef DAAN_TEST1_MAXON_H
+#define DAAN_TEST1_MAXON_H
 
 #include "DataStore.h"
-#include "canbus.h"
-#ifndef EPOSS
-#define EPOSS
+#include "../../lib-cpp/Canbus/canbus.h"
 using namespace MIO;
 
 /* -----------------------------------------------------------------------------
@@ -107,4 +107,5 @@ class EPOS{
     void Move();
 };
 
-#endif
+#endif	// DAAN_TEST1_MAXON_H
+

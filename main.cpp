@@ -6,6 +6,15 @@
 #include <unistd.h> 
 #include <fstream>
 #include <sstream>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+#include <termios.h>
+#include <cstdlib>
+#include <math.h>
+//#include <chrono>
+#include <ctime>
+#include <ratio>
 
 #include "solarboattwente.h"
 //#include "lib-cpp/Logging/thread.h"
@@ -16,51 +25,74 @@
 #include "lib-cpp/Logging/thread.h"
 #include "src-cpp/Genasun_Watt_Sensor/MPPT.h"
 //#include "lib-cpp/Logging/easylogging++.h"
-
-
+#include "src-cpp/Control_System/DataStore.h"
+#include "src-cpp/Control_System/Filtered_data.h"
+#include "src-cpp/Control_System/Sensor.h"
+#include "src-cpp/Control_System/ComplementaryFilter.h"
+#include "src-cpp/Control_System/PID_caller.h"
+#include "src-cpp/Control_System/Force_to_wing_angle.h"
+#include "src-cpp/Control_System/Daan_Test1_maxon.h"
+#include "lib-cpp/Canbus/canbus.h"
 
 using namespace std;
 using namespace MIO;
 using namespace PowerElectronics;
 using namespace structures;
 
+//Define everything 
+//Open up the data acquisition parts  
+Serial * serial_wheel = new Serial("/dev/steer");
+CANbus * canbus_bms = new CANbus("/dev/can0", 1);
+CANbus * canbus_driver = new CANbus("/dev/can1", 1);
 
-int main(int argc, const char** argv) {
-  //Open up the data acquisition parts
-  Serial * serial_wheel = new Serial("/dev/steer");
-  CANbus * canbus_bms = new CANbus("/dev/can0", 1);
-  CANbus * canbus_driver = new CANbus("/dev/can1", 1);
-  
-  
-  //Open up the global structures
-  PowerInput * power_input = new PowerInput;
-  PowerOutput * power_output = new PowerOutput;
-  UserInput * user_input = new UserInput;
-  ControlData * control_data = new ControlData;
-  
+//Open up the global structures
+PowerInput * power_input = new PowerInput;
+PowerOutput * power_output = new PowerOutput;
+UserInput * user_input = new UserInput;
+ControlData * control_data = new ControlData;
+
+UI::ControlWheel * control_wheel = new UI::ControlWheel(serial_wheel);
+BMS * m_bms = new BMS(canbus_bms);
+canmsg_t * bms_tx = new canmsg_t;
+canmsg_t * driver_tx = new canmsg_t;
+
+//Define everything from the control system
+DataStore * xsens_data = new DataStore();
+DataStore * ruwe_data = new DataStore();
+DataStore * filtered_data = new DataStore();
+DataStore * complementary_data= new DataStore();
+DataStore * pid_data = new DataStore();
+DataStore * FtoW_data = new DataStore();
+RuwDataFilter * filter = new RuwDataFilter();
+ComplementaryFilter * com_filter = new ComplementaryFilter();
+PID_caller * PIDAAN = new PID_caller();
+control::ForceToWingAngle * FtoW = new control::ForceToWingAngle();
+CANbus * canbus1 = new CANbus("can1", 1);
+
+EPOS * maxon1 = new EPOS(canbus1,1);
+EPOS * maxon2 = new EPOS(canbus1,2);
+EPOS * maxon4 = new EPOS(canbus1,4);
+
+void floating(){
   //Starting with reading from the CANbus
   canbus_bms->start(100);
   canbus_driver->start(100);
   
   //Start the Steering Wheel
-  UI::ControlWheel * control_wheel = new UI::ControlWheel(serial_wheel);
   control_wheel->start_reading(user_input, 50);
     
   //Start the BMS
-  BMS * m_bms = new BMS(canbus_bms);
   m_bms->start_reading(power_input);
   
   MPPT_Box * mppt_box = new MPPT_Box(canbus_bms);
   
   //construct message for bms
-  canmsg_t * bms_tx = new canmsg_t;
   bms_tx->id = CANID_BMS_TX;
   bms_tx->length = 2;
   bms_tx->data[0] = 0x01;
   bms_tx->data[1] = 0x0;
   
   //Construct message for driver
-  canmsg_t * driver_tx = new canmsg_t;
   driver_tx->id = 0xcf;
   driver_tx->length = 4;
   driver_tx->data[0] = 0;
@@ -107,7 +139,91 @@ int main(int argc, const char** argv) {
   canmsg_t  motor_2_data;
   canmsg_t  driver_state_data;
   canmsg_t  reference_data;
+}
+
+void controlsystem(){ 
+typedef std::chrono::microseconds ms;
+typedef std::chrono::milliseconds mls;
+  /* -----------------------------------------------------------------------------
+All three motors are going to home.
+----------------------------------------------------------------------------- */    
+//high_resolution_clock::time_point t0= high_resolution_clock::now();
+this_thread::sleep_for(chrono::milliseconds(10000));
+maxon1->Homing();
+this_thread::sleep_for(chrono::milliseconds(1000));
+maxon1->HomingCheck();
+this_thread::sleep_for(chrono::milliseconds(10000));
+maxon2->Homing();
+this_thread::sleep_for(chrono::milliseconds(1000));
+maxon2->HomingCheck();
+this_thread::sleep_for(chrono::milliseconds(10000));   
+maxon4->Homing();
+this_thread::sleep_for(chrono::milliseconds(1000));
+maxon4->HomingCheck();
+    
+/* -----------------------------------------------------------------------------
+All three motors are going in the startpositionmode.
+----------------------------------------------------------------------------- */    
+maxon1->StartPositionMode();
+this_thread::sleep_for(chrono::milliseconds(1000));      
+maxon2->StartPositionMode();
+this_thread::sleep_for(chrono::milliseconds(1000));
+maxon4->StartPositionMode();
+this_thread::sleep_for(chrono::milliseconds(10000));
+
+std::this_thread::sleep_for(std::chrono::milliseconds(500));  // wait 500 milliseconds, because otherwise the xsens can enter the configuration mode
   
+filter->m_ruwe_state_data = ruwe_data;     // (2)
+filter->m_filtered_data = filtered_data;        // (3)
+com_filter->m_filtered_data = filtered_data; //(4)
+com_filter->m_complementary_data = complementary_data; //(5)
+PIDAAN->m_complementary_data = complementary_data;  //(6)
+PIDAAN->m_PID_data = pid_data; //(7)
+FtoW->m_complementary_data = complementary_data; //(8)
+FtoW->m_PID_data = pid_data; //(9)
+FtoW->m_FtoW_data = FtoW_data; //(10)
+FtoW->m_xsens_state_data= xsens_data;
+maxon1->m_FtoW_data = FtoW_data; //(11)
+maxon2->m_FtoW_data = FtoW_data; //(12)
+maxon4->m_FtoW_data = FtoW_data; //(13)
+    
+Serial * m_serial = new Serial("/dev/xsense", 9600);
+Xsens * m_xsens = new Xsens(); //initialise class Xsens
+Sensor * de_sensor = new Sensor(m_xsens,m_serial);
+m_xsens->m_xsens_state_data = xsens_data; //(0)
+de_sensor->m_xsens_state_data = xsens_data;
+de_sensor->m_ruwe_state_data = ruwe_data;  // (1)
+int counter_control = 4;
+  while (true) {
+    std::chrono::high_resolution_clock::time_point t1= std::chrono::high_resolution_clock::now();
+    de_sensor->get_data();
+    if (counter_control ==0){
+      filter->FilterIt();
+      com_filter->CalculateRealHeight();            
+      PIDAAN->PID_in();
+      FtoW->MMA();
+      
+      maxon1->Move();
+      maxon2->Move();
+      this_thread::sleep_for(chrono::milliseconds(5));
+      maxon4->Move();
+      counter_control=5;
+    }
+    counter_control--;
+    std::chrono::high_resolution_clock::time_point t2= std::chrono::high_resolution_clock::now();
+    ms d = std::chrono::duration_cast<ms>(t1-t2);
+    int t_total = 12500-d.count();
+    printf("loop tijd is %i",t_total);
+    this_thread::sleep_for(chrono::microseconds(t_total));
+  }
+}
+
+
+int main(int argc, const char** argv) {  
+  
+  std::thread thread_floating(floating);
+  std::thread thread_controlsystem(controlsystem);
+    
   while (true){
     counter++;
     real_speed = 32 * user_input->steer.raw_throttle * CORRECTION_FACTOR/100;
