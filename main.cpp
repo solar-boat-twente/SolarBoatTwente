@@ -55,6 +55,7 @@ UI::ControlWheel * control_wheel = new UI::ControlWheel(serial_wheel);
 BMS * m_bms = new BMS(canbus_bms);
 canmsg_t * bms_tx = new canmsg_t;
 canmsg_t * driver_tx = new canmsg_t;
+MPPT_Box * mppt_box = new MPPT_Box(canbus_bms);
 
 //Define everything from the control system
 DataStore * xsens_data = new DataStore();
@@ -83,62 +84,6 @@ void floating(){
     
   //Start the BMS
   m_bms->start_reading(power_input);
-  
-  MPPT_Box * mppt_box = new MPPT_Box(canbus_bms);
-  
-  //construct message for bms
-  bms_tx->id = CANID_BMS_TX;
-  bms_tx->length = 2;
-  bms_tx->data[0] = 0x01;
-  bms_tx->data[1] = 0x0;
-  
-  //Construct message for driver
-  driver_tx->id = 0xcf;
-  driver_tx->length = 4;
-  driver_tx->data[0] = 0;
-  driver_tx->data[1] = 2;
-  driver_tx->data[2] = 0x19;
-  driver_tx->data[3] = 0x99;
-  
-  //Construct sampling message;
-  canmsg_t driver_sample;
-  driver_sample.id = 0xC7;
-  driver_sample.length = 8;
-  
-  driver_sample.data[0] = 0x0;
-  driver_sample.data[1] = 0x08;
-  driver_sample.data[2] = 0;
-  driver_sample.data[3] = 0xff;
-  driver_sample.data[4] = 0x03;
-  driver_sample.data[5] = 0xE8;
-  driver_sample.data[6] = 0x0;
-  driver_sample.data[7] = 0x64;
-  
-  //First turn off all the mppts before turning them back on..
-  mppt_box->set_all_relay(false);
-  for(int i = 1; i<11; i++){
-    mppt_box->set_relay_from_number(true, 11-i);
-    this_thread::sleep_for(chrono::milliseconds(100));
-  } 
-  
-  uint8_t required_speed_percent = 50;
-  short signed int real_speed = 0;
-  
-  short int CORRECTION_FACTOR = 100; //value between 0 and 1, set correct for max current.
-  
-  int counter = 0;
-  
-  ofstream file;
-  file.open("/root/logfiles/log230519.log", std::ios::app);
-  //buffer for mppt data
-  float mppt_buffer[10][4];
-
-  //buffers for driver data;
-  canmsg_t  supply_1_data;
-  canmsg_t  motor_1_data;
-  canmsg_t  motor_2_data;
-  canmsg_t  driver_state_data;
-  canmsg_t  reference_data;
 }
 
 void controlsystem(){ 
@@ -223,7 +168,61 @@ int main(int argc, const char** argv) {
   
   std::thread thread_floating(floating);
   std::thread thread_controlsystem(controlsystem);
-    
+  
+  //construct message for bms
+  bms_tx->id = CANID_BMS_TX;
+  bms_tx->length = 2;
+  bms_tx->data[0] = 0x01;
+  bms_tx->data[1] = 0x0;
+  
+  //Construct message for driver
+  driver_tx->id = 0xcf;
+  driver_tx->length = 4;
+  driver_tx->data[0] = 0;
+  driver_tx->data[1] = 2;
+  driver_tx->data[2] = 0x19;
+  driver_tx->data[3] = 0x99;
+  
+  //Construct sampling message;
+  canmsg_t driver_sample;
+  driver_sample.id = 0xC7;
+  driver_sample.length = 8;
+  
+  driver_sample.data[0] = 0x0;
+  driver_sample.data[1] = 0x08;
+  driver_sample.data[2] = 0;
+  driver_sample.data[3] = 0xff;
+  driver_sample.data[4] = 0x03;
+  driver_sample.data[5] = 0xE8;
+  driver_sample.data[6] = 0x0;
+  driver_sample.data[7] = 0x64;
+  
+  //First turn off all the mppts before turning them back on..
+  mppt_box->set_all_relay(false);
+  for(int i = 1; i<11; i++){
+    mppt_box->set_relay_from_number(true, 11-i);
+    this_thread::sleep_for(chrono::milliseconds(100));
+  } 
+  
+  uint8_t required_speed_percent = 50;
+  short signed int real_speed = 0;
+  
+  short int CORRECTION_FACTOR = 100; //value between 0 and 1, set correct for max current.
+  
+  int counter = 0;
+  
+  ofstream file;
+  file.open("/root/logfiles/log230519.log", std::ios::app);
+  //buffer for mppt data
+  float mppt_buffer[10][4];
+
+  //buffers for driver data;
+  canmsg_t  supply_1_data;
+  canmsg_t  motor_1_data;
+  canmsg_t  motor_2_data;
+  canmsg_t  driver_state_data;
+  canmsg_t  reference_data;
+  
   while (true){
     counter++;
     real_speed = 32 * user_input->steer.raw_throttle * CORRECTION_FACTOR/100;
