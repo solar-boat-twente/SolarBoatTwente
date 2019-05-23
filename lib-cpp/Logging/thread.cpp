@@ -361,9 +361,9 @@ void *ThreadWriteUserPowerData(void *ptr)
         if (UserPowerToPython == 1) // only needs to write if the command is given
         {
             pthread_mutex_lock(&mutex3);
-            freopen(pipe_user_power_to_python, "w", stdout);
+            freopen(pipe_user_power_to_python, "w", stderr);
             user_power_pipe.write_struct_user_power(gl_power_input_ptr, gl_power_output_ptr, gl_user_input_ptr);
-            fclose(stdout);
+            fclose(stderr);
             UserPowerToPython = 0;
            
             pthread_mutex_unlock(&mutex3);

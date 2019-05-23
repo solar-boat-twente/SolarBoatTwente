@@ -63,10 +63,10 @@ struct PowerInput {
     uint8_t error_location;
     
     //The maximum temperature in the BMS in degC
-    short int max_temp;
+    int max_temp;
     
     //The minimum temperature in the BMS in degC
-    short int min_temp;
+    int min_temp;
     
     //The balancing state of the BMS, False: not balancing, True: balancing
     bool balance_state; 

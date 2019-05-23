@@ -8,6 +8,7 @@
 #include <thread>
 #include <chrono>
 #include "MPPT.h"
+#include "MPPT_CANIDs.hpp"
 #include "../../lib-cpp/Debugging/easy_debugging.hpp"
 #include "../../include-cpp/can4linux.h"
 
@@ -17,7 +18,7 @@ using namespace MIO;
 
 using namespace MIO::PowerElectronics;
 
-MPPT::MPPT(CANbus * const canbus, uint8_t number_of_mppts, unsigned long start_address, unsigned long relay_address) : number_of_mppts_(number_of_mppts) {
+MPPT_Box::MPPT_Box(CANbus * const canbus, uint8_t number_of_mppts, unsigned long start_address, unsigned long relay_address) : number_of_mppts_(number_of_mppts) {
   if(number_of_mppts_>12) {
     M_ERR<<"WE DO NOT HAVE THAT MANY MPPTS!! (╯°□°）╯︵ ┻━┻";
   }
@@ -39,11 +40,11 @@ MPPT::MPPT(CANbus * const canbus, uint8_t number_of_mppts, unsigned long start_a
   }
 }
 
-int MPPT::get_bytes_from_address(uint8_t buf[], unsigned long address) {
+int MPPT_Box::get_bytes_from_address(uint8_t buf[], unsigned long address) {
   if(canbus_->status()->open){
     canmsg_t raw_receive;
     int success = canbus_->read_can(address, &raw_receive);
-    if(success==1){
+    if(success!=-1){
       if(raw_receive.length!=8){
         M_WARN<<"MESSAGE LENGTH NOT EQUAL TO 8, MAYBE INVALID ID!";
       }
@@ -62,7 +63,7 @@ int MPPT::get_bytes_from_address(uint8_t buf[], unsigned long address) {
 }
 
 
-int MPPT::get_float_from_address(float buf[], unsigned long address) {
+int MPPT_Box::get_float_from_address(float buf[], unsigned long address) {
   uint8_t raw_result[8];
   int receive_success = get_bytes_from_address(raw_result, address)==1;
   if(receive_success==1){
@@ -82,7 +83,7 @@ int MPPT::get_float_from_address(float buf[], unsigned long address) {
 }
 
 
-int MPPT::get_bytes_from_number(uint8_t buf[], int cell_number) {
+int MPPT_Box::get_bytes_from_number(uint8_t buf[], int cell_number) {
   //Checks if the cell_number is valid, for now it allows it.
   if(cell_number<start_address_ or cell_number>start_address_+number_of_mppts_){
     M_WARN<<"CELL NUMBER NOT WITHIN RANGE OF MPPTS";
@@ -101,7 +102,7 @@ int MPPT::get_bytes_from_number(uint8_t buf[], int cell_number) {
   return success;
 }
 
-int MPPT::get_float_from_number(float buf[], int cell_number) {
+int MPPT_Box::get_float_from_number(float buf[], int cell_number) {
   //Checks if the cell_number is valid, for now it allows it.
   if(cell_number<start_address_ or cell_number>start_address_+number_of_mppts_){
     M_WARN<<"CELL NUMBER NOT WITHIN RANGE OF MPPTS (╯°□°）╯︵ ┻━┻";
@@ -121,14 +122,15 @@ int MPPT::get_float_from_number(float buf[], int cell_number) {
   return get_float_from_address(buf, address);
 }
 
-int MPPT::get_all_bytes_data(uint8_t buf[][8]) {
+int MPPT_Box::get_all_bytes_data(uint8_t buf[][8]) {
   int received = 0;
   int success;
   uint8_t raw_result[8]; //Buffer to store the result for one address
   int count = 0; //Stores the row which the data is written to. 
-  for(int address = start_address_; address<start_address_+number_of_mppts_; address++){
+  //for (int i = 61; i<71; i++){
+  for(int i = start_address_; i<(start_address_+number_of_mppts_); i++){
     //Gets the bytes for one address and writes it to the final matrix
-    success = get_bytes_from_address(raw_result, address);
+    success = get_bytes_from_address(raw_result, i);
     
     for(int j = 0; j<8; j++){
       buf[count][j] = raw_result[j];
@@ -136,7 +138,7 @@ int MPPT::get_all_bytes_data(uint8_t buf[][8]) {
     count++;
     
     if(success<0){
-      return -1;
+      M_WARN<<"LOOK AT THE READ CAN ERROR";
     } else {
       received+=success;
     }
@@ -144,24 +146,36 @@ int MPPT::get_all_bytes_data(uint8_t buf[][8]) {
   return received;
 }
 
-int MPPT::get_all_float_data(float buf[][4]) {
+int MPPT_Box::get_all_float_data(float buf[][4]) {
   uint8_t raw_result[number_of_mppts_][8];
-  int receive_success = get_all_bytes_data(raw_result); 
+  int receive_success = get_all_bytes_data(raw_result);
+  
+    std::cout<<"\n"<<"READ DATA FFROM MPPT: \n";
+  for(int i =0; i<8; i++){
+      for(int j = 0; j<10; j++){
+        std::cout<<(int)raw_result[j][i]<<" "; 
+      } 
+      std::cout<<"\n";
+    } std::cout<<std::endl;
+  
   for(int i = 0; i<number_of_mppts_; i++){
     
     for(int j=0; j<4; j++){
        //Results are a voltage for i = 0,2 and current for i = 1,3, change accordingly
-      if(j%2) {
+      if(j%2==0) {
         buf[i][j] = get_V_float(raw_result[i][2*j], raw_result[i][2*j+1]);
+        std::cout<<"Voltage value: "<<get_int_(raw_result[i][2*j], raw_result[i][2*j+1])<<" ";
       } else {
         buf[i][j] = get_A_float(raw_result[i][2*j], raw_result[i][2*j+1]);
+        std::cout<<"AMP value: "<<get_int_(raw_result[i][2*j], raw_result[i][2*j+1])<<" ";
+
       } 
     }
   } 
   return receive_success;
 }
 
-int MPPT::set_relay_from_number(bool state, int cell_number) {
+int MPPT_Box::set_relay_from_number(bool state, int cell_number) {
   if (set_relay_states_from_number_(cell_number, state)==1) {
     canmsg_t * send_relays = new canmsg_t;
     send_relays->length = 2;
@@ -177,7 +191,7 @@ int MPPT::set_relay_from_number(bool state, int cell_number) {
   }
 }
 
-int MPPT::set_relay_from_number(bool state, int cell_number[], int number_of_cells) {
+int MPPT_Box::set_relay_from_number(bool state, int cell_number[], int number_of_cells) {
   for(int i = 0; i<number_of_cells; i++){
     if(set_relay_states_from_number_(cell_number[i], state)!=1) {
       return -1;
@@ -195,12 +209,12 @@ int MPPT::set_relay_from_number(bool state, int cell_number[], int number_of_cel
   
 }
 
-int MPPT::set_relay_from_address(bool state, unsigned long address) {
+int MPPT_Box::set_relay_from_address(bool state, unsigned long address) {
   int cell_number = address - start_address_ + 1;
   return set_relay_from_number(state, address); //This function will do all of the error handling
  }
 
-int MPPT::set_relay_from_address(bool state, unsigned long address[], int number_of_cells) {
+int MPPT_Box::set_relay_from_address(bool state, unsigned long address[], int number_of_cells) {
   int cell_numbers[number_of_cells];
   
   for(int i = 0; i<number_of_cells; i++){
@@ -208,7 +222,7 @@ int MPPT::set_relay_from_address(bool state, unsigned long address[], int number
   }
 }
 
-int MPPT::set_all_relay(bool state) {
+int MPPT_Box::set_all_relay(bool state) {
   int cell_numbers[number_of_mppts_];
   for (int i = 0; i<number_of_mppts_; i++){
     cell_numbers[i] = i+1;
@@ -217,22 +231,22 @@ int MPPT::set_all_relay(bool state) {
  }
 
 
-int MPPT::get_int_(uint8_t high_byte, uint8_t low_byte) {
+int MPPT_Box::get_int_(uint8_t high_byte, uint8_t low_byte) {
   return 256*(int)high_byte + (int)low_byte;
 }
 
 
-float MPPT::get_A_float(uint8_t high_byte, uint8_t low_byte) {
+float MPPT_Box::get_A_float(uint8_t high_byte, uint8_t low_byte) {
   int integer_value = get_int_(high_byte, low_byte);
   return (float)integer_value/A_factor;
 }
 
-float MPPT::get_V_float(uint8_t high_byte, uint8_t low_byte) {
+float MPPT_Box::get_V_float(uint8_t high_byte, uint8_t low_byte) {
   int integer_value = get_int_(high_byte, low_byte);
   return (float)integer_value/V_factor;
 }
 
-int MPPT::set_relay_states_from_number_(int cell_number, bool state){
+int MPPT_Box::set_relay_states_from_number_(int cell_number, bool state){
   if (cell_number>number_of_mppts_|| cell_number<1) {
     M_ERR<<"INVALID CELL NUMBER! NOTHING WAS WRITTEN (='_' )";
     return -1;
@@ -240,15 +254,15 @@ int MPPT::set_relay_states_from_number_(int cell_number, bool state){
   
   if(state){
     if(cell_number>8){
-      relay_states[1] |= 1<<(cell_number-9);
+      relay_states[0] |= 1<<(cell_number-9);
     } else {
-      relay_states[0] |= 1<<(cell_number-1);
+      relay_states[1] |= 1<<(cell_number-1);
     }
   } else {
     if(cell_number>8){
-      relay_states[1] &= ~(1<<(cell_number-9));
+      relay_states[0] &= ~(1<<(cell_number-9));
     } else {
-      relay_states[0] &= ~(1<<(cell_number-1));
+      relay_states[1] &= ~(1<<(cell_number-1));
     }
   }
   M_DEBUG<<"STATE 1: "<<(int)relay_states[0]<<" | STATE 2: "<<(int)relay_states[1];
@@ -256,13 +270,14 @@ int MPPT::set_relay_states_from_number_(int cell_number, bool state){
   
 }
 
-int MPPT::set_relay_from_array(bool state[]) {
-  for(int i = 0; i<number_of_mppts_; i++)
-    relay_states[i] = state[i];
- 
+int MPPT_Box::set_relay_from_array(bool state[]) {
+  for(int i = 0; i<number_of_mppts_; i++){
+    set_relay_states_from_number_(i+1, state[i]);
+  } 
+  set_relay_from_relay_states_();
 }
 
-int MPPT::set_relay_from_relay_states_() {
+int MPPT_Box::set_relay_from_relay_states_() {
   canmsg_t * send_relays = new canmsg_t;
   send_relays->length = 2;
   send_relays->id = relay_address_;
@@ -276,7 +291,7 @@ int MPPT::set_relay_from_relay_states_() {
 
 
 
-MPPT_Controller::MPPT_Controller(MPPT * const m_mppt, structures::PowerInput* const m_power_input, structures::PowerOutput* const m_power_output) : 
+MPPT_Controller::MPPT_Controller(MPPT_Box * const m_mppt, structures::PowerInput* const m_power_input, structures::PowerOutput* const m_power_output) : 
     mppt(m_mppt), power_input(m_power_input), power_output(m_power_output){
   
   if(mppt->canbus_->status()){
@@ -286,7 +301,7 @@ MPPT_Controller::MPPT_Controller(MPPT * const m_mppt, structures::PowerInput* co
   }
 }
 
-int MPPT_Controller::start(const int delay) {
+int MPPT_Controller::start_reading(const int delay) {
   if(mppt->canbus_->status()->status){
     if(!reading_state){
       reading_state = true;
@@ -300,11 +315,14 @@ int MPPT_Controller::start(const int delay) {
     M_ERR<<"CANNOT START READING BECAUSE CANBUS NOT RUNNING (╯•﹏•╰)";
     return -1;
   }
+}
+
+int MPPT_Controller::start_writing(const int delay) {
   if(mppt->canbus_->status()->open){
     if(!writing_state){
       writing_state = true;
       M_OK<<"MPPT_CONTROLLER WAS STARTED WRITING ( ◞･౪･)";
-      m_reading_thread_ = thread(&MPPT_Controller::writing_thread_, this, delay);
+      m_writing_thread_ = thread(&MPPT_Controller::writing_thread_, this, delay);
     } else {
       M_WARN<<"MPPT WRITING WAS ALREADY STARTED (¬_¬)";
       return -1;
@@ -317,7 +335,7 @@ int MPPT_Controller::start(const int delay) {
   return 1;
 }
 
-int MPPT_Controller::stop() {
+int MPPT_Controller::stop_reading() {
   if(reading_state){
     reading_state = false;
     m_reading_thread_.join();
@@ -325,7 +343,9 @@ int MPPT_Controller::stop() {
   } else {
     M_WARN<<"BMS WRITING HAS NOT YET STARTED (>_<)";
   }
-  
+}
+
+int MPPT_Controller::stop_writing() {
   if (writing_state){
     writing_state = false;
     m_writing_thread_.join();
@@ -342,14 +362,22 @@ int MPPT_Controller::read_data_() {
   for(int i = 0; i<mppt->number_of_mppts_; i++){
     power_input->solar_panels.MPPT_power[i] = buffer[i][0]*buffer[i][1];
     power_input->solar_panels.panel_power[i] = buffer[i][2]*buffer[i][3];
+    
+
   }
+  std::cout<<"\n"<<"READ DATA FFROM MPPT: \n";
+  for(int i =0; i<4; i++){
+      for(int j = 0; j<10; j++){
+        std::cout<<buffer[j][i]<<" "; 
+      } 
+      std::cout<<"\n";
+    } std::cout<<std::endl;
   return success;
 }
 
 int MPPT_Controller::write_data_() {
-  for(int i = 0; i<mppt->number_of_mppts_; i++){
     return mppt->set_relay_from_array(power_output->solar_panel_states);
-  }
+  
 }
 
 int MPPT_Controller::reading_thread_(const int delay) {

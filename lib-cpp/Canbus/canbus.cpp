@@ -21,14 +21,10 @@
 using namespace MIO;
 using namespace std;
 /*public: */
-CANbus::CANbus( const char * device_name, unsigned int buffer_size, unsigned int baudrate) {
+
+CANbus::CANbus(const char * device_name, unsigned int buffer_size, unsigned int baudrate) {
   //Filling the can_status structure
-  //char device[20];
-  //int len = sprintf(device, "/dev/%s", device_name);
   can_status->device = device_name;
-  for(int i=0; i<9; i++){
-    //can_status->device[i] = device[i];
-  }
   can_status->total_buffer = buffer_size;
   can_status->baudrate = baudrate;
   can_status->buffer_left = buffer_size;
@@ -68,7 +64,7 @@ int CANbus::open_can(int flag) {
 int CANbus::close_can() {
   if(can_status->open){
     M_INFO<<"CLOSING CAN (*＾▽＾)／";
-    can_status->open =false;
+    can_status->open = false;
     return close(file_descriptor);
   } else {
     M_WARN<<"CANBUS HAS NOT YET BEEN OPENED, DON'T CLOSE A CLOSED CONNECTION! (='_' )";
