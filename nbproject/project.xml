@@ -12,7 +12,6 @@
             <sourceRootList>
                 <sourceRootElem>.</sourceRootElem>
                 <sourceRootElem>.</sourceRootElem>
-                <sourceRootElem>src-cpp/Control</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
