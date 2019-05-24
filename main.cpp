@@ -68,11 +68,11 @@ RuwDataFilter * filter = new RuwDataFilter();
 ComplementaryFilter * com_filter = new ComplementaryFilter();
 PID_caller * PIDAAN = new PID_caller();
 control::ForceToWingAngle * FtoW = new control::ForceToWingAngle();
-CANbus * canbus1 = new CANbus("can1", 1);
+//CANbus * canbus1 = new CANbus("can1", 1);
 
-EPOS * maxon1 = new EPOS(canbus1,1);
-EPOS * maxon2 = new EPOS(canbus1,2);
-EPOS * maxon4 = new EPOS(canbus1,4);
+EPOS * maxon1 = new EPOS(canbus_driver,1);
+EPOS * maxon2 = new EPOS(canbus_driver,2);
+EPOS * maxon4 = new EPOS(canbus_driver,4);
 
 void floating(){
   //Starting with reading from the CANbus
@@ -92,20 +92,29 @@ typedef std::chrono::milliseconds mls;
   /* -----------------------------------------------------------------------------
 All three motors are going to home.
 ----------------------------------------------------------------------------- */    
-//high_resolution_clock::time_point t0= high_resolution_clock::now();
-this_thread::sleep_for(chrono::milliseconds(10000));
+////high_resolution_clock::time_point t0= high_resolution_clock::now();
+//this_thread::sleep_for(chrono::milliseconds(10000));
+//maxon1->Homing();
+//this_thread::sleep_for(chrono::milliseconds(1000));
+//maxon1->HomingCheck();
+//this_thread::sleep_for(chrono::milliseconds(10000));
+//maxon2->Homing();
+//this_thread::sleep_for(chrono::milliseconds(1000));
+//maxon2->HomingCheck();
+//this_thread::sleep_for(chrono::milliseconds(10000));   
+//maxon4->Homing();
+//this_thread::sleep_for(chrono::milliseconds(30000));
+//maxon4->HomingCheck();
+//    
 maxon1->Homing();
-this_thread::sleep_for(chrono::milliseconds(1000));
-maxon1->HomingCheck();
-this_thread::sleep_for(chrono::milliseconds(10000));
 maxon2->Homing();
-this_thread::sleep_for(chrono::milliseconds(1000));
-maxon2->HomingCheck();
-this_thread::sleep_for(chrono::milliseconds(10000));   
 maxon4->Homing();
-this_thread::sleep_for(chrono::milliseconds(1000));
+this_thread::sleep_for(chrono::milliseconds(500));
+
+maxon1->HomingCheck();
+maxon2->HomingCheck();
 maxon4->HomingCheck();
-    
+
 /* -----------------------------------------------------------------------------
 All three motors are going in the startpositionmode.
 ----------------------------------------------------------------------------- */    
@@ -135,6 +144,7 @@ maxon4->m_FtoW_data = FtoW_data; //(13)
 Serial * m_serial = new Serial("/dev/xsense", 9600);
 Xsens * m_xsens = new Xsens(); //initialise class Xsens
 Sensor * de_sensor = new Sensor(m_xsens,m_serial);
+
 m_xsens->m_xsens_state_data = xsens_data; //(0)
 de_sensor->m_xsens_state_data = xsens_data;
 de_sensor->m_ruwe_state_data = ruwe_data;  // (1)
@@ -200,7 +210,7 @@ int main(int argc, const char** argv) {
   //First turn off all the mppts before turning them back on..
   mppt_box->set_all_relay(false);
   for(int i = 1; i<11; i++){
-    mppt_box->set_relay_from_number(true, 11-i);
+    //mppt_box->set_relay_from_number(true, 11-i);
     this_thread::sleep_for(chrono::milliseconds(100));
   } 
   
@@ -212,8 +222,10 @@ int main(int argc, const char** argv) {
   int counter = 0;
   
   ofstream file;
-  file.open("/root/logfiles/log230519.log", std::ios::app);
+  file.open("/root/logfiles/log240519.log", std::ios::app);
   //buffer for mppt data
+  ofstream control_file;
+  control_file.open("/root/logfiles/control_log_240519.log", std::ios::app);
   float mppt_buffer[10][4];
 
   //buffers for driver data;
@@ -233,11 +245,11 @@ int main(int argc, const char** argv) {
     driver_tx->data[2] = real_speed>>8;
     driver_tx->data[3] = real_speed&0xFF;
 
-    canbus_bms->write_can(bms_tx);
-    this_thread::sleep_for(chrono::milliseconds(100));
+    //canbus_bms->write_can(bms_tx);
+    this_thread::sleep_for(chrono::milliseconds(50));
     canbus_driver->write_can(driver_tx);
     
-    if (counter%5 == 1){
+    if (counter%10 == 1){
       mppt_box->get_all_float_data(mppt_buffer);
       
       canbus_driver->read_can(0xd0, &driver_state_data);
@@ -283,6 +295,22 @@ int main(int argc, const char** argv) {
     if (counter%10 == 1){
       
       
+    }
+    
+    if (counter%1 == 1){
+     DataStore *m_PID_data;
+     DataStore *m_complementary_data;
+     DataStore *m_xsens_state_data;
+     
+     DataStore::PIDDataTotal log_OUTPUT_PID  = m_PID_data-> GetPIDData(); 
+     DataStore::RealData log_INPUT_PID = m_complementary_data-> GetComplementaryData();
+     DataStore::XsensData log_xsens = m_xsens_state_data->GetXsensData();
+     
+    
+     control_file<<counter<<log_OUTPUT_PID.Force_height << ","<<log_OUTPUT_PID.Force_pitch << ","<<log_OUTPUT_PID.Force_roll << ","
+         <<log_INPUT_PID.Real_height << ","<<log_INPUT_PID.Real_pitch<< ","<<log_INPUT_PID.Real_roll<< ","
+         <<log_xsens.roll<< ","<<log_xsens.acceleration_z<< ","<<log_xsens.acceleration_x;
+     
     }
     
   }

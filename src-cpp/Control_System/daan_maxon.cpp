@@ -87,7 +87,7 @@ void EPOS::Homing(){  //foo is een teller, als can.write lukt komt er een 1 uit 
 void EPOS::HomingCheck(){
     
     int k=0;
-    while(k<10){
+    while(k<100){
     
     canmsg_t m_StatusWord;
     m_StatusWord.id = 0x600+NODE_ID;
@@ -178,11 +178,13 @@ void EPOS::Move(){
     
    
     if (NODE_ID==4){
-      //NOG AANPASSEN!!!
-        quartercircles=quartercircles + (alphas.Wing_back*57.324*50000);
+      //2000000qc bij 16 graden, dus 125000 bij 1 graad
+        quartercircles=quartercircles + ((alphas.Wing_back*180/3.1415)*125000);
         cout << "NODE = 4 \r\n" << endl;
-            if (quartercircles < -1000000)
-            quartercircles = -1000000;
+            if (quartercircles < -800000)
+            quartercircles = -800000;
+            else if (quartercircles > 2000000)
+            quartercircles = 2000000;
         cout << "positie achter =  \r\n"<<quartercircles ;
     }
     else if(NODE_ID==1) {
@@ -243,7 +245,7 @@ void EPOS::Move(){
     m_Move.id = 0x600+NODE_ID;
     m_Move.length = 8;
     memcpy(&m_Move.data[0],(char*) Move_Data, 8);
-    sanders_can->write_can(&m_Move);
+    //sanders_can->write_can(&m_Move);
     
 }
         

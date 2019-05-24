@@ -103,6 +103,7 @@
         </logicalFolder>
       </logicalFolder>
       <itemPath>main.cpp</itemPath>
+      <itemPath>solarboattwente.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -206,6 +207,8 @@
       <item path="pipes/TelemInputToPython" ex="false" tool="3" flavor2="0">
       </item>
       <item path="pipes/UserPowerToPython" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="solarboattwente.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="solarboattwente.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -402,6 +405,8 @@
       <item path="pipes/TelemInputToPython" ex="false" tool="3" flavor2="0">
       </item>
       <item path="pipes/UserPowerToPython" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="solarboattwente.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="solarboattwente.h" ex="false" tool="3" flavor2="0">
       </item>

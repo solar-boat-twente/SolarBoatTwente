@@ -22,8 +22,6 @@
 
 /*
  * All the input structures and nested input structures for the power data.
- *
- *
  */
 namespace MIO{
 namespace structures {
@@ -307,7 +305,31 @@ struct ControlData {
   int reserved2;
 };
 }/* structures */
+
+//
+//#include "src-cpp/Battery_Magagement_System/BMS.h"
+//#include "src-cpp/Control_Wheel/Control_Wheel.hpp"
+//#include "src-cpp/Genasun_Watt_Sensor/MPPT.h"
+//
+//class SolarBoatTwente{
+// public:
+//  SolarBoatTwente();
+//  
+//  initialize_bms();
+//  
+//  initialize_driver();
+//  
+//  initialize_control_wheel();
+//  
+//  initialize_control_system();
+//  
+//};
+
+
+
+
 }/* top_level */
+
 
 #endif /* SOLARBOATTWENTE_H */
 
