@@ -32,7 +32,7 @@ void control::ForceToWingAngle::MMA() {
    DataStore::XsensData v = m_xsens_state_data->GetXsensData();
    //float velocity = 7;
    float velocity = v.acceleration_x*pow(0.0125,2);
-   
+   if (velocity>3){    //snelheid hoger dan 3m/s
     int i;
     float matrix_MMA[3][3] = {
         {1, 1, 1},
@@ -119,6 +119,12 @@ void control::ForceToWingAngle::MMA() {
      /*Now we can calculate the angle that the maxon motor should make in such 
       * a way that the wing is making the right angle.   
       */
-       
-     
+   }
+   else{
+    output.Wing_left = 0;//left_angle_total - input2.Real_pitch - kZeroLiftAngle;
+    output.Wing_right = 0;//right_angle_total - input2.Real_pitch - kZeroLiftAngle;
+    output.Wing_back = 0;//back_angle_total - input2.Real_pitch - kZeroLiftAngle;
+      
+   }
+   
 }

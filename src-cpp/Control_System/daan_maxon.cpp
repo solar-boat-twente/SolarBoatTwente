@@ -183,8 +183,8 @@ void EPOS::Move(){
         cout << "NODE = 4 \r\n" << endl;
             if (quartercircles < -800000)
             quartercircles = -800000;
-            else if (quartercircles > 2000000)
-            quartercircles = 2000000;
+            else if (quartercircles > 1500000)
+            quartercircles = 1500000;
         cout << "positie achter =  \r\n"<<quartercircles ;
     }
     else if(NODE_ID==1) {
@@ -245,7 +245,7 @@ void EPOS::Move(){
     m_Move.id = 0x600+NODE_ID;
     m_Move.length = 8;
     memcpy(&m_Move.data[0],(char*) Move_Data, 8);
-    //sanders_can->write_can(&m_Move);
+    sanders_can->write_can(&m_Move);
     
 }
         

@@ -92,20 +92,6 @@ typedef std::chrono::milliseconds mls;
   /* -----------------------------------------------------------------------------
 All three motors are going to home.
 ----------------------------------------------------------------------------- */    
-////high_resolution_clock::time_point t0= high_resolution_clock::now();
-//this_thread::sleep_for(chrono::milliseconds(10000));
-//maxon1->Homing();
-//this_thread::sleep_for(chrono::milliseconds(1000));
-//maxon1->HomingCheck();
-//this_thread::sleep_for(chrono::milliseconds(10000));
-//maxon2->Homing();
-//this_thread::sleep_for(chrono::milliseconds(1000));
-//maxon2->HomingCheck();
-//this_thread::sleep_for(chrono::milliseconds(10000));   
-//maxon4->Homing();
-//this_thread::sleep_for(chrono::milliseconds(30000));
-//maxon4->HomingCheck();
-//    
 maxon1->Homing();
 maxon2->Homing();
 maxon4->Homing();
@@ -119,11 +105,11 @@ maxon4->HomingCheck();
 All three motors are going in the startpositionmode.
 ----------------------------------------------------------------------------- */    
 maxon1->StartPositionMode();
-this_thread::sleep_for(chrono::milliseconds(1000));      
+//this_thread::sleep_for(chrono::milliseconds(1000));      
 maxon2->StartPositionMode();
-this_thread::sleep_for(chrono::milliseconds(1000));
+//this_thread::sleep_for(chrono::milliseconds(1000));
 maxon4->StartPositionMode();
-this_thread::sleep_for(chrono::milliseconds(10000));
+//this_thread::sleep_for(chrono::milliseconds(10000));
 
 std::this_thread::sleep_for(std::chrono::milliseconds(500));  // wait 500 milliseconds, because otherwise the xsens can enter the configuration mode
   
@@ -148,11 +134,12 @@ Sensor * de_sensor = new Sensor(m_xsens,m_serial);
 m_xsens->m_xsens_state_data = xsens_data; //(0)
 de_sensor->m_xsens_state_data = xsens_data;
 de_sensor->m_ruwe_state_data = ruwe_data;  // (1)
-int counter_control = 4;
+int counter_control_front = 4;        //80Hz waar de loop op loopt
+int counter_control_back = 8;
   while (true) {
     std::chrono::high_resolution_clock::time_point t1= std::chrono::high_resolution_clock::now();
     de_sensor->get_data();
-    if (counter_control ==0){
+    if (counter_control_front == 0){     //Voorvleugels lopen op 20Hz
       filter->FilterIt();
       com_filter->CalculateRealHeight();            
       PIDAAN->PID_in();
@@ -161,10 +148,18 @@ int counter_control = 4;
       maxon1->Move();
       maxon2->Move();
       this_thread::sleep_for(chrono::milliseconds(5));
-      maxon4->Move();
-      counter_control=5;
+      counter_control_front = 5;
     }
-    counter_control--;
+    if (counter_control_back == 0){ //achtervleugel op 10 Hz
+      filter->FilterIt();
+      com_filter->CalculateRealHeight();            
+      PIDAAN->PID_in();
+      FtoW->MMA();  
+      maxon4->Move();
+      counter_control_back=9;
+    }
+    counter_control_front--;
+    counter_control_back--;
     std::chrono::high_resolution_clock::time_point t2= std::chrono::high_resolution_clock::now();
     ms d = std::chrono::duration_cast<ms>(t1-t2);
     int t_total = 12500-d.count();
@@ -172,7 +167,6 @@ int counter_control = 4;
     this_thread::sleep_for(chrono::microseconds(t_total));
   }
 }
-
 
 int main(int argc, const char** argv) {  
   
@@ -210,7 +204,7 @@ int main(int argc, const char** argv) {
   //First turn off all the mppts before turning them back on..
   mppt_box->set_all_relay(false);
   for(int i = 1; i<11; i++){
-    //mppt_box->set_relay_from_number(true, 11-i);
+    mppt_box->set_relay_from_number(true, 11-i);
     this_thread::sleep_for(chrono::milliseconds(100));
   } 
   
@@ -225,7 +219,7 @@ int main(int argc, const char** argv) {
   file.open("/root/logfiles/log240519.log", std::ios::app);
   //buffer for mppt data
   ofstream control_file;
-  control_file.open("/root/logfiles/control_log_240519.log", std::ios::app);
+  control_file.open("/root/logfiles/control_240519.txt", std::ios::app);
   float mppt_buffer[10][4];
 
   //buffers for driver data;
@@ -245,7 +239,7 @@ int main(int argc, const char** argv) {
     driver_tx->data[2] = real_speed>>8;
     driver_tx->data[3] = real_speed&0xFF;
 
-    //canbus_bms->write_can(bms_tx);
+    canbus_bms->write_can(bms_tx);
     this_thread::sleep_for(chrono::milliseconds(50));
     canbus_driver->write_can(driver_tx);
     
@@ -297,7 +291,6 @@ int main(int argc, const char** argv) {
       
     }
     
-    if (counter%1 == 1){
      DataStore *m_PID_data;
      DataStore *m_complementary_data;
      DataStore *m_xsens_state_data;
@@ -306,12 +299,11 @@ int main(int argc, const char** argv) {
      DataStore::RealData log_INPUT_PID = m_complementary_data-> GetComplementaryData();
      DataStore::XsensData log_xsens = m_xsens_state_data->GetXsensData();
      
-    
      control_file<<counter<<log_OUTPUT_PID.Force_height << ","<<log_OUTPUT_PID.Force_pitch << ","<<log_OUTPUT_PID.Force_roll << ","
          <<log_INPUT_PID.Real_height << ","<<log_INPUT_PID.Real_pitch<< ","<<log_INPUT_PID.Real_roll<< ","
-         <<log_xsens.roll<< ","<<log_xsens.acceleration_z<< ","<<log_xsens.acceleration_x;
+         <<log_xsens.roll<< ","<<log_xsens.acceleration_z<< ","<<log_xsens.acceleration_x<<"\n"<<flush;
      
-    }
+  
     
   }
   

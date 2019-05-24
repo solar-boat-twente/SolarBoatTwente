@@ -39,7 +39,7 @@ void ComplementaryFilter::CalculateRealHeight()
    height_xsens=input.filtered_Z_accel*pow(dt,2);
    //realData.Real_roll=(roll_front+input.filtered_roll)/2;
    realData.Real_roll=input.filtered_roll;
-   realData.Real_height=(height_left+height_right+height_xsens)/3;
+   realData.Real_height=height_xsens;//(height_left+height_right+height_xsens)/3;
    realData.Real_pitch=input.filtered_pitch;
    printf("roll_front is %f\r\n",roll_front);
    printf("real angles zijn: %f,%f,%f\r\n",realData.Real_height,realData.Real_roll,realData.Real_pitch);  
