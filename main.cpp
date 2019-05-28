@@ -33,6 +33,7 @@
 #include "src-cpp/Control_System/Force_to_wing_angle.h"
 #include "src-cpp/Control_System/Daan_Test1_maxon.h"
 #include "lib-cpp/Canbus/canbus.h"
+#include "lib-cpp/Debugging/easy_debugging.hpp"
 
 using namespace std;
 using namespace MIO;
@@ -42,8 +43,8 @@ using namespace structures;
 //Define everything 
 //Open up the data acquisition parts  
 Serial * serial_wheel = new Serial("/dev/steer");
-CANbus * canbus_bms = new CANbus("/dev/can0", 1);
-CANbus * canbus_driver = new CANbus("/dev/can1", 1);
+CANbus * canbus_bms = new CANbus("/dev/can1", 1);
+CANbus * canbus_driver = new CANbus("/dev/can0", 1);
 
 //Open up the global structures
 PowerInput * power_input = new PowerInput;
@@ -55,7 +56,7 @@ UI::ControlWheel * control_wheel = new UI::ControlWheel(serial_wheel);
 BMS * m_bms = new BMS(canbus_bms);
 canmsg_t * bms_tx = new canmsg_t;
 canmsg_t * driver_tx = new canmsg_t;
-MPPT_Box * mppt_box = new MPPT_Box(canbus_bms);
+MPPT_Box * mppt_box = new MPPT_Box(canbus_driver);
 
 //Define everything from the control system
 DataStore * xsens_data = new DataStore();
@@ -70,9 +71,9 @@ PID_caller * PIDAAN = new PID_caller();
 control::ForceToWingAngle * FtoW = new control::ForceToWingAngle();
 //CANbus * canbus1 = new CANbus("can1", 1);
 
-EPOS * maxon1 = new EPOS(canbus_driver,1);
-EPOS * maxon2 = new EPOS(canbus_driver,2);
-EPOS * maxon4 = new EPOS(canbus_driver,4);
+EPOS * maxon1 = new EPOS(canbus_bms,1);
+EPOS * maxon2 = new EPOS(canbus_bms,2);
+EPOS * maxon4 = new EPOS(canbus_bms,4);
 
 void floating(){
   //Starting with reading from the CANbus
@@ -87,19 +88,32 @@ void floating(){
 }
 
 void controlsystem(){ 
+//int motor_on = 0;
+//  canmsg_t test_buffer;
+//  while(true){
+//      motor_on = canbus_driver->read_can(0xd0, &test_buffer);
+//      if (motor_on == 1){
+//        break;
+//      }
+//      this_thread::sleep_for(chrono::milliseconds(300));
+//    }
+//  
 typedef std::chrono::microseconds ms;
 typedef std::chrono::milliseconds mls;
   /* -----------------------------------------------------------------------------
 All three motors are going to home.
 ----------------------------------------------------------------------------- */    
+this_thread::sleep_for(chrono::milliseconds(2000));
 maxon1->Homing();
+this_thread::sleep_for(chrono::milliseconds(2000));
 maxon2->Homing();
-maxon4->Homing();
+this_thread::sleep_for(chrono::milliseconds(2000));
+//maxon4->Homing();
 this_thread::sleep_for(chrono::milliseconds(500));
 
 maxon1->HomingCheck();
 maxon2->HomingCheck();
-maxon4->HomingCheck();
+//maxon4->HomingCheck();
 
 /* -----------------------------------------------------------------------------
 All three motors are going in the startpositionmode.
@@ -108,8 +122,26 @@ maxon1->StartPositionMode();
 //this_thread::sleep_for(chrono::milliseconds(1000));      
 maxon2->StartPositionMode();
 //this_thread::sleep_for(chrono::milliseconds(1000));
-maxon4->StartPositionMode();
+//maxon4->StartPositionMode();
 //this_thread::sleep_for(chrono::milliseconds(10000));
+
+
+/*NEW VERSION FOR HOMING MAXON --> A LOT FASTER!*/
+//maxon1->start_homing();
+//maxon2->start_homing();
+//maxon4->start_homing();
+//
+//maxon1->check_homing_block();
+//maxon2->check_homing_block();
+//maxon4->check_homing_block();
+//
+//maxon1->start_position_mode();
+//maxon2->start_position_mode();
+//maxon4->start_position_mode();
+//
+//maxon1->check_position_mode();
+//maxon2->check_position_mode();
+//maxon4->check_position_mode();
 
 std::this_thread::sleep_for(std::chrono::milliseconds(500));  // wait 500 milliseconds, because otherwise the xsens can enter the configuration mode
   
@@ -147,7 +179,7 @@ int counter_control_back = 8;
       
       maxon1->Move();
       maxon2->Move();
-      this_thread::sleep_for(chrono::milliseconds(5));
+      //this_thread::sleep_for(chrono::milliseconds(5));
       counter_control_front = 5;
     }
     if (counter_control_back == 0){ //achtervleugel op 10 Hz
@@ -155,13 +187,13 @@ int counter_control_back = 8;
       com_filter->CalculateRealHeight();            
       PIDAAN->PID_in();
       FtoW->MMA();  
-      maxon4->Move();
+      //maxon4->Move();
       counter_control_back=9;
     }
     counter_control_front--;
     counter_control_back--;
     std::chrono::high_resolution_clock::time_point t2= std::chrono::high_resolution_clock::now();
-    ms d = std::chrono::duration_cast<ms>(t1-t2);
+    ms d = std::chrono::duration_cast<ms>(t2-t1);
     int t_total = 12500-d.count();
     printf("loop tijd is %i",t_total);
     this_thread::sleep_for(chrono::microseconds(t_total));

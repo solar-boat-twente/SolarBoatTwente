@@ -14,7 +14,7 @@ using namespace structures;
 using namespace control;
 //float dt, float Kp, float Kd, float Ki, float Fc
 void control::PID::PIDRoll(){
-        k->PID_roll=STATE6;//STATE3;
+        k->PID_roll=STATE5;//STATE3;
         
     switch(k->PID_roll){
         case STATE1 : pimpl = new PIDImpl(0.0125,237.597,27.078,-132.816,1.424); //laf
@@ -28,6 +28,8 @@ void control::PID::PIDRoll(){
         case STATE5 : pimpl = new PIDImpl(0.0125,79.228,5,0,100); 
         printf("roll state 5  word gebruikt\r\n"); break;
         case STATE6 : pimpl = new PIDImpl(0.0125,79.228,48.055,5,100);      //new PID together with PID for height (state 7) and state 6 for pitch
+        printf("roll state 5  word gebruikt\r\n"); break;
+        case STATE7 : pimpl = new PIDImpl(0.0125,0,0,0,0);      //new PID together with PID for height (state 7) and state 6 for pitch
         printf("roll state 5  word gebruikt\r\n"); break;
     }       
     //pimpl = new PIDImpl(dt,Kp,Kd,Ki,Fc);
@@ -53,7 +55,7 @@ void control::PID::PIDPitch(){
     //pimpl = new PIDImpl(dt,Kp,Kd,Ki,Fc);
 }
 void control::PID::PIDHeight(){
-        k->PID_height=STATE7; //STATE6;
+        k->PID_height=STATE6; //STATE6;
         
     switch(k->PID_height){
         case STATE1 : pimpl = new PIDImpl(0.0125,145.200,5.761,86.764,2.327); 

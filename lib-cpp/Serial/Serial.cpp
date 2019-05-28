@@ -50,7 +50,7 @@ int MIO::Serial::read_bytes(uint8_t buf[], short int max_bytes) {
     M_INFO<<"READING MESSAGE:";
   }
   
-  for(int i = 0; i<max_bytes; i++){
+  for(int i = 0; i<max_bytes; i++){  // hier blijven we in hangen als we niet de 350 hebben bereikt
     n_read = read(file_descriptor, &m_buffer_, 1);
     buf[i]=m_buffer_;
     

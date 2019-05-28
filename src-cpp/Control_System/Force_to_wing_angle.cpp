@@ -30,8 +30,8 @@ void control::ForceToWingAngle::MMA() {
    DataStore::RealData input2 =m_complementary_data-> GetComplementaryData();
    DataStore::AngleWings output;
    DataStore::XsensData v = m_xsens_state_data->GetXsensData();
-   //float velocity = 7;
-   float velocity = v.acceleration_x*pow(0.0125,2);
+   float velocity = 7;
+   //float velocity = v.acceleration_x*pow(0.0125,2);
    if (velocity>3){    //snelheid hoger dan 3m/s
     int i;
     float matrix_MMA[3][3] = {
@@ -81,7 +81,7 @@ void control::ForceToWingAngle::MMA() {
      const float kBackSurface = 0.5*(37297+37930+10794+10794) * 0.000006;
      const float kDensity = 1025; //kg/m3 density salt water
      const int kLiftSlope = 5;
-     const float kZeroLiftAngle =-0.05236;      //radians
+     const float kZeroLiftAngle =0; //-0.05236;      //radians
      
      //test to check the surface std::cout << (kLeftSurface) << '\t';
      
@@ -96,7 +96,7 @@ void control::ForceToWingAngle::MMA() {
      float back_angle_total = back_lift_coefficient / kLiftSlope;
       
      //calculate the final wing angles
-     //input2.Real_pitch
+     input2.Real_pitch = 0;
      output.Wing_left = left_angle_total - input2.Real_pitch - kZeroLiftAngle;
      output.Wing_right = right_angle_total - input2.Real_pitch - kZeroLiftAngle;
      output.Wing_back  = back_angle_total - input2.Real_pitch - kZeroLiftAngle;
