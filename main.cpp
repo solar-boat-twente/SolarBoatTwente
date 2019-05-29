@@ -34,6 +34,8 @@
 #include "src-cpp/Control_System/Daan_Test1_maxon.h"
 #include "lib-cpp/Canbus/canbus.h"
 #include "lib-cpp/Debugging/easy_debugging.hpp"
+#include "src-cpp/Motor/Motor.hpp"
+
 
 using namespace std;
 using namespace MIO;
@@ -202,8 +204,10 @@ int counter_control_back = 8;
 
 int main(int argc, const char** argv) {  
   
+  Motor * motor  = new Motor(canbus_driver, 15);
+  
   std::thread thread_floating(floating);
-  std::thread thread_controlsystem(controlsystem);
+  //std::thread thread_controlsystem(controlsystem);
   
   //construct message for bms
   bms_tx->id = CANID_BMS_TX;
@@ -252,6 +256,10 @@ int main(int argc, const char** argv) {
   //buffer for mppt data
   ofstream control_file;
   control_file.open("/root/logfiles/control_240519.txt", std::ios::app);
+  
+  ofstream driver_file;
+  driver_file.open("/root/logfiles/driver_2019_05_29_01_20");
+  
   float mppt_buffer[10][4];
 
   //buffers for driver data;
@@ -261,10 +269,11 @@ int main(int argc, const char** argv) {
   canmsg_t  driver_state_data;
   canmsg_t  reference_data;
   
+  int no_driver_data_counter = 0;
+  
   while (true){
     counter++;
     real_speed = 32 * user_input->steer.raw_throttle * CORRECTION_FACTOR/100;
-    std::cout<<real_speed<<std::endl;
     if (user_input->steer.reverse){
       real_speed = -real_speed;
     }
@@ -276,67 +285,83 @@ int main(int argc, const char** argv) {
     canbus_driver->write_can(driver_tx);
     
     if (counter%10 == 1){
-      mppt_box->get_all_float_data(mppt_buffer);
-      
-      canbus_driver->read_can(0xd0, &driver_state_data);
-      canbus_driver->read_can(0xd8, &reference_data);
-      canbus_driver->read_can(0xe0, &supply_1_data);
-      canbus_driver->read_can(0xf0, &motor_1_data);
-      canbus_driver->read_can(0xf8, &motor_2_data);      
-      
-      
-      file<<counter<<power_input->battery.max_temp << ","<<power_input->battery.total_current << ","<<power_input->battery.total_voltage << ","
-          <<power_input->battery.state_of_charge << ","<<user_input->steer.raw_throttle;
-      file<<",Solar,";
-      
-      for(int i = 0; i<4; i++){
-        for (int j = 0; j<10; j++){
-          file<<mppt_buffer[j][i]<<",";
-        }
-      file<<" ,";
+      if(motor->update_data_from_driver()){
+        no_driver_data_counter = 0;
+      } else {
+        no_driver_data_counter++;
       }
-      file<<"Driver,";
-      for(int i = 0; i<8; i++){
-        file<<(int)driver_state_data.data[i]<<",";
+      if(no_driver_data_counter>5){
+        motor->setup_sampling();
+        no_driver_data_counter = 0;
       }
-      " ,";
-      for(int i = 0; i<8; i++){
-        file<<(int)reference_data.data[i]<<",";
-      }
-      " ,";
-      for(int i = 0; i<8; i++){
-        file<<(int)supply_1_data.data[i]<<",";
-      }
-      " ,";
-      for(int i = 0; i<8; i++){
-        file<<(int)motor_1_data.data[i]<<",";
-      }
-      " ,";      
-      for(int i = 0; i<8; i++){
-        file<<(int)motor_2_data.data[i]<<",";
-      }      
-      file<<"\n"<<flush;
-    } 
-    
-    if (counter%10 == 1){
       
-      
+      driver_file<<no_driver_data_counter<<","<<counter<<","<<(int)motor->values.driver_temp<<","<<motor->values.link_voltage<<","<<motor->values.phase_current<<","<<motor->values.motor_power<<","<<motor->values.rotor_speed
+          <<","<<motor->values.supply_current<<","<<motor->values.supply_voltage<<","<<motor->values.torque<<","<<(int)motor->values.motor_mode<<","<<(int)real_speed<<"\n"<<flush;
+        
     }
     
-     DataStore *m_PID_data;
-     DataStore *m_complementary_data;
-     DataStore *m_xsens_state_data;
-     
-     DataStore::PIDDataTotal log_OUTPUT_PID  = m_PID_data-> GetPIDData(); 
-     DataStore::RealData log_INPUT_PID = m_complementary_data-> GetComplementaryData();
-     DataStore::XsensData log_xsens = m_xsens_state_data->GetXsensData();
-     
-     control_file<<counter<<log_OUTPUT_PID.Force_height << ","<<log_OUTPUT_PID.Force_pitch << ","<<log_OUTPUT_PID.Force_roll << ","
-         <<log_INPUT_PID.Real_height << ","<<log_INPUT_PID.Real_pitch<< ","<<log_INPUT_PID.Real_roll<< ","
-         <<log_xsens.roll<< ","<<log_xsens.acceleration_z<< ","<<log_xsens.acceleration_x<<"\n"<<flush;
-     
-  
-    
+//    if (counter%10 == 1){
+//      mppt_box->get_all_float_data(mppt_buffer);
+//      
+//      canbus_driver->read_can(0xd0, &driver_state_data);
+//      canbus_driver->read_can(0xd8, &reference_data);
+//      canbus_driver->read_can(0xe0, &supply_1_data);
+//      canbus_driver->read_can(0xf0, &motor_1_data);
+//      canbus_driver->read_can(0xf8, &motor_2_data);      
+//      
+//      
+//      file<<counter<<power_input->battery.max_temp << ","<<power_input->battery.total_current << ","<<power_input->battery.total_voltage << ","
+//          <<power_input->battery.state_of_charge << ","<<user_input->steer.raw_throttle;
+//      file<<",Solar,";
+//      
+//      for(int i = 0; i<4; i++){
+//        for (int j = 0; j<10; j++){
+//          file<<mppt_buffer[j][i]<<",";
+//        }
+//      file<<" ,";
+//      }
+//      file<<"Driver,";
+//      for(int i = 0; i<8; i++){
+//        file<<(int)driver_state_data.data[i]<<",";
+//      }
+//      " ,";
+//      for(int i = 0; i<8; i++){
+//        file<<(int)reference_data.data[i]<<",";
+//      }
+//      " ,";
+//      for(int i = 0; i<8; i++){
+//        file<<(int)supply_1_data.data[i]<<",";
+//      }
+//      " ,";
+//      for(int i = 0; i<8; i++){
+//        file<<(int)motor_1_data.data[i]<<",";
+//      }
+//      " ,";      
+//      for(int i = 0; i<8; i++){
+//        file<<(int)motor_2_data.data[i]<<",";
+//      }      
+//      file<<"\n"<<flush;
+//    } 
+//    
+//    if (counter%10 == 1){
+//      
+//      
+//    }
+//    
+//     DataStore *m_PID_data;
+//     DataStore *m_complementary_data;
+//     DataStore *m_xsens_state_data;
+//     
+//     DataStore::PIDDataTotal log_OUTPUT_PID  = m_PID_data-> GetPIDData(); 
+//     DataStore::RealData log_INPUT_PID = m_complementary_data-> GetComplementaryData();
+//     DataStore::XsensData log_xsens = m_xsens_state_data->GetXsensData();
+//     
+//     control_file<<counter<<log_OUTPUT_PID.Force_height << ","<<log_OUTPUT_PID.Force_pitch << ","<<log_OUTPUT_PID.Force_roll << ","
+//         <<log_INPUT_PID.Real_height << ","<<log_INPUT_PID.Real_pitch<< ","<<log_INPUT_PID.Real_roll<< ","
+//         <<log_xsens.roll<< ","<<log_xsens.acceleration_z<< ","<<log_xsens.acceleration_x<<"\n"<<flush;
+//     
+//  
+//    
   }
   
   

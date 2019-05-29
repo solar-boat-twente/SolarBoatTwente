@@ -101,6 +101,11 @@
           <itemPath>src-cpp/Genasun_Watt_Sensor/MPPT.h</itemPath>
           <itemPath>src-cpp/Genasun_Watt_Sensor/MPPT_CANIDs.hpp</itemPath>
         </logicalFolder>
+        <logicalFolder name="f2" displayName="Motor" projectFiles="true">
+          <itemPath>src-cpp/Motor/Motor.cpp</itemPath>
+          <itemPath>src-cpp/Motor/Motor.hpp</itemPath>
+          <itemPath>src-cpp/Motor/Motor_defs.hpp</itemPath>
+        </logicalFolder>
       </logicalFolder>
       <itemPath>main.cpp</itemPath>
       <itemPath>solarboattwente.cpp</itemPath>
@@ -327,6 +332,12 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="src-cpp/Motor/Motor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Motor/Motor.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Motor/Motor_defs.hpp" ex="false" tool="3" flavor2="0">
+      </item>
     </conf>
     <conf name="Release" type="1">
       <toolsSet>
@@ -524,6 +535,12 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="src-cpp/Motor/Motor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Motor/Motor.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Motor/Motor_defs.hpp" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>

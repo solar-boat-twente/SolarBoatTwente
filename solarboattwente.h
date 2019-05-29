@@ -11,17 +11,32 @@
  * Created on April 9, 2019, 11:37 AM
  */
 
-#include <stdint.h>
-
 #ifndef SOLARBOATTWENTE_H
 #define SOLARBOATTWENTE_H
 
+#include <thread>
+
+const short int STD_POWER_OUTPUT_DELAY = 100;
+
+union two_bytes{
+  int16_t signed_int;
+  uint16_t unsigned_int;
+  uint8_t bytes[2];
+};
+
+union four_bytes{
+  uint32_t unsigned_int;
+  int32_t signed_int;
+  uint8_t bytes[4];  
+};
 /*
  Declaring all the structures 
  */
 
 /*
  * All the input structures and nested input structures for the power data.
+ *
+ *
  */
 namespace MIO{
 namespace structures {
@@ -63,10 +78,10 @@ struct PowerInput {
     uint8_t error_location;
     
     //The maximum temperature in the BMS in degC
-    int max_temp;
+    short int max_temp;
     
     //The minimum temperature in the BMS in degC
-    int min_temp;
+    short int min_temp;
     
     //The balancing state of the BMS, False: not balancing, True: balancing
     bool balance_state; 
@@ -105,11 +120,12 @@ struct PowerInput {
     //Test wether the key is in the motor controller, true if motor controller is off
     bool driver_on;
     //Error number
-    bool error_word;
+    two_bytes error_word;
     
     //Low priority limiter (other type of error);
-    bool low_priority_limiter;
+    two_bytes low_priority_limiter;
     
+    uint8_t high_priority_limiter;
     //One reserved Variable;
     int reserved1;
     int reserved2;
@@ -174,8 +190,8 @@ struct UserInput {
     bool force_battery; 
     // bool whether the button for the solar 
     bool motor_on;
-    // States whether the system should debug, false on start-up, on true all the software should restart
-    bool debug_on;
+    // States whether the solar deck should be on
+    bool solar_on;
   };
 
   struct SteeringInput {
@@ -304,32 +320,35 @@ struct ControlData {
   int reserved1;
   int reserved2;
 };
+
+
+class PowerOutputHandler{
+  
+ public: 
+  PowerOutputHandler(PowerInput * power_input, PowerOutput * power_output, UserInput * user_input);
+  
+  int start(short int delay = STD_POWER_OUTPUT_DELAY);
+  
+  int stop();
+  
+  
+ private:
+  
+  int handling_function(short int delay);
+  
+  std::thread m_thread;
+
+  PowerInput * const power_input;
+  PowerOutput * const power_output;
+  UserInput * const user_input;
+  
+  bool active;
+  
+};
 }/* structures */
-
-//
-//#include "src-cpp/Battery_Magagement_System/BMS.h"
-//#include "src-cpp/Control_Wheel/Control_Wheel.hpp"
-//#include "src-cpp/Genasun_Watt_Sensor/MPPT.h"
-//
-//class SolarBoatTwente{
-// public:
-//  SolarBoatTwente();
-//  
-//  initialize_bms();
-//  
-//  initialize_driver();
-//  
-//  initialize_control_wheel();
-//  
-//  initialize_control_system();
-//  
-//};
-
-
 
 
 }/* top_level */
-
 
 #endif /* SOLARBOATTWENTE_H */
 
