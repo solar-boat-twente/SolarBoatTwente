@@ -35,6 +35,7 @@
 #include "lib-cpp/Canbus/canbus.h"
 #include "lib-cpp/Debugging/easy_debugging.hpp"
 #include "src-cpp/Motor/Motor.hpp"
+#include "src-cpp/Button_Box/Button_Box.hpp"
 
 
 using namespace std;
@@ -47,6 +48,7 @@ using namespace structures;
 Serial * serial_wheel = new Serial("/dev/steer");
 CANbus * canbus_bms = new CANbus("/dev/can1", 1);
 CANbus * canbus_driver = new CANbus("/dev/can0", 1);
+UI::ADAM
 
 //Open up the global structures
 PowerInput * power_input = new PowerInput;

@@ -38,6 +38,10 @@
         <itemPath>include-cpp/easylogging++.h</itemPath>
       </logicalFolder>
       <logicalFolder name="lib-cpp" displayName="lib-cpp" projectFiles="true">
+        <logicalFolder name="ADAM" displayName="ADAM" projectFiles="true">
+          <itemPath>ADAM.cpp</itemPath>
+          <itemPath>ADAM.hpp</itemPath>
+        </logicalFolder>
         <logicalFolder name="Canbus" displayName="Canbus" projectFiles="true">
           <itemPath>lib-cpp/Canbus/CANbus.md</itemPath>
           <itemPath>lib-cpp/Canbus/canbus.cpp</itemPath>
@@ -64,6 +68,12 @@
           <itemPath>src-cpp/Battery_Magagement_System/BMS.cpp</itemPath>
           <itemPath>src-cpp/Battery_Magagement_System/BMS.h</itemPath>
           <itemPath>src-cpp/Battery_Magagement_System/BMS_CANIDs.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="f1" displayName="Button_Box" projectFiles="true">
+          <itemPath>src-cpp/Button_Box/Button_Box.cpp</itemPath>
+          <itemPath>src-cpp/Button_Box/Button_Box.hpp</itemPath>
+          <itemPath>src-cpp/Button_Box/Encoders.cpp</itemPath>
+          <itemPath>src-cpp/Button_Box/Encoders.hpp</itemPath>
         </logicalFolder>
         <logicalFolder name="f1" displayName="Control" projectFiles="true">
           <itemPath>src-cpp/Control_System/Biquad.cpp</itemPath>
@@ -156,6 +166,10 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="ADAM.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ADAM.hpp" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="config/control_data.conf" ex="false" tool="3" flavor2="0">
       </item>
       <item path="config/control_data_python.conf" ex="false" tool="3" flavor2="0">
@@ -231,6 +245,14 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="src-cpp/Button_Box/Button_Box.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Button_Box/Button_Box.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Button_Box/Encoders.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Button_Box/Encoders.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src-cpp/Control_System/Biquad.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -360,6 +382,10 @@
           <developmentMode>5</developmentMode>
         </asmTool>
       </compileType>
+      <item path="ADAM.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="ADAM.hpp" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="config/control_data.conf" ex="false" tool="3" flavor2="0">
       </item>
       <item path="config/control_data_python.conf" ex="false" tool="3" flavor2="0">
@@ -435,6 +461,14 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="src-cpp/Button_Box/Button_Box.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Button_Box/Button_Box.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Button_Box/Encoders.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Button_Box/Encoders.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src-cpp/Control_System/Biquad.cpp" ex="false" tool="1" flavor2="0">
       </item>
