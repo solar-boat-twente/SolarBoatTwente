@@ -318,9 +318,9 @@ void *ThreadWriteControlData(void *ptr)
         if (ControlDataToPython == 1) // only needs to write if the command is given
         {
             pthread_mutex_lock(&mutex2);
-            freopen(pipe_control_data_to_python, "w", stdout);
+            freopen(pipe_control_data_to_python, "w", stderr);
             control_data_pipe.write_struct_control_data(gl_control_data_ptr);
-            fclose(stdout);
+            fclose(stderr);
             pthread_mutex_unlock(&mutex2);
             ControlDataToPython = 0;
         }
@@ -406,9 +406,9 @@ void *ThreadWriteTelemInputData(void *ptr)
         if (TelemInputToPython == 1) // only needs to write if the command is given
         {
             pthread_mutex_lock(&mutex4);
-            freopen(pipe_telem_input_to_python, "w", stdout);
+            freopen(pipe_telem_input_to_python, "w", stderr);
             telem_input_pipe.write_struct_telemetry_input(gl_telemetry_input_ptr);
-            fclose(stdout);
+            fclose(stderr);
             TelemInputToPython = 0;
            
             pthread_mutex_unlock(&mutex4);

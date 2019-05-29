@@ -18,7 +18,7 @@ namespace MIO{
 namespace PowerElectronics{
 
 const unsigned long CANID_MPPT_START_ADDRESS = 0x3D;
-const unsigned long CANID_MPPT_RELAY = 0x3F;
+const unsigned long CANID_MPPT_RELAY = 0x3C;
 
 const short int STD_MPPT_DELAY = 50;
 

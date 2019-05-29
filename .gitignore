@@ -7,5 +7,6 @@ dist/
 nbdist/
 .nb-gradle/
 *.log
-pipes/
+/pipes/
 
+/config/logfiles/

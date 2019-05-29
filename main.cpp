@@ -79,8 +79,8 @@ EPOS * maxon4 = new EPOS(canbus_bms,4);
 
 void floating(){
   //Starting with reading from the CANbus
-  canbus_bms->start(100);
-  canbus_driver->start(100);
+  canbus_bms->start(5);
+  canbus_driver->start(5);
   
   //Start the Steering Wheel
   control_wheel->start_reading(user_input, 50);
@@ -204,6 +204,7 @@ int counter_control_back = 8;
 
 int main(int argc, const char** argv) {  
   
+  
   Motor * motor  = new Motor(canbus_driver, 15);
   
   std::thread thread_floating(floating);
@@ -237,12 +238,18 @@ int main(int argc, const char** argv) {
   driver_sample.data[6] = 0x0;
   driver_sample.data[7] = 0x64;
   
+  canmsg_t mppt_tx;
+  mppt_tx.id = 0x3c;
+  mppt_tx.length = 2;
+  mppt_tx.data[0] = 0xff;
+  mppt_tx.data[1] = 0xff;
+  
   //First turn off all the mppts before turning them back on..
-  mppt_box->set_all_relay(false);
-  for(int i = 1; i<11; i++){
-    mppt_box->set_relay_from_number(true, 11-i);
-    this_thread::sleep_for(chrono::milliseconds(100));
-  } 
+//  mppt_box->set_all_relay(false);
+//  for(int i = 1; i<11; i++){
+//    mppt_box->set_relay_from_number(true, 11-i);
+//    this_thread::sleep_for(chrono::milliseconds(100));
+//  } 
   
   uint8_t required_speed_percent = 50;
   short signed int real_speed = 0;
@@ -252,13 +259,13 @@ int main(int argc, const char** argv) {
   int counter = 0;
   
   ofstream file;
-  file.open("/root/logfiles/log240519.log", std::ios::app);
+  file.open("/root/logfiles/log290519.log", std::ios::app);
   //buffer for mppt data
   ofstream control_file;
   control_file.open("/root/logfiles/control_240519.txt", std::ios::app);
   
   ofstream driver_file;
-  driver_file.open("/root/logfiles/driver_2019_05_29_01_20");
+  driver_file.open("/root/logfiles/driver_2019_05_29_11_33", std::ios::app);
   
   float mppt_buffer[10][4];
 
@@ -281,10 +288,14 @@ int main(int argc, const char** argv) {
     driver_tx->data[3] = real_speed&0xFF;
 
     canbus_bms->write_can(bms_tx);
-    this_thread::sleep_for(chrono::milliseconds(50));
+    this_thread::sleep_for(chrono::milliseconds(100));
     canbus_driver->write_can(driver_tx);
     
-    if (counter%10 == 1){
+    if (counter%5 == 1){
+    for(int i = 1; i<11; i++){
+      //mppt_box->set_relay_from_number(true, 11-i);
+      //this_thread::sleep_for(chrono::milliseconds(5));
+    } 
       if(motor->update_data_from_driver()){
         no_driver_data_counter = 0;
       } else {
@@ -297,11 +308,13 @@ int main(int argc, const char** argv) {
       
       driver_file<<no_driver_data_counter<<","<<counter<<","<<(int)motor->values.driver_temp<<","<<motor->values.link_voltage<<","<<motor->values.phase_current<<","<<motor->values.motor_power<<","<<motor->values.rotor_speed
           <<","<<motor->values.supply_current<<","<<motor->values.supply_voltage<<","<<motor->values.torque<<","<<(int)motor->values.motor_mode<<","<<(int)real_speed<<"\n"<<flush;
-        
+      
+      //screen_threads.writeUserPower(power_input, power_output, user_input, 0, 1);
     }
     
-//    if (counter%10 == 1){
-//      mppt_box->get_all_float_data(mppt_buffer);
+    if (counter%10 == 1){
+      //canbus_driver->write_can(&mppt_tx);
+      mppt_box->get_all_float_data(mppt_buffer);
 //      
 //      canbus_driver->read_can(0xd0, &driver_state_data);
 //      canbus_driver->read_can(0xd8, &reference_data);
@@ -309,17 +322,17 @@ int main(int argc, const char** argv) {
 //      canbus_driver->read_can(0xf0, &motor_1_data);
 //      canbus_driver->read_can(0xf8, &motor_2_data);      
 //      
-//      
-//      file<<counter<<power_input->battery.max_temp << ","<<power_input->battery.total_current << ","<<power_input->battery.total_voltage << ","
-//          <<power_input->battery.state_of_charge << ","<<user_input->steer.raw_throttle;
-//      file<<",Solar,";
-//      
-//      for(int i = 0; i<4; i++){
-//        for (int j = 0; j<10; j++){
-//          file<<mppt_buffer[j][i]<<",";
-//        }
-//      file<<" ,";
-//      }
+      
+      file<<counter<<","<<power_input->battery.max_temp << ","<<power_input->battery.total_current << ","<<power_input->battery.total_voltage << ","
+          <<power_input->battery.state_of_charge << ","<<user_input->steer.raw_throttle;
+      file<<",Solar,";
+      
+      for(int i = 0; i<4; i++){
+        for (int j = 0; j<10; j++){
+          file<<mppt_buffer[j][i]<<",";
+        }
+      file<<" ,";
+      }
 //      file<<"Driver,";
 //      for(int i = 0; i<8; i++){
 //        file<<(int)driver_state_data.data[i]<<",";
@@ -340,8 +353,8 @@ int main(int argc, const char** argv) {
 //      for(int i = 0; i<8; i++){
 //        file<<(int)motor_2_data.data[i]<<",";
 //      }      
-//      file<<"\n"<<flush;
-//    } 
+      file<<"\n"<<flush;
+    } 
 //    
 //    if (counter%10 == 1){
 //      
@@ -363,7 +376,5 @@ int main(int argc, const char** argv) {
 //  
 //    
   }
-  
-  
   return 0;
 }
