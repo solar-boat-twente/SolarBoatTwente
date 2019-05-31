@@ -1,7 +1,14 @@
 #include "logging.h"
 
+
 using namespace MIO;
 using namespace structures;
+
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 
 Logger::Logger(const std::string PathToConfig)
 {
@@ -88,9 +95,8 @@ void Logger::write_struct_telemetry_input(const structures::TelemetryInput *tele
            << telemetry_input_ptr->control.overwrite  << ","
            << telemetry_input_ptr->solar_panel_states[0]  << "," << telemetry_input_ptr->solar_panel_states[1]  << ","<< telemetry_input_ptr->solar_panel_states[2]  << ","
            << telemetry_input_ptr->solar_panel_states[3]  << ","<< telemetry_input_ptr->solar_panel_states[4]  << ","<< telemetry_input_ptr->solar_panel_states[5]  << ","
-           << telemetry_input_ptr->solar_panel_states[6]  << ","<< telemetry_input_ptr->solar_panel_states[7]  << ","<< telemetry_input_ptr->solar_panel_states[8]  << ","
-           << telemetry_input_ptr->solar_panel_states[9]  << ","
-           << "," << telemetry_input_ptr->advised_speed;
+           << telemetry_input_ptr->solar_panel_states[6]  << ","<< telemetry_input_ptr->solar_panel_states[7] 
+           << "," << telemetry_input_ptr->advised_speed<<std::endl;
 }
 
 

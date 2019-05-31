@@ -12,6 +12,7 @@ using namespace std;
 
 using namespace MIO::UI;
 
+/** TO DO: MAKE SURE THAT THIS STARTS AT FALSE ON START UP (STORE FIRST VALUE)*/
 ButtonBox::ButtonBox(ADAM * const adam): m_adam(adam) {
     }
 

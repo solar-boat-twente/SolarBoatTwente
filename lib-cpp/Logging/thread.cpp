@@ -12,9 +12,9 @@
  */
 
 #include "thread.h"
-#define CONTROL_DATA_WRITE_CYCLE_TIME 13333
-#define USER_POWER_WRITE_CYCLE_TIME 200000
-#define TELEM_INPUT_WRITE_CYCLE_TIME 20000
+#define CONTROL_DATA_WRITE_CYCLE_TIME 13
+#define USER_POWER_WRITE_CYCLE_TIME 20
+#define TELEM_INPUT_WRITE_CYCLE_TIME 20
 
 using namespace MIO;
 
@@ -317,11 +317,13 @@ void *ThreadWriteControlData(void *ptr)
         
         if (ControlDataToPython == 1) // only needs to write if the command is given
         {
-            pthread_mutex_lock(&mutex2);
+            pthread_mutex_lock(&mutex3);
             freopen(pipe_control_data_to_python, "w", stderr);
+            std::cout<<"START WRITING CONTROL"<<std::endl;
             control_data_pipe.write_struct_control_data(gl_control_data_ptr);
+            std::cout<<"STOP WRITING CONTROL"<<std::endl;
             fclose(stderr);
-            pthread_mutex_unlock(&mutex2);
+            pthread_mutex_unlock(&mutex3);
             ControlDataToPython = 0;
         }
          
@@ -361,9 +363,11 @@ void *ThreadWriteUserPowerData(void *ptr)
         if (UserPowerToPython == 1) // only needs to write if the command is given
         {
             pthread_mutex_lock(&mutex3);
+            std::cout<<"START WRITING USER_POWER"<<std::endl;
             freopen(pipe_user_power_to_python, "w", stderr);
             user_power_pipe.write_struct_user_power(gl_power_input_ptr, gl_power_output_ptr, gl_user_input_ptr);
             fclose(stderr);
+            std::cout<<"STOP WRITING USER_POWER"<<std::endl;
             UserPowerToPython = 0;
            
             pthread_mutex_unlock(&mutex3);
