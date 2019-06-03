@@ -122,7 +122,7 @@ void floating(){
   
   //Start the BMS
   m_bms->start_reading(power_input);
-  m_bms->start_writing(power_output);
+  //m_bms->start_writing(power_output);
   button_box->start_reading();
 
 }
@@ -137,11 +137,16 @@ int main(int argc, const char** argv) {
   std::thread thread_floating(floating);
   //std::thread thread_controlsystem(controlsystem);
   this_thread::sleep_for(chrono::milliseconds(2000));
+  button_box->set_battery_force_led(false);
+  button_box->set_battery_led(false);
+  button_box->set_motor_led(false);
+  button_box->set_solar_led(false);
 //  //construct message for bms
-//  bms_tx->id = CANID_BMS_TX;
-//  bms_tx->length = 2;
-//  bms_tx->data[0] = 0x01;
-//  bms_tx->data[1] = 0x0;
+  canmsg_t * bms_tx = new canmsg_t;
+  bms_tx->id = CANID_BMS_TX;
+  bms_tx->length = 2;
+  bms_tx->data[0] = 0x01;
+  bms_tx->data[1] = 0x0;
   
   //Construct message for driver
   driver_tx->id = 0xcf;
@@ -220,7 +225,22 @@ int main(int argc, const char** argv) {
     driver_tx->data[2] = real_speed>>8;
     driver_tx->data[3] = real_speed&0xFF;
 
-    //canbus_bms->write_can(bms_tx);
+    if (user_input->buttons.battery_on && !user_input->buttons.force_battery){
+        bms_tx->data[0] = 1;
+        bms_tx->data[1] = 0;
+        canbus_bms->write_can(bms_tx);
+    } else {
+        bms_tx->data[0] = 0;
+        bms_tx->data[1] = 0;
+    }
+    
+    if (user_input->buttons.force_battery&&user_input->buttons.battery_on){
+        bms_tx->data[0] = 2;
+        bms_tx->data[1] = 1;
+        canbus_bms->write_can(bms_tx);
+    }
+    
+    
     this_thread::sleep_for(chrono::milliseconds(50));
     if (no_driver_data_counter<4){
         canbus_driver->write_can(driver_tx);
