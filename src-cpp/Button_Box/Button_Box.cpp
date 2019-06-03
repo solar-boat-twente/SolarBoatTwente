@@ -14,21 +14,36 @@ using namespace MIO::UI;
 
 /** TO DO: MAKE SURE THAT THIS STARTS AT FALSE ON START UP (STORE FIRST VALUE)*/
 ButtonBox::ButtonBox(ADAM * const adam): m_adam(adam) {
-    }
+  for(int i = 0; i<4; i++){
+    initial_button_states[i] = get_button_state(i);
+  }
+}
 
 int ButtonBox::switch_led(int led_number, bool state) {
   if(led_number<0 or led_number>4){
     M_ERR<<"ENTERED INVALID LED NUMBER"<<led_number;
+  } else {
+    std::cout<<"WRITTEN A "<<state<<" TO "<<led_number<<std::endl;
+    m_adam->write_port(led_number+16, state);
+    output_button_states[led_number] = state;
   }
-  std::cout<<"WRITTEN A "<<state<<" TO "<<led_number<<std::endl;
-  m_adam->write_port(led_number+16, state);
 
 }
 
 bool ButtonBox::get_button_state(int button_number) {
-  int result = m_adam->read_counter(button_number*2);
+  int result = m_adam->read_counter(button_number*2); //Get the button state from the ADAM
   M_DEBUG<<"RESULT FOR: "<<button_number<<" IS: "<<result;
-  return (m_adam->read_counter(button_number*2)%2 == 1);
+  result = result - initial_button_states[button_number]; //Substract original button state from current one
+  //Check if the value gotten is logical value
+  int previous_value = previous_button_states[button_number];
+  if(result-previous_value>=0&&result-previous_value<3){
+    previous_button_states[button_number] = result;
+    return (result%2 == 1);
+  } else {
+    M_WARN<<"INVALID VALUE FOR BUTTON STATE, RETURNING PREVIOUS BUTTON STATE";
+    return (previous_value%2==1);
+  }
+  
 }
 
 ButtonBox * ButtonBoxHandler::button_box = NULL;
@@ -40,6 +55,7 @@ ButtonBoxHandler::ButtonBoxHandler(ADAM * const adam, structures::UserInput* m_u
   
   initialized = true;
   button_box = new ButtonBox(adam);
+  
 }
 
 int ButtonBoxHandler::start_reading(short int delay) {
@@ -58,10 +74,21 @@ int ButtonBoxHandler::stop_reading() {
 int ButtonBoxHandler::set_motor_led(bool state) {
   if(button_box!=NULL){
     button_box->switch_led(0, state);
+    return 1;
   } else {
     M_ERR<<"DID NOT WRITE MOTOR LED BECAUSE BUTTON BOX HANDLER NOT INITIALIZED";
+    return -1;
   }
 }
+
+
+
+int ButtonBoxHandler::set_motor_led(ButtonState state){
+  if(button_box!=NULL){
+
+  }
+}
+
 
 int ButtonBoxHandler::set_solar_led(bool state) {
   if(button_box!=NULL){
@@ -104,6 +131,31 @@ int ButtonBoxHandler::reading_thread_(short int delay) {
   }
 }
 
+void ButtonBoxHandler::leds_thread_() {
+  int counter = 0;
+  while(true){
+    counter++;
+    for(int i = 0; i<4; i++){
+      switch (button_states[i]) {
+        case CONTINUOUS:
+          button_box->switch_led(i, true);
+          break;
+        case NO_LIGHT:
+          button_box->switch_led(i, false);
+          break;
+        case BLINK_FAST:
+          button_box->switch_led(i, !button_box->output_button_states[i]);
+          break;
+        case BLINK_SLOW:
+          if (counter%SLOW_QUICK_BLINK_RATIO == 1){
+            button_box->switch_led(i, !button_box->output_button_states[i]);
+          }
+          break; 
+      } 
+    } 
+    this_thread::sleep_for(chrono::milliseconds(SHORT_BLINK_DELAY));
+  }
+}
 
 
 

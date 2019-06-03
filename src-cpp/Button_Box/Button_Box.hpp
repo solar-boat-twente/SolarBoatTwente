@@ -17,15 +17,19 @@
 #include "../../lib-cpp/ADAM/ADAM.hpp"
 #include "../../solarboattwente.h"
 #include <thread>
+#include <vector>
 namespace MIO{
 namespace UI{
 
 const short int STD_BUTTON_READ_DELAY = 500;
-
+const short int SHORT_BLINK_DELAY = 100;
+const short int SLOW_QUICK_BLINK_RATIO = 10;
 
 class ButtonBox{
   
  public:
+  bool output_button_states[4] = {false, false, false, false};
+  
   ButtonBox(ADAM * const adam);
   
   /**
@@ -48,9 +52,22 @@ class ButtonBox{
   
   
  private:
+  
+  bool check_valid;
+  
+  int initial_button_states[4] = {0,0,0,0};
+  int previous_button_states[4] = {0,0,0,0};
+  
   ADAM * const m_adam;
 };
 
+
+enum ButtonState {
+  CONTINUOUS,
+  NO_LIGHT,
+  BLINK_SLOW,
+  BLINK_FAST
+};
 
 class ButtonBoxHandler{
   
@@ -61,13 +78,27 @@ class ButtonBoxHandler{
   
   int stop_reading();
   
-  static int set_motor_led(bool state);
+  /**
+   * 
+   * @param state
+   * @return 
+   */
+  int set_motor_led(bool state);
+  /**
+   * 
+   * @param state
+   * @return 
+   */
+  int set_motor_led(ButtonState state);
   
-  static int set_battery_led(bool state);
+  int set_battery_led(bool state);
+  int set_battery_led(ButtonState state);
   
-  static int set_battery_force_led(bool state);
+  int set_battery_force_led(bool state);
+  int set_battery_force_led(ButtonState state);
   
-  static int set_solar_led(bool state);
+  int set_solar_led(bool state);
+  int set_solar_led(ButtonState state);
   
  private:
   
@@ -75,9 +106,17 @@ class ButtonBoxHandler{
   
   bool reading_state;
   
+  
   structures::UserInput * const user_input;
   
   std::thread m_reading_thread;
+  
+  std::thread m_leds_thread_;
+  
+  ButtonState button_states[4];
+  
+  
+  void leds_thread_();
   
   static ButtonBox * button_box;
   
