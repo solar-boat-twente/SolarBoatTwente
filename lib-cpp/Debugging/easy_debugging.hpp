@@ -129,3 +129,4 @@ class Debug
 #endif
 
 #endif /* EASY_DEBUGGING_HPP */
+
