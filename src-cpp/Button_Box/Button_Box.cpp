@@ -16,6 +16,7 @@ using namespace MIO::UI;
 ButtonBox::ButtonBox(ADAM * const adam): m_adam(adam) {
   for(int i = 0; i<4; i++){
     initial_button_states[i] = get_button_state(i);
+    M_OK<<"SET INITIAL BUTTON STATE "<<i<<" TO: "<<initial_button_states[i];
     switch_led(i, false);
   }
 }
@@ -37,11 +38,12 @@ int ButtonBox::switch_led(int led_number, bool state) {
 bool ButtonBox::get_button_state(int button_number) {
   int result = m_adam->read_counter(button_number*2); //Get the button state from the ADAM
   M_DEBUG<<"RESULT FOR: "<<button_number<<" IS: "<<result;
-  result = result - initial_button_states[button_number]; //Substract original button state from current one
+  
   //Check if the value gotten is logical value
   int previous_value = previous_button_states[button_number];
   if(result-previous_value>=0&&result-previous_value<10){
     previous_button_states[button_number] = result;
+    result = result - initial_button_states[button_number]; //Substract original button state from current one
     return (result%2 == 1);
   } else {
     M_WARN<<"INVALID VALUE FOR BUTTON STATE, RETURNING PREVIOUS BUTTON STATE";

@@ -22,7 +22,7 @@ using namespace MIO;
 using namespace std;
 /*public: */
 
-CANbus::CANbus(const char * device_name, unsigned int buffer_size, unsigned int baudrate) {
+CANbus::CANbus(const char * device_name, unsigned int buffer_size, unsigned int baudrate, int flag) {
   //Filling the can_status structure
   can_status->device = device_name;
   can_status->total_buffer = buffer_size;
@@ -32,7 +32,7 @@ CANbus::CANbus(const char * device_name, unsigned int buffer_size, unsigned int 
   can_status->status = false;
   can_status->open = false;
   //Opens the CANbus
-  if(open_can(O_RDWR)>0){
+  if(open_can(flag)>0){
     set_baudrate(baudrate);
   };
   

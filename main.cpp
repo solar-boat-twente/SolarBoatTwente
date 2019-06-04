@@ -48,7 +48,7 @@ using namespace structures;
 //Open up the data acquisition parts  
 Serial * serial_wheel = new Serial("/dev/steer");
 CANbus * canbus_bms = new CANbus("/dev/can1", 1);
-CANbus * canbus_driver = new CANbus("/dev/can0", 1);
+CANbus * canbus_driver = new CANbus("/dev/can0", 1,STD_BUFFER, O_RDWR|O_NONBLOCK);
 UI::ADAM * adam_6050 = new UI::ADAM("192.168.1.50", 502);
 
 
@@ -86,10 +86,10 @@ EPOS * maxon2 = new EPOS(canbus_bms,2);
 EPOS * maxon4 = new EPOS(canbus_bms,4);
 
 void floating(){
-  button_box->set_battery_force_led(true);
-  button_box->set_battery_led(true);
-  button_box->set_motor_led(true);
-  button_box->set_solar_led(true);
+  button_box->set_battery_force_led(UI::BLINK_FAST);
+  button_box->set_battery_led(UI::BLINK_SLOW);
+  button_box->set_motor_led(UI::BLINK_FAST);
+  button_box->set_solar_led(UI::BLINK_SLOW);
   
   
   //Starting with reading from the CANbus
@@ -136,7 +136,7 @@ int main(int argc, const char** argv) {
   
   std::thread thread_floating(floating);
   //std::thread thread_controlsystem(controlsystem);
-  this_thread::sleep_for(chrono::milliseconds(2000));
+  this_thread::sleep_for(chrono::milliseconds(5000));
   button_box->set_battery_force_led(false);
   button_box->set_battery_led(false);
   button_box->set_motor_led(false);
