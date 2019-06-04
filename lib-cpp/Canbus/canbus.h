@@ -26,7 +26,7 @@ namespace MIO {
 #define STD_BAUD 250 // standard baudrate
 #define STD_BUFFER 100
 #define STD_ID 257752
-
+const int STD_FLAG = O_RDWR;
 
 
 /*
@@ -103,7 +103,7 @@ class CANbus {
    * 
    *  
    */
-  CANbus(const char * device_name, unsigned int buffer_size = STD_BUFFER, unsigned int baudrate = STD_BAUD);
+  CANbus(const char * device_name, unsigned int buffer_size = STD_BUFFER, unsigned int baudrate = STD_BAUD, int flag = STD_FLAG);
   
   
   int open_can(int flag = O_RDWR);
@@ -209,4 +209,3 @@ int print_canmsg(canmsg_t * const msg);
 
 
 #endif /* CANBUS_H */
-

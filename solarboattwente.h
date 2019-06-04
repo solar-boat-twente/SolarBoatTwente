@@ -14,6 +14,21 @@
 #ifndef SOLARBOATTWENTE_H
 #define SOLARBOATTWENTE_H
 
+#include <thread>
+
+const short int STD_POWER_OUTPUT_DELAY = 100;
+
+union two_bytes{
+  int16_t signed_int;
+  uint16_t unsigned_int;
+  uint8_t bytes[2];
+};
+
+union four_bytes{
+  uint32_t unsigned_int;
+  int32_t signed_int;
+  uint8_t bytes[4];  
+};
 /*
  Declaring all the structures 
  */
@@ -105,11 +120,12 @@ struct PowerInput {
     //Test wether the key is in the motor controller, true if motor controller is off
     bool driver_on;
     //Error number
-    bool error_word;
+    two_bytes error_word;
     
     //Low priority limiter (other type of error);
-    bool low_priority_limiter;
+    two_bytes low_priority_limiter;
     
+    uint8_t high_priority_limiter;
     //One reserved Variable;
     int reserved1;
     int reserved2;
@@ -174,8 +190,8 @@ struct UserInput {
     bool force_battery; 
     // bool whether the button for the solar 
     bool motor_on;
-    // States whether the system should debug, false on start-up, on true all the software should restart
-    bool debug_on;
+    // States whether the solar deck should be on
+    bool solar_on;
   };
 
   struct SteeringInput {
@@ -304,8 +320,34 @@ struct ControlData {
   int reserved1;
   int reserved2;
 };
+
+
+class PowerOutputHandler{
+  
+ public: 
+  PowerOutputHandler(PowerInput * power_input, PowerOutput * power_output, UserInput * user_input);
+  
+  int start(short int delay = STD_POWER_OUTPUT_DELAY);
+  
+  int stop();
+  
+  
+ private:
+  
+  int handling_function(short int delay);
+  
+  std::thread m_thread;
+
+  PowerInput * const power_input;
+  PowerOutput * const power_output;
+  UserInput * const user_input;
+  
+  bool active;
+  
+};
 }/* structures */
+
+
 }/* top_level */
 
 #endif /* SOLARBOATTWENTE_H */
-

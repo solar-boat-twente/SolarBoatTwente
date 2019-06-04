@@ -50,13 +50,13 @@ int MIO::Serial::read_bytes(uint8_t buf[], short int max_bytes) {
     M_INFO<<"READING MESSAGE:";
   }
   
-  for(int i = 0; i<max_bytes; i++){
+  for(int i = 0; i<max_bytes; i++){  // hier blijven we in hangen als we niet de 350 hebben bereikt
     n_read = read(file_descriptor, &m_buffer_, 1);
     buf[i]=m_buffer_;
     
-    if(max_bytes>1){
-      cout<<BOLD<<"\b\b\b\b\b\b\b\b\b\b\b\b\b\b"<<flush<<"MESSAGE: "<<i<<"/"<<max_bytes;
-    }
+    //if(max_bytes>1){
+    //  cout<<BOLD<<"\b\b\b\b\b\b\b\b\b\b\b\b\b\b"<<flush<<"MESSAGE: "<<i<<"/"<<max_bytes;
+    //}
     
     if (n_read<0){
       M_ERR<<"ERROR READING: "<<strerror(errno);
@@ -68,14 +68,14 @@ int MIO::Serial::read_bytes(uint8_t buf[], short int max_bytes) {
     cout<<RST<<endl;
   }
   
-  if(n_read>1){
+  if(max_bytes>1){
     M_DEBUG << "SERIAL RESPONSE: ";
     for(int i = 0; i<max_bytes; i++){
-      std::cout<<BOLD<<showbase<<" "<<(int)buf[i]<<dec;
+      std::cout<<BOLD<<showbase<<hex<<" "<<(int)buf[i]<<dec<<RST;
     } 
-    std::cout<<RST<<endl;
+    std::cout<<endl;
     return max_bytes;
-  } else if (n_read = 1){
+  } else if (max_bytes = 1){
     M_DEBUG<<"SERIAL RESPONSE: "<<BOLD<<showbase<<(int)buf[0]<<dec;
     return max_bytes;
   } else if (n_read<0){

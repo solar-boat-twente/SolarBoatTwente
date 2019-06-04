@@ -100,10 +100,9 @@ class Debug
   }
   
   template<class M>
-  Debug& printArray(M arr[], int length){
+  Debug &printArray(M arr[], int length){
     for(int i = 0; i<length; i++){
-      std::cout<<std::hex<<std::showbase<<arr[i]<<" "<<std::dec;
-      printf("0x%x ",  arr[1]);
+      std::cout<<std::hex<<std::showbase<<(int)arr[i]<<" "<<std::dec;
     }
     return *this;
   }
@@ -130,4 +129,3 @@ class Debug
 #endif
 
 #endif /* EASY_DEBUGGING_HPP */
-

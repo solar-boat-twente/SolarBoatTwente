@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>lib-cpp/Logging/new_logging.hpp</itemPath>
       <itemPath>solarboattwente.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -38,6 +39,10 @@
         <itemPath>include-cpp/easylogging++.h</itemPath>
       </logicalFolder>
       <logicalFolder name="lib-cpp" displayName="lib-cpp" projectFiles="true">
+        <logicalFolder name="ADAM" displayName="ADAM" projectFiles="true">
+          <itemPath>lib-cpp/ADAM/ADAM.cpp</itemPath>
+          <itemPath>lib-cpp/ADAM/ADAM.hpp</itemPath>
+        </logicalFolder>
         <logicalFolder name="Canbus" displayName="Canbus" projectFiles="true">
           <itemPath>lib-cpp/Canbus/CANbus.md</itemPath>
           <itemPath>lib-cpp/Canbus/canbus.cpp</itemPath>
@@ -65,6 +70,35 @@
           <itemPath>src-cpp/Battery_Magagement_System/BMS.h</itemPath>
           <itemPath>src-cpp/Battery_Magagement_System/BMS_CANIDs.h</itemPath>
         </logicalFolder>
+        <logicalFolder name="f1" displayName="Button_Box" projectFiles="true">
+          <itemPath>src-cpp/Button_Box/Button_Box.cpp</itemPath>
+          <itemPath>src-cpp/Button_Box/Button_Box.hpp</itemPath>
+          <itemPath>src-cpp/Button_Box/Encoders.cpp</itemPath>
+          <itemPath>src-cpp/Button_Box/Encoders.hpp</itemPath>
+        </logicalFolder>
+        <logicalFolder name="f1" displayName="Control" projectFiles="true">
+          <itemPath>src-cpp/Control_System/Biquad.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/Biquad.h</itemPath>
+          <itemPath>src-cpp/Control_System/ComplementaryFilter.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/ComplementaryFilter.h</itemPath>
+          <itemPath>src-cpp/Control_System/Daan_Test1_maxon.h</itemPath>
+          <itemPath>src-cpp/Control_System/DataStore.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/DataStore.h</itemPath>
+          <itemPath>src-cpp/Control_System/Filtered_data.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/Filtered_data.h</itemPath>
+          <itemPath>src-cpp/Control_System/Force_to_wing_angle.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/Force_to_wing_angle.h</itemPath>
+          <itemPath>src-cpp/Control_System/PID_caller.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/PID_caller.h</itemPath>
+          <itemPath>src-cpp/Control_System/Sensor.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/Sensor.h</itemPath>
+          <itemPath>src-cpp/Control_System/Xsens.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/Xsens.h</itemPath>
+          <itemPath>src-cpp/Control_System/control_main.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/daan_maxon.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/pid.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/pid.h</itemPath>
+        </logicalFolder>
         <logicalFolder name="Control_Wheel"
                        displayName="Control_Wheel"
                        projectFiles="true">
@@ -78,8 +112,26 @@
           <itemPath>src-cpp/Genasun_Watt_Sensor/MPPT.h</itemPath>
           <itemPath>src-cpp/Genasun_Watt_Sensor/MPPT_CANIDs.hpp</itemPath>
         </logicalFolder>
+        <logicalFolder name="f2" displayName="Motor" projectFiles="true">
+          <itemPath>src-cpp/Motor/Motor.cpp</itemPath>
+          <itemPath>src-cpp/Motor/Motor.hpp</itemPath>
+          <itemPath>src-cpp/Motor/Motor_defs.hpp</itemPath>
+        </logicalFolder>
       </logicalFolder>
       <itemPath>main.cpp</itemPath>
+      <itemPath>lib-cpp/Logging/new_logging.cpp</itemPath>
+      <itemPath>solarboattwente.cpp</itemPath>
+    </logicalFolder>
+    <logicalFolder name="TestFiles"
+                   displayName="Test Files"
+                   projectFiles="false"
+                   kind="TEST_LOGICAL_FOLDER">
+    </logicalFolder>
+    <logicalFolder name="ExternalFiles"
+                   displayName="Important Files"
+                   projectFiles="false"
+                   kind="IMPORTANT_FILES_FOLDER">
+      <itemPath>Makefile</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -95,6 +147,7 @@
   </logicalFolder>
   <sourceRootList>
     <Elem>.</Elem>
+    <Elem>.</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -109,6 +162,11 @@
           <standard>8</standard>
           <commandLine>-pthread --std=c++11 -g</commandLine>
         </ccTool>
+        <linkerTool>
+          <linkerLibItems>
+            <linkerOptionItem>`pkg-config --libs libmodbus`</linkerOptionItem>
+          </linkerLibItems>
+        </linkerTool>
       </compileType>
       <item path="config/control_data.conf" ex="false" tool="3" flavor2="0">
       </item>
@@ -128,6 +186,10 @@
       </item>
       <item path="include-cpp/easylogging++.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="lib-cpp/ADAM/ADAM.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="lib-cpp/ADAM/ADAM.hpp" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="lib-cpp/Canbus/CANbus.md" ex="false" tool="3" flavor2="0">
       </item>
       <item path="lib-cpp/Canbus/canbus.cpp" ex="false" tool="1" flavor2="0">
@@ -142,6 +204,10 @@
       <item path="lib-cpp/Logging/logging.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="lib-cpp/Logging/logging.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lib-cpp/Logging/new_logging.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="lib-cpp/Logging/new_logging.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="lib-cpp/Logging/thread.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -167,6 +233,8 @@
       </item>
       <item path="pipes/UserPowerToPython" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="solarboattwente.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="solarboattwente.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src-cpp/Battery_Magagement_System/BMS.cpp"
@@ -183,6 +251,92 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="src-cpp/Button_Box/Button_Box.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Button_Box/Button_Box.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Button_Box/Encoders.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Button_Box/Encoders.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Biquad.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Biquad.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/ComplementaryFilter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/ComplementaryFilter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Daan_Test1_maxon.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/DataStore.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/DataStore.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Filtered_data.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Filtered_data.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Force_to_wing_angle.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Force_to_wing_angle.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/PID_caller.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/PID_caller.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Sensor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Sensor.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Xsens.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Xsens.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/control_main.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/daan_maxon.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/pid.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/pid.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src-cpp/Control_Wheel/Control_Wheel.cpp"
             ex="false"
@@ -205,6 +359,12 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="src-cpp/Motor/Motor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Motor/Motor.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Motor/Motor_defs.hpp" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
     <conf name="Release" type="1">
@@ -246,6 +406,10 @@
       </item>
       <item path="include-cpp/easylogging++.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="lib-cpp/ADAM/ADAM.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="lib-cpp/ADAM/ADAM.hpp" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="lib-cpp/Canbus/CANbus.md" ex="false" tool="3" flavor2="0">
       </item>
       <item path="lib-cpp/Canbus/canbus.cpp" ex="false" tool="1" flavor2="0">
@@ -260,6 +424,10 @@
       <item path="lib-cpp/Logging/logging.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="lib-cpp/Logging/logging.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lib-cpp/Logging/new_logging.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="lib-cpp/Logging/new_logging.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="lib-cpp/Logging/thread.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -285,6 +453,8 @@
       </item>
       <item path="pipes/UserPowerToPython" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="solarboattwente.cpp" ex="false" tool="1" flavor2="0">
+      </item>
       <item path="solarboattwente.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src-cpp/Battery_Magagement_System/BMS.cpp"
@@ -301,6 +471,92 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="src-cpp/Button_Box/Button_Box.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Button_Box/Button_Box.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Button_Box/Encoders.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Button_Box/Encoders.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Biquad.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Biquad.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/ComplementaryFilter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/ComplementaryFilter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Daan_Test1_maxon.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/DataStore.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/DataStore.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Filtered_data.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Filtered_data.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Force_to_wing_angle.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Force_to_wing_angle.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/PID_caller.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/PID_caller.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Sensor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Sensor.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Xsens.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Xsens.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/control_main.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/daan_maxon.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/pid.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/pid.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src-cpp/Control_Wheel/Control_Wheel.cpp"
             ex="false"
@@ -323,6 +579,12 @@
             ex="false"
             tool="3"
             flavor2="0">
+      </item>
+      <item path="src-cpp/Motor/Motor.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Motor/Motor.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Motor/Motor_defs.hpp" ex="false" tool="3" flavor2="0">
       </item>
     </conf>
   </confs>

@@ -184,7 +184,7 @@ int BMS::parse_response1_(std::vector<uint8_t> * bytes, structures::PowerInput* 
     //Get all the values from the battery, look at REC API MANUAL.
     power_input->battery.state_of_charge = 0.5*(*bytes)[0];
     power_input->battery.total_voltage = (256*(*bytes)[1]+(*bytes)[2])*0.002;
-    power_input->battery.total_current = (256*(*bytes)[3]+ (*bytes)[4])*0.020;
+    power_input->battery.total_current = (signed short int)((256*(*bytes)[3]+ (*bytes)[4]))*0.020;
     power_input->battery.state_of_health = (0.5*(*bytes)[5]);
     power_input->battery.error_number = (*bytes)[6];
     power_input->battery.error_location = (*bytes)[7];
@@ -193,7 +193,7 @@ int BMS::parse_response1_(std::vector<uint8_t> * bytes, structures::PowerInput* 
     M_OK<<"READING AND PARSING BMS RESPONSE 1 SUCCESSFUL! d(>_･ )";
     M_DEBUG<<"RESULT FROM RESPONSE 1 IS: \n"<<" SOC: "<<power_input->battery.state_of_charge<< " | Total Voltage: "<<power_input->battery.total_voltage<<
         " | Total Current: "<<power_input->battery.total_current<< "\n SOH: "<<power_input->battery.state_of_health<<
-        " | Error Number: "<<power_input->battery.error_number<< " | Error Location: "<<power_input->battery.error_location<<"\n";
+        " | Error Number: "<<(int)power_input->battery.error_number<< " | Error Location: "<<(int)power_input->battery.error_location<<"\n";
     return 1;
   } else {
     M_ERR<<"INCORRECT MESSAGE SIZE FOR ID = "<<CANID_BMS_RESPONSE1<<" SIZE WAS EQUAL TO "<<bytes->size()<<" (　ﾟдﾟ)";

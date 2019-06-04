@@ -41,7 +41,7 @@ class BMS {
     };
     
   static const int STD_BMS_READ_DELAY = 500;
-  static const int STD_BMS_WRITE_DELAY = 500;
+  static const int STD_BMS_WRITE_DELAY = 100;
   
   
  public:
@@ -151,4 +151,3 @@ class BMS {
 }
 }
 #endif /* BMS_H */
-
