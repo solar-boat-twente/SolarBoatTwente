@@ -94,7 +94,6 @@
           <itemPath>src-cpp/Control_System/Sensor.h</itemPath>
           <itemPath>src-cpp/Control_System/Xsens.cpp</itemPath>
           <itemPath>src-cpp/Control_System/Xsens.h</itemPath>
-          <itemPath>src-cpp/Control_System/control_main.cpp</itemPath>
           <itemPath>src-cpp/Control_System/daan_maxon.cpp</itemPath>
           <itemPath>src-cpp/Control_System/pid.cpp</itemPath>
           <itemPath>src-cpp/Control_System/pid.h</itemPath>
@@ -324,11 +323,6 @@
       </item>
       <item path="src-cpp/Control_System/Xsens.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/control_main.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
       <item path="src-cpp/Control_System/daan_maxon.cpp"
             ex="false"
             tool="1"
@@ -543,11 +537,6 @@
       <item path="src-cpp/Control_System/Xsens.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="src-cpp/Control_System/Xsens.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/control_main.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
       </item>
       <item path="src-cpp/Control_System/daan_maxon.cpp"
             ex="false"

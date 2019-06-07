@@ -7,59 +7,57 @@
 
 //#include <string>
 
-class DataStore
-{
+class DataStore {
+  
 
     public:
         
-        struct sensor_struct
-        {
-            float pitch[4];
-            float roll[4];
-            float Z_accel[4];
-            float angle_left[4];
-            float angle_right[4];
-
+        struct sensor_struct {
+            float pitch;
+            float roll;
+            float Z_accel;
+            float angle_left;
+            float angle_right;
         };
-        struct FilteredData
-        {
+        
+        struct FilteredData {
           float filtered_pitch;
           float filtered_roll ;
           float filtered_Z_accel ;
           float filtered_angle_left ;
           float filtered_angle_right ;
         };
-        struct RealData
-        {
+        
+        struct RealData {
           float Real_height;
           float Real_roll;
           float Real_pitch;
         };
         
-        struct PIDDataTotal
-        {
+        struct PIDDataTotal {
           float Force_height;
           float Force_roll;
           float Force_pitch;
         };
-        struct AngleWings
-        {
+        
+        struct AngleWings {
             float Wing_left;
             float Wing_right;
             float Wing_back;
         };
+        
         struct XsensData{
-        float roll;
-        float yaw;
-        float pitch;
-        float acceleration_x;
-        float acceleration_y;
-        float acceleration_z;
-        float velocity_x;
-        float velocity_y;
-        float velocity_z;
-        float latitude;
-        float longitude;            
+          float roll;
+          float yaw;
+          float pitch;
+          float acceleration_x;
+          float acceleration_y;
+          float acceleration_z;
+          float velocity_x;
+          float velocity_y;
+          float velocity_z;
+          float latitude;
+          float longitude;            
         };
         DataStore();
         

@@ -15,7 +15,7 @@
 //#include <chrono>
 #include <ctime>
 #include <ratio>
-
+#include <mutex>
 #include "solarboattwente.h"
 //#include "lib-cpp/Logging/thread.h"
 //#include "lib-cpp/Logging/logging.h"
@@ -50,7 +50,7 @@ Serial * serial_wheel = new Serial("/dev/steer");
 CANbus * canbus_bms = new CANbus("/dev/can1", 1);
 CANbus * canbus_driver = new CANbus("/dev/can0", 1);
 UI::ADAM * adam_6050 = new UI::ADAM("192.168.1.50", 502);
-
+UI::ADAM * adam_6017 = new UI::ADAM("192.168.1.127", 502);
 
 //Open up the global structures
 PowerInput * power_input = new PowerInput;
@@ -68,7 +68,9 @@ canmsg_t * bms_tx = new canmsg_t;
 canmsg_t * driver_tx = new canmsg_t;
 MPPT_Box * mppt_box = new MPPT_Box(canbus_driver);
 
-//Define everything from the control system
+ 
+///// DEFINE EVERYTHING FROM THE CONTROL SYSTEM
+
 DataStore * xsens_data = new DataStore();
 DataStore * ruwe_data = new DataStore();
 DataStore * filtered_data = new DataStore();
@@ -79,11 +81,13 @@ RuwDataFilter * filter = new RuwDataFilter();
 ComplementaryFilter * com_filter = new ComplementaryFilter();
 PID_caller * PIDAAN = new PID_caller();
 control::ForceToWingAngle * FtoW = new control::ForceToWingAngle();
-//CANbus * canbus1 = new CANbus("can1", 1);
-
-EPOS * maxon1 = new EPOS(canbus_bms,1);
-EPOS * maxon2 = new EPOS(canbus_bms,2);
-EPOS * maxon4 = new EPOS(canbus_bms,4);
+Serial * m_serial = new Serial("/dev/xsense", 9600);
+Xsens * m_xsens = new Xsens();
+Sensor * de_sensor = new Sensor(m_xsens,m_serial);
+    
+EPOS * maxon1 = new EPOS(canbus_bms,adam_6017,1);
+EPOS * maxon2 = new EPOS(canbus_bms,adam_6017,2);
+EPOS * maxon4 = new EPOS(canbus_bms,adam_6017,4);
 
 void floating(){
   button_box->set_battery_force_led(true);
@@ -91,16 +95,13 @@ void floating(){
   button_box->set_motor_led(true);
   button_box->set_solar_led(true);
   
-  
   //Starting with reading from the CANbus
   canbus_bms->start(0);
   canbus_driver->start(0);
-  
-  
+    
   //Start the Steering Wheel
   control_wheel->start_reading(user_input, 50);
-    
-  
+   
   //Define required parts of the structures:
   user_input->buttons.battery_on = false;
   user_input->buttons.force_battery = false;
@@ -110,8 +111,7 @@ void floating(){
   control_data->real_height = 0;
   control_data->real_roll = 0;
   control_data->xsens.speed = 0;
-  
-  
+ 
   power_input->driver.motor_temp = 20;
   power_input->driver.driver_temp = 20;
   power_input->battery.max_temp = 20;
@@ -122,9 +122,115 @@ void floating(){
   
   //Start the BMS
   m_bms->start_reading(power_input);
-  m_bms->start_writing(power_output);
+  //m_bms->start_writing(power_output);
   button_box->start_reading();
 
+}
+
+void sensor(){
+    m_xsens->m_xsens_state_data = xsens_data; //(0)
+    uint8_t msg[50];
+    uint8_t msg_[350];
+    while (true){
+    m_serial->read_bytes(msg_, 350);
+    //serie->read_bytes(msg_bytes, 35);
+    //serie->read_bytes(msg_bytes, 35);
+    
+    for (int n = 0; n < 4; n++){
+        for (int m = 0; m < 50; m++) {
+            msg[m]=msg_[m];
+        }
+        m_xsens->ParseMessage(msg);
+        m_xsens->ParseData();  
+    }
+    }    
+}
+
+void controlsystem(){ 
+typedef std::chrono::microseconds ms;
+typedef std::chrono::milliseconds mls;
+  /* -----------------------------------------------------------------------------
+All three motors are going to home.
+----------------------------------------------------------------------------- */    
+this_thread::sleep_for(chrono::milliseconds(2000));
+maxon1->Homing();
+this_thread::sleep_for(chrono::milliseconds(2000));
+maxon2->Homing();
+this_thread::sleep_for(chrono::milliseconds(2000));
+maxon4->Homing();
+this_thread::sleep_for(chrono::milliseconds(500));
+
+maxon1->HomingCheck();
+maxon2->HomingCheck();
+maxon4->HomingCheck();
+
+/* -----------------------------------------------------------------------------
+All three motors are going in the startpositionmode.
+----------------------------------------------------------------------------- */    
+maxon1->StartPositionMode();
+this_thread::sleep_for(chrono::milliseconds(1000));      
+maxon2->StartPositionMode();
+this_thread::sleep_for(chrono::milliseconds(1000));
+maxon4->StartPositionMode();
+this_thread::sleep_for(chrono::milliseconds(1000));
+std::this_thread::sleep_for(std::chrono::milliseconds(500));  // wait 500 milliseconds, because otherwise the xsens can enter the configuration mode
+  
+filter->m_ruwe_state_data = ruwe_data;     // (2)
+filter->m_filtered_data = filtered_data;        // (3)
+com_filter->m_filtered_data = filtered_data; //(4)
+com_filter->m_complementary_data = complementary_data; //(5)
+PIDAAN->m_complementary_data = complementary_data;  //(6)
+PIDAAN->m_PID_data = pid_data; //(7)
+FtoW->m_complementary_data = complementary_data; //(8)
+FtoW->m_PID_data = pid_data; //(9)
+FtoW->m_FtoW_data = FtoW_data; //(10)
+FtoW->m_xsens_state_data= xsens_data;
+maxon1->m_FtoW_data = FtoW_data; //(11)
+maxon2->m_FtoW_data = FtoW_data; //(12)
+maxon4->m_FtoW_data = FtoW_data; //(13)
+    
+//Serial * m_serial = new Serial("/dev/xsense", 9600);
+//Xsens * m_xsens = new Xsens(); //initialise class Xsens
+//Sensor * de_sensor = new Sensor(m_xsens,m_serial);
+
+//m_xsens->m_xsens_state_data = xsens_data; //(0)
+de_sensor->m_xsens_state_data = xsens_data;
+de_sensor->m_ruwe_state_data = ruwe_data;  // (1)
+//de_sensor->start_receiving();
+int counter_control_front = 4;        //80Hz waar de loop op loopt
+//int counter_control_back = 8;
+  while (true) {
+    std::chrono::high_resolution_clock::time_point t1= std::chrono::high_resolution_clock::now();
+    de_sensor->get_data();
+    
+    if (counter_control_front == 0){     //Voorvleugels lopen op 20Hz
+      filter->FilterIt();
+      com_filter->CalculateRealHeight();            
+      PIDAAN->PID_in();
+      FtoW->MMA();
+      
+      maxon1->Move();
+      maxon2->Move(); 
+      maxon4->Move();
+      this_thread::sleep_for(chrono::milliseconds(5));
+      counter_control_front = 5;
+    }
+//    if (counter_control_back == 0){ //achtervleugel op 10 Hz
+//      filter->FilterIt();
+//      com_filter->CalculateRealHeight();            
+//      PIDAAN->PID_in();
+//      FtoW->MMA();  
+//      maxon4->Move();
+//      counter_control_back=9;
+//    }
+    counter_control_front--;
+//    counter_control_back--;
+    std::chrono::high_resolution_clock::time_point t2= std::chrono::high_resolution_clock::now();
+    ms d = std::chrono::duration_cast<ms>(t2-t1);
+    int t_total = 12500-d.count();
+    printf("loop tijd is %i \r\n",t_total);
+    this_thread::sleep_for(chrono::microseconds(t_total));
+  }
 }
 
 int main(int argc, const char** argv) {  
@@ -135,13 +241,20 @@ int main(int argc, const char** argv) {
   Motor * motor  = new Motor(canbus_driver, 15);
   
   std::thread thread_floating(floating);
-  //std::thread thread_controlsystem(controlsystem);
+  std::thread thread_controlsystem(controlsystem);
+  std::thread thread_sensor(sensor);
   this_thread::sleep_for(chrono::milliseconds(2000));
+  
+  button_box->set_battery_force_led(false);
+  button_box->set_battery_led(false);
+  button_box->set_motor_led(false);
+  button_box->set_solar_led(false);
 //  //construct message for bms
-//  bms_tx->id = CANID_BMS_TX;
-//  bms_tx->length = 2;
-//  bms_tx->data[0] = 0x01;
-//  bms_tx->data[1] = 0x0;
+  canmsg_t * bms_tx = new canmsg_t;
+  bms_tx->id = CANID_BMS_TX;
+  bms_tx->length = 2;
+  bms_tx->data[0] = 0x01;
+  bms_tx->data[1] = 0x0;
   
   //Construct message for driver
   driver_tx->id = 0xcf;
@@ -220,7 +333,22 @@ int main(int argc, const char** argv) {
     driver_tx->data[2] = real_speed>>8;
     driver_tx->data[3] = real_speed&0xFF;
 
-    //canbus_bms->write_can(bms_tx);
+    if (user_input->buttons.battery_on && !user_input->buttons.force_battery){
+        bms_tx->data[0] = 1;
+        bms_tx->data[1] = 0;
+        canbus_bms->write_can(bms_tx);
+    } else {
+        bms_tx->data[0] = 0;
+        bms_tx->data[1] = 0;
+    }
+    
+    if (user_input->buttons.force_battery&&user_input->buttons.battery_on){
+        bms_tx->data[0] = 2;
+        bms_tx->data[1] = 1;
+        canbus_bms->write_can(bms_tx);
+    }
+    
+    
     this_thread::sleep_for(chrono::milliseconds(50));
     if (no_driver_data_counter<4){
         canbus_driver->write_can(driver_tx);

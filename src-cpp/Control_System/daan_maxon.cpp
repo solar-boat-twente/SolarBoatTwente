@@ -1,5 +1,6 @@
 #include "Daan_Test1_maxon.h"
 #include "../../lib-cpp/Canbus/canbus.h"
+#include "../../lib-cpp/ADAM/ADAM.hpp"
 #define EPOS_DEBUG
 #include <stdio.h>      // standard input / output functions
 #include <stdlib.h>
@@ -172,14 +173,22 @@ void EPOS::StartPositionMode(){
 
 void EPOS::Move(){
     DataStore::AngleWings alphas = m_FtoW_data->GetWingData();
+    std::cout<<"Result from 5: "<<adam_6->read_counter(5)<<endl;
     
+    position_button = adam_6->read_counter(5);
       //366889 qc bij 1 rad hoekverdraaiing
     //float quartercircles= (-366889/alphas.Wing_right);
-    
-   
+    float user;
+    float user_wing;
+    user = position_button/65536;
+            if (user<0.5){
+                user_wing= -1*user*1000000;
+            } else {
+                user_wing=user*1000000;
+            }
     if (NODE_ID==4){
       //2000000qc bij 16 graden, dus 125000 bij 1 graad
-        quartercircles=quartercircles + ((alphas.Wing_back*180/3.1415)*125000);
+        quartercircles=quartercircles + ((alphas.Wing_back*180/3.1415)*125000)+user_wing;   //absolute positie en start direct
         cout << "NODE = 4 \r\n" << endl;
             if (quartercircles < -800000)
             quartercircles = -800000;
@@ -190,24 +199,24 @@ void EPOS::Move(){
     else if(NODE_ID==1) {
         //366889 qc bij 1 rad hoekverdraaiing
         //10000 qc bij 1 graad
-        quartercircles=quartercircles + ((alphas.Wing_left*180/3.1415)*10000);
+        quartercircles=quartercircles + ((alphas.Wing_left*180/3.1415)*10000)+user_wing;
         cout << "NODE=1 \r\n" << endl;
             if (quartercircles < -100000)
             quartercircles = -100000;
-            else if (quartercircles > 120000)
-            quartercircles = 120000;
-        cout << "positie rechts is \r\n"<<quartercircles ;
+            else if (quartercircles > 110000)
+            quartercircles = 110000;
+        cout << "alphas_links is: " << alphas.Wing_left << "\r\n"; 
+        cout << "positie links is "<<quartercircles<<"\r\n";
         }
     else {
           //366889 qc bij 1 rad hoekverdraaiing
-        quartercircles=quartercircles + ((alphas.Wing_right*180/3.1415)*10000);
+        quartercircles=quartercircles + ((alphas.Wing_right*180/3.1415)*10000)+user_wing;
         cout << "NODE = 2 \r\n" << endl;
         if (quartercircles < -100000)
             quartercircles = -100000;
-        else if (quartercircles > 120000)
-                quartercircles = 120000;
-        
-        cout << "positie links is  \r\n"<<quartercircles ;
+        else if (quartercircles > 110000)
+                quartercircles = 110000;
+        cout << "positie links is "<<quartercircles << "\r\n";
         }
      
     /* -------------------------------------------------------------------------
@@ -234,8 +243,8 @@ void EPOS::Move(){
     
     unsigned char Move_Data[8];
     Move_Data[0] = 0x23;
-    Move_Data[1] = 0x62;
-    Move_Data[2] = 0x20;
+    Move_Data[1] = 0x7A;  //0x62;
+    Move_Data[2] = 0x60;  //0x20;
     Move_Data[3] = 0x00;
     Move_Data[4] = QC.byte[0];
     Move_Data[5] = QC.byte[1];
@@ -247,6 +256,11 @@ void EPOS::Move(){
     memcpy(&m_Move.data[0],(char*) Move_Data, 8);
     sanders_can->write_can(&m_Move);
     
+    canmsg_t m_Start_Absolute_Pos;
+    m_Start_Absolute_Pos.id = 0x600+NODE_ID;
+    m_Start_Absolute_Pos.length = 8;
+    memcpy(&m_Start_Absolute_Pos.data[0],(char*) Start_Absolute_Pos, 8);
+    sanders_can->write_can(&m_Start_Absolute_Pos);
 }
         
               

@@ -3,6 +3,7 @@
 
 #include "DataStore.h"
 #include "../../lib-cpp/Canbus/canbus.h"
+#include "../../lib-cpp/ADAM/ADAM.hpp"
 using namespace MIO;
 
 /* -----------------------------------------------------------------------------
@@ -31,6 +32,7 @@ those in chapter 8.7 from the application node.
 ----------------------------------------------------------------------------- */
 const char Position_Mode_Data[8] = {0x2F,0x60,0x60,0x00,0xFF,0x00,0x00,0x00};
 
+const char Start_Absolute_Pos[8] = {0x2F,0x40,0x60,0x00,0x3F,0x00,0x00,0x00};
 /* -----------------------------------------------------------------------------
 Sends a CAN Message to the controller
 Returns 1 for succes. May be slow. a faster send message is build into Goto_Pos
@@ -54,15 +56,18 @@ class EPOS{
     
     //verbinding met main function
     DataStore *m_FtoW_data;
-    
+    float position_button;
     int NODE_ID;   // the CAN adress of this controller
     CANbus * sanders_can;
-    EPOS(int node_id){
-        NODE_ID=node_id;
-        };
-    EPOS(CANbus * can, int node_id){
+    UI::ADAM * adam_6;
+    
+//    EPOS(int node_id){
+//        NODE_ID=node_id;
+//        };
+    EPOS(CANbus * can, UI::ADAM * adam, int node_id){
         NODE_ID=node_id;
         sanders_can=can;
+        adam_6=adam;
         };
     int moving_allowed;
     float quartercircles = 0;
