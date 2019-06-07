@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>src-cpp/SolarBoat.hpp</itemPath>
       <itemPath>lib-cpp/Logging/new_logging.hpp</itemPath>
       <itemPath>solarboattwente.h</itemPath>
     </logicalFolder>
@@ -371,6 +372,8 @@
       </item>
       <item path="src-cpp/Motor/Motor_defs.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src-cpp/SolarBoat.hpp" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="src-cpp/Temperature_Sensor/Temperature_Sensor.cpp"
             ex="false"
             tool="1"
@@ -602,6 +605,8 @@
       <item path="src-cpp/Motor/Motor.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src-cpp/Motor/Motor_defs.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/SolarBoat.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src-cpp/Temperature_Sensor/Temperature_Sensor.cpp"
             ex="false"

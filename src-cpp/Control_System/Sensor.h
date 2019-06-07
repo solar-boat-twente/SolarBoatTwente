@@ -19,7 +19,8 @@ class Sensor
 {
 
 public:
-    int j=0;
+    int j=0; //gebruiken om te tellen. Na iedere seconde een waarde van 80 (systeem runt op 80Hz).
+    
     Sensor();   // Voor testen met data in een file
     virtual ~Sensor();
     // Netter om geen public variabelen te hebben, maar alleen private.

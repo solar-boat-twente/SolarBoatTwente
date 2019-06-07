@@ -30,8 +30,11 @@ void control::ForceToWingAngle::MMA() {
    DataStore::RealData input2 =m_complementary_data-> GetComplementaryData();
    DataStore::AngleWings output;
    DataStore::XsensData v = m_xsens_state_data->GetXsensData();
-   float velocity = 7;
+   //float velocity = 5;//7;
    //float velocity = v.acceleration_x*pow(0.0125,2);
+   float velocity = v.velocity_x;
+   cout << "versnelling x "<<v.acceleration_x << "\r\n";
+   cout << "snelheid x  "<<velocity << "\r\n";
    if (velocity>3){    //snelheid hoger dan 3m/s
     int i;
     float matrix_MMA[3][3] = {
@@ -100,20 +103,20 @@ void control::ForceToWingAngle::MMA() {
      output.Wing_left = left_angle_total - input2.Real_pitch - kZeroLiftAngle;
      output.Wing_right = right_angle_total - input2.Real_pitch - kZeroLiftAngle;
      output.Wing_back  = back_angle_total - input2.Real_pitch - kZeroLiftAngle;
-     cout << "versnelling x  \r\n"<<v.acceleration_x;
-     cout << "snelheid x  \r\n"<<velocity ;
-     cout << "links Cl  \r\n"<<left_lift_coefficient;
-     cout << "rechts Cl  \r\n"<<right_lift_coefficient ;
-     cout << "Achter Cl  \r\n"<<back_lift_coefficient ;
-     cout << "lift hoogte  \r\n"<<input.Force_height ;
-     cout << "lift roll  \r\n"<<input.Force_roll ;
-     cout << "lift pitch  \r\n"<<input.Force_pitch  ;
-     cout << "lift links  \r\n"<<left_force ;
-     cout << "lift rechts  \r\n"<<right_force ;
-     cout << "lift achter  \r\n"<<back_force  ;
-     cout << "vleugelhoek links  \r\n"<<output.Wing_left ;
-     cout << "vleugelhoek rechts  \r\n"<<output.Wing_right ;
-     cout << "vleugelhoek achter  \r\n"<<output.Wing_back  ;
+     cout << "versnelling x "<<v.acceleration_x << "\r\n";
+     cout << "snelheid x  "<<velocity << "\r\n";
+     cout << "links Cl  "<<left_lift_coefficient<< "\r\n";
+     cout << "rechts Cl  "<<right_lift_coefficient << "\r\n";
+     cout << "Achter Cl "<<back_lift_coefficient << "\r\n";
+     cout << "lift hoogte  "<<input.Force_height << "\r\n";
+     cout << "lift roll  "<<input.Force_roll << "\r\n";
+     cout << "lift pitch  "<<input.Force_pitch  << "\r\n";
+     cout << "lift links  "<<left_force << "\r\n";
+     cout << "lift rechts  "<<right_force << "\r\n";
+     cout << "lift achter  "<<back_force  << "\r\n";
+     cout << "vleugelhoek links "<<output.Wing_left << "\r\n";
+     cout << "vleugelhoek rechts  "<<output.Wing_right << "\r\n";
+     cout << "vleugelhoek achter  "<<output.Wing_back  << "\r\n";
      m_FtoW_data->PutWingData(&output);
      return ;
      /*Now we can calculate the angle that the maxon motor should make in such 
@@ -121,10 +124,13 @@ void control::ForceToWingAngle::MMA() {
       */
    }
    else{
-    output.Wing_left = 0;//left_angle_total - input2.Real_pitch - kZeroLiftAngle;
-    output.Wing_right = 0;//right_angle_total - input2.Real_pitch - kZeroLiftAngle;
-    output.Wing_back = 0;//back_angle_total - input2.Real_pitch - kZeroLiftAngle;
-      
+    output.Wing_left = -0.05236;//left_angle_total - input2.Real_pitch - kZeroLiftAngle;
+    output.Wing_right = -0.05236;//right_angle_total - input2.Real_pitch - kZeroLiftAngle;
+    output.Wing_back = -0.05236;//back_angle_total - input2.Real_pitch - kZeroLiftAngle;
+    cout << "Else statement bereikt"  << "\r\n";
+    cout << "Wing_left in force to wing angle" << output.Wing_left << "\r\n";
+    m_FtoW_data->PutWingData(&output);
+    return ;  
    }
    
 }

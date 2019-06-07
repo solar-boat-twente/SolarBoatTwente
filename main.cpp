@@ -10,6 +10,14 @@
 #include "lib-cpp/Logging/thread.h"
 #include "src-cpp/Temperature_Sensor/Temperature_Sensor.hpp"
 
+#include "src-cpp/Control_System/DataStore.h"
+#include "src-cpp/Control_System/Filtered_data.h"
+#include "src-cpp/Control_System/Sensor.h"
+#include "src-cpp/Control_System/ComplementaryFilter.h"
+#include "src-cpp/Control_System/PID_caller.h"
+#include "src-cpp/Control_System/Force_to_wing_angle.h"
+#include "src-cpp/Control_System/Daan_Test1_maxon.h"
+
 #define MOTOR_MODE 3; //Set the motor mode to rpm controlled
 const int SPEED_CORRECTION_FACTOR = 100; //value between 0 and 100, set correct for max current.
 
@@ -30,6 +38,8 @@ Serial * serial_wheel = new Serial("/dev/steer");
 CANbus * canbus_bms = new CANbus("/dev/can1", 1); //CANbus for both the bms and the maxon motors
 CANbus * canbus_driver = new CANbus("/dev/can0", 1,STD_BAUD, O_RDWR|O_NONBLOCK); //CANbus for only the motor (has to be nonblocking)
 UI::ADAM * adam_6050 = new UI::ADAM("192.168.1.50", 502);
+UI::ADAM * adam_6017 = new UI::ADAM("192.168.1.127", 502);
+
 
 //Initiate the power_output_handler which will ensure that the power_output structure is written
 structures::PowerOutputHandler * power_output_handler = new structures::PowerOutputHandler(power_input, power_output, user_input);
@@ -45,6 +55,25 @@ Thread * screen_threads = new Thread;
 
 //Create Temperature Sensor for MIO object
 MIO::TemperatureSensor * temp_sens = new MIO::TemperatureSensor;
+
+DataStore * xsens_data = new DataStore();
+DataStore * ruwe_data = new DataStore();
+DataStore * filtered_data = new DataStore();
+DataStore * complementary_data= new DataStore();
+DataStore * pid_data = new DataStore();
+DataStore * FtoW_data = new DataStore();
+RuwDataFilter * filter = new RuwDataFilter();
+ComplementaryFilter * com_filter = new ComplementaryFilter();
+PID_caller * PIDAAN = new PID_caller();
+control::ForceToWingAngle * FtoW = new control::ForceToWingAngle();
+Serial * m_serial = new Serial("/dev/xsense", 9600);
+Xsens * m_xsens = new Xsens();
+Sensor * de_sensor = new Sensor(m_xsens,m_serial);
+    
+EPOS * maxon1 = new EPOS(canbus_bms,adam_6017,1);
+EPOS * maxon2 = new EPOS(canbus_bms,adam_6017,2);
+EPOS * maxon4 = new EPOS(canbus_bms,adam_6017,4);
+
 
 
 void initiate_structures(){
@@ -221,8 +250,117 @@ void write_to_screen(){
   screen_threads->writeControlData(control_data,0,1);
 }
 
+void sensor(){
+    m_xsens->m_xsens_state_data = xsens_data; //(0)
+    uint8_t msg[50];
+    uint8_t msg_[350];
+    while (true){
+    m_serial->read_bytes(msg_, 350);
+    //serie->read_bytes(msg_bytes, 35);
+    //serie->read_bytes(msg_bytes, 35);
+    
+    for (int n = 0; n < 4; n++){
+        for (int m = 0; m < 50; m++) {
+            msg[m]=msg_[m];
+        }
+        m_xsens->ParseMessage(msg);
+        m_xsens->ParseData();  
+    }
+    }    
+}
+
+void controlsystem(){ 
+typedef std::chrono::microseconds ms;
+typedef std::chrono::milliseconds mls;
+  /* -----------------------------------------------------------------------------
+All three motors are going to home.
+----------------------------------------------------------------------------- */    
+this_thread::sleep_for(chrono::milliseconds(2000));
+maxon1->Homing();
+this_thread::sleep_for(chrono::milliseconds(2000));
+maxon2->Homing();
+this_thread::sleep_for(chrono::milliseconds(2000));
+maxon4->Homing();
+this_thread::sleep_for(chrono::milliseconds(500));
+
+maxon1->HomingCheck();
+maxon2->HomingCheck();
+maxon4->HomingCheck();
+
+/* -----------------------------------------------------------------------------
+All three motors are going in the startpositionmode.
+----------------------------------------------------------------------------- */    
+maxon1->StartPositionMode();
+this_thread::sleep_for(chrono::milliseconds(1000));      
+maxon2->StartPositionMode();
+this_thread::sleep_for(chrono::milliseconds(1000));
+maxon4->StartPositionMode();
+this_thread::sleep_for(chrono::milliseconds(1000));
+std::this_thread::sleep_for(std::chrono::milliseconds(500));  // wait 500 milliseconds, because otherwise the xsens can enter the configuration mode
+  
+filter->m_ruwe_state_data = ruwe_data;     // (2)
+filter->m_filtered_data = filtered_data;        // (3)
+com_filter->m_filtered_data = filtered_data; //(4)
+com_filter->m_complementary_data = complementary_data; //(5)
+PIDAAN->m_complementary_data = complementary_data;  //(6)
+PIDAAN->m_PID_data = pid_data; //(7)
+FtoW->m_complementary_data = complementary_data; //(8)
+FtoW->m_PID_data = pid_data; //(9)
+FtoW->m_FtoW_data = FtoW_data; //(10)
+FtoW->m_xsens_state_data= xsens_data;
+maxon1->m_FtoW_data = FtoW_data; //(11)
+maxon2->m_FtoW_data = FtoW_data; //(12)
+maxon4->m_FtoW_data = FtoW_data; //(13)
+    
+//Serial * m_serial = new Serial("/dev/xsense", 9600);
+//Xsens * m_xsens = new Xsens(); //initialise class Xsens
+//Sensor * de_sensor = new Sensor(m_xsens,m_serial);
+
+//m_xsens->m_xsens_state_data = xsens_data; //(0)
+de_sensor->m_xsens_state_data = xsens_data;
+de_sensor->m_ruwe_state_data = ruwe_data;  // (1)
+//de_sensor->start_receiving();
+int counter_control_front = 4;        //80Hz waar de loop op loopt
+//int counter_control_back = 8;
+  while (true) {
+    std::chrono::high_resolution_clock::time_point t1= std::chrono::high_resolution_clock::now();
+    de_sensor->get_data();
+    
+    if (counter_control_front == 0){     //Voorvleugels lopen op 20Hz
+      filter->FilterIt();
+      com_filter->CalculateRealHeight();            
+      PIDAAN->PID_in();
+      FtoW->MMA();
+      
+      maxon1->Move();
+      maxon2->Move(); 
+      maxon4->Move();
+      this_thread::sleep_for(chrono::milliseconds(5));
+      counter_control_front = 5;
+    }
+//    if (counter_control_back == 0){ //achtervleugel op 10 Hz
+//      filter->FilterIt();
+//      com_filter->CalculateRealHeight();            
+//      PIDAAN->PID_in();
+//      FtoW->MMA();  
+//      maxon4->Move();
+//      counter_control_back=9;
+//    }
+    counter_control_front--;
+//    counter_control_back--;
+    std::chrono::high_resolution_clock::time_point t2= std::chrono::high_resolution_clock::now();
+    ms d = std::chrono::duration_cast<ms>(t2-t1);
+    int t_total = 12500-d.count();
+    printf("loop tijd is %i \r\n",t_total);
+    this_thread::sleep_for(chrono::microseconds(t_total));
+  }
+}
+
 int main(int argc, const char** argv) { 
   time_t start = time(0);
+  
+  std::thread thread_controlsystem(controlsystem);
+  std::thread thread_sensor(sensor);
   
   //Leds us first make the led blink before we do anything else
   blink_leds();
@@ -238,10 +376,13 @@ int main(int argc, const char** argv) {
    
   //Initiate the two files for logging
   ofstream file;
-  file.open("/root/logfiles/power_log_test_06_05.csv", std::ios::app);
+  file.open("/root/logfiles/power_log_test_06_07.csv", std::ios::app);
   
   ofstream driver_file;
-  driver_file.open("/root/logfiles/driver_log_test_06_05.csv", std::ios::app);
+  driver_file.open("/root/logfiles/driver_log_test_06_07.csv", std::ios::app);
+  
+  ofstream control_file;
+  control_file.open("/root/logfiles/control_log_test_06_07", std::ios::app);
   
   int loop_counter = 0;
   //buffers for driver data;
@@ -274,6 +415,22 @@ int main(int argc, const char** argv) {
       
       file<<seconds_since_start(start)<<","<<power_input->battery.max_temp << ","<<power_input->battery.total_current << ","<<power_input->battery.total_voltage << ","
           <<power_input->battery.state_of_charge << ","<<user_input->steer.raw_throttle<<"\n"<<flush;
+      
+     DataStore *m_PID_data;
+     DataStore *m_complementary_data;
+     DataStore *m_xsens_state_data;
+     
+     DataStore::PIDDataTotal log_OUTPUT_PID  = m_PID_data-> GetPIDData(); 
+     DataStore::RealData log_INPUT_PID = m_complementary_data-> GetComplementaryData();
+     DataStore::XsensData log_xsens = m_xsens_state_data->GetXsensData();
+     
+     control_file<<seconds_since_start(start)<<log_OUTPUT_PID.Force_height << ","<<log_OUTPUT_PID.Force_pitch << ","<<log_OUTPUT_PID.Force_roll << ","
+         <<log_INPUT_PID.Real_height << ","<<log_INPUT_PID.Real_pitch<< ","<<log_INPUT_PID.Real_roll<< ","
+         <<log_xsens.roll<< ","<<log_xsens.acceleration_z<< ","<<log_xsens.acceleration_x<<"\n"<<flush;
+     
+  
+  
+      
       
       write_to_screen();
     } 

@@ -23,8 +23,10 @@
 #include <numeric>
 #include "DataStore.h"
 #include "Xsens.h"
-
+#include <mutex>
 using namespace MIO;
+
+std::mutex mutexje;
 
 xsens::Xsens::Xsens() {
 }
@@ -180,13 +182,15 @@ void xsens::Xsens::ParseData(){
         xsensor.roll = pointer2float(Parser->DATA + i + 2);
         xsensor.pitch = pointer2float(Parser->DATA + i + 6); 
         xsensor.yaw = pointer2float(Parser->DATA + i + 10); 
-        std::cout << "xsens roll is\r\n "<<xsensor.roll ;
-        std::cout << "xsens pitch is\r\n "<<xsensor.pitch ;
+        std::cout << "xsens roll is "<<xsensor.roll << "\r\n";
+        std::cout << "xsens pitch is  "<<xsensor.pitch << "\r\n";
         //printf("pitch: %f\r\n", DataStruct->pitch);
         //printf("yaw: %f\r\n", DataStruct->yaw);
         i = i + 13;
         //std::cout << "i is "<<i ;
+        mutexje.lock();
         m_xsens_state_data->PutXsensData(&xsensor);
+        mutexje.unlock();
         State = ID;
         break;
         
@@ -213,7 +217,9 @@ void xsens::Xsens::ParseData(){
         //printf("vel_z: %f\r\n", DataStruct->velocity_z);
         State = ID;
         i = i + 13;
+        //mtx.lock();
         m_xsens_state_data->PutXsensData(&xsensor);
+        //mtx.unlock();
         break;
         
       case LatLon:
@@ -224,7 +230,9 @@ void xsens::Xsens::ParseData(){
         //printf("lon: %f\r\n", DataStruct->longitude);
         State = ID;
         i = i + 9;
+        //mtx.lock();
         m_xsens_state_data->PutXsensData(&xsensor);
+        //mtx.unlock();
         break;
         
       default:
@@ -239,5 +247,4 @@ void xsens::Xsens::ParseData(){
     //printf("Error in message xsens");
   }
 }
-
 
