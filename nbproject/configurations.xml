@@ -117,10 +117,15 @@
           <itemPath>src-cpp/Motor/Motor.hpp</itemPath>
           <itemPath>src-cpp/Motor/Motor_defs.hpp</itemPath>
         </logicalFolder>
+        <logicalFolder name="f3" displayName="Temperature_Sensor" projectFiles="true">
+          <itemPath>src-cpp/Temperature_Sensor/Temperature_Sensor.cpp</itemPath>
+          <itemPath>src-cpp/Temperature_Sensor/Temperature_Sensor.hpp</itemPath>
+        </logicalFolder>
       </logicalFolder>
       <itemPath>main.cpp</itemPath>
       <itemPath>lib-cpp/Logging/new_logging.cpp</itemPath>
       <itemPath>solarboattwente.cpp</itemPath>
+      <itemPath>testing/test_main.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -366,6 +371,18 @@
       </item>
       <item path="src-cpp/Motor/Motor_defs.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src-cpp/Temperature_Sensor/Temperature_Sensor.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Temperature_Sensor/Temperature_Sensor.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="testing/test_main.cpp" ex="false" tool="1" flavor2="0">
+      </item>
     </conf>
     <conf name="Release" type="1">
       <toolsSet>
@@ -585,6 +602,18 @@
       <item path="src-cpp/Motor/Motor.hpp" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src-cpp/Motor/Motor_defs.hpp" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Temperature_Sensor/Temperature_Sensor.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Temperature_Sensor/Temperature_Sensor.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="testing/test_main.cpp" ex="false" tool="1" flavor2="0">
       </item>
     </conf>
   </confs>

@@ -15,6 +15,7 @@
 #define SOLARBOATTWENTE_H
 
 #include <thread>
+#include "lib-cpp/Debugging/easy_debugging.hpp"
 
 const short int STD_POWER_OUTPUT_DELAY = 100;
 

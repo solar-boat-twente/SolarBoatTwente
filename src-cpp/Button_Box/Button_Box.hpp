@@ -14,8 +14,10 @@
 #ifndef BUTTON_BOX_HPP
 #define BUTTON_BOX_HPP
 
-#include "../../lib-cpp/ADAM/ADAM.hpp"
+
 #include "../../solarboattwente.h"
+#include "../../lib-cpp/ADAM/ADAM.hpp"
+
 #include <thread>
 #include <vector>
 namespace MIO{

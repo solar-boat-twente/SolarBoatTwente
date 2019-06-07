@@ -37,13 +37,12 @@ BMS::BMS(CANbus * const m_canbus):canbus_(m_canbus) {
  }
 
 
-int BMS::start_reading(structures::PowerInput* power_input){
+int BMS::start_reading(structures::PowerInput* power_input, short int delay){
   //Test if the BMS has already been started, if not starts the reading thread
   if(canbus_->status()->status){
     if(!bms_status->read_state){
       bms_status->read_state = true;
       M_OK<<"BMS WAS STARTED ( ◞･౪･)";
-      short int delay = STD_BMS_READ_DELAY;
       m_reading_thread_ = thread(&BMS::reading_thread_, this, power_input, delay);
       return 1;
     } else{
@@ -70,12 +69,11 @@ int BMS::stop_reading(){
   }
 }
 
-int BMS::start_writing(structures::PowerOutput* power_output) {
+int BMS::start_writing(structures::PowerOutput* power_output, short int delay) {
   //Tests if the BMS has started writing, if not yet started it starts writing.
   if(!bms_status->write_state){
     bms_status->write_state = true;
 
-    short int delay = STD_BMS_WRITE_DELAY;
     m_writing_thread_ = thread(&BMS::writing_thread_, this, power_output, delay);
     return 1;
   } else{

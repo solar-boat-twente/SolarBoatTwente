@@ -10,3 +10,4 @@ nbdist/
 pipes/
 /config/run.sh
 /config/logfiles/
+testing/

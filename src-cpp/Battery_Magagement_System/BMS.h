@@ -18,7 +18,7 @@
 
 #include "../../lib-cpp/Canbus/canbus.h"
 #include "../../solarboattwente.h"
-
+#include "BMS_CANIDs.h"
 
 namespace MIO{
 
@@ -73,7 +73,7 @@ class BMS {
    *  1 : Start reading is successful
    *  -1: Start reading not successful
    */
-  int start_reading(structures::PowerInput * const power_input);
+  int start_reading(structures::PowerInput * const power_input, short int delay = STD_BMS_READ_DELAY);
   
     
   /*
@@ -86,7 +86,7 @@ class BMS {
    *  1 : Start writing is successful
    *  -1: Start not successful not successful
    */
-  int start_writing(structures::PowerOutput * const power_output);
+  int start_writing(structures::PowerOutput * const power_output, short int delay = STD_BMS_WRITE_DELAY);
   /*
    * Write one message to the can bus (mostly for testing); 
    * 
