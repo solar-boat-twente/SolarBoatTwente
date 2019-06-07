@@ -78,13 +78,14 @@
           <itemPath>src-cpp/Button_Box/Encoders.hpp</itemPath>
         </logicalFolder>
         <logicalFolder name="f1" displayName="Control" projectFiles="true">
-          <itemPath>src-cpp/Control_System/Biquad.cpp</itemPath>
-          <itemPath>src-cpp/Control_System/Biquad.h</itemPath>
-          <itemPath>src-cpp/Control_System/ComplementaryFilter.cpp</itemPath>
-          <itemPath>src-cpp/Control_System/ComplementaryFilter.h</itemPath>
-          <itemPath>src-cpp/Control_System/Daan_Test1_maxon.h</itemPath>
+          <itemPath>src-cpp/Control_System/Filter/Biquad.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/Filter/Biquad.h</itemPath>
+          <itemPath>src-cpp/Control_System/Filter/ComplementaryFilter.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/Filter/ComplementaryFilter.h</itemPath>
           <itemPath>src-cpp/Control_System/DataStore.cpp</itemPath>
           <itemPath>src-cpp/Control_System/DataStore.h</itemPath>
+          <itemPath>src-cpp/Control_System/EPOS.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/EPOS.h</itemPath>
           <itemPath>src-cpp/Control_System/Filtered_data.cpp</itemPath>
           <itemPath>src-cpp/Control_System/Filtered_data.h</itemPath>
           <itemPath>src-cpp/Control_System/Force_to_wing_angle.cpp</itemPath>
@@ -96,7 +97,6 @@
           <itemPath>src-cpp/Control_System/Xsens.cpp</itemPath>
           <itemPath>src-cpp/Control_System/Xsens.h</itemPath>
           <itemPath>src-cpp/Control_System/control_main.cpp</itemPath>
-          <itemPath>src-cpp/Control_System/daan_maxon.cpp</itemPath>
           <itemPath>src-cpp/Control_System/pid.cpp</itemPath>
           <itemPath>src-cpp/Control_System/pid.h</itemPath>
         </logicalFolder>
@@ -266,31 +266,36 @@
       </item>
       <item path="src-cpp/Button_Box/Encoders.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Biquad.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/Biquad.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/ComplementaryFilter.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/ComplementaryFilter.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/Daan_Test1_maxon.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="src-cpp/Control_System/DataStore.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
       <item path="src-cpp/Control_System/DataStore.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/EPOS.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/EPOS.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Filter/Biquad.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Filter/Biquad.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Filter/ComplementaryFilter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Filter/ComplementaryFilter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="src-cpp/Control_System/Filtered_data.cpp"
             ex="false"
@@ -331,11 +336,6 @@
       <item path="src-cpp/Control_System/Xsens.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src-cpp/Control_System/control_main.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/daan_maxon.cpp"
             ex="false"
             tool="1"
             flavor2="0">
@@ -500,31 +500,36 @@
       </item>
       <item path="src-cpp/Button_Box/Encoders.hpp" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Biquad.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/Biquad.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/ComplementaryFilter.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/ComplementaryFilter.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/Daan_Test1_maxon.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="src-cpp/Control_System/DataStore.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
       <item path="src-cpp/Control_System/DataStore.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/EPOS.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/EPOS.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Filter/Biquad.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Filter/Biquad.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Filter/ComplementaryFilter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Filter/ComplementaryFilter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="src-cpp/Control_System/Filtered_data.cpp"
             ex="false"
@@ -565,11 +570,6 @@
       <item path="src-cpp/Control_System/Xsens.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src-cpp/Control_System/control_main.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/daan_maxon.cpp"
             ex="false"
             tool="1"
             flavor2="0">

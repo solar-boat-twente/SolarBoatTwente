@@ -8,7 +8,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "Biquad.h" 
+#include "Filter/Biquad.h" 
 #include "DataStore.h"
 #include "Xsens.h"
 using namespace std;

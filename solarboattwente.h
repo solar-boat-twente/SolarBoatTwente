@@ -16,7 +16,6 @@
 
 #include <thread>
 #include "lib-cpp/Debugging/easy_debugging.hpp"
-#include "src-cpp/Control_System/Biquad.h"
 
 const short int STD_POWER_OUTPUT_DELAY = 100;
 

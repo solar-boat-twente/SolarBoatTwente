@@ -13,10 +13,10 @@
 #include "src-cpp/Control_System/DataStore.h"
 #include "src-cpp/Control_System/Filtered_data.h"
 #include "src-cpp/Control_System/Sensor.h"
-#include "src-cpp/Control_System/ComplementaryFilter.h"
+#include "src-cpp/Control_System/Filter/ComplementaryFilter.h"
 #include "src-cpp/Control_System/PID_caller.h"
 #include "src-cpp/Control_System/Force_to_wing_angle.h"
-#include "src-cpp/Control_System/Daan_Test1_maxon.h"
+#include "src-cpp/Control_System/EPOS.h"
 
 #define MOTOR_MODE 3; //Set the motor mode to rpm controlled
 const int SPEED_CORRECTION_FACTOR = 100; //value between 0 and 100, set correct for max current.
@@ -25,6 +25,7 @@ using namespace std;
 using namespace MIO;
 using namespace PowerElectronics;
 using namespace UI;
+using namespace Control;
 
 //Open up the global structures
 structures::PowerInput * power_input = new structures::PowerInput;
@@ -63,16 +64,16 @@ DataStore * complementary_data= new DataStore();
 DataStore * pid_data = new DataStore();
 DataStore * FtoW_data = new DataStore();
 RuwDataFilter * filter = new RuwDataFilter();
-ComplementaryFilter * com_filter = new ComplementaryFilter();
+ComplementaryFilter * com_filter = new ComplementaryFilter(filtered_data, complementary_data);
 PID_caller * PIDAAN = new PID_caller();
 control::ForceToWingAngle * FtoW = new control::ForceToWingAngle();
 Serial * m_serial = new Serial("/dev/xsense", 9600);
 Xsens * m_xsens = new Xsens();
 Sensor * de_sensor = new Sensor(m_xsens,m_serial);
     
-EPOS * maxon1 = new EPOS(canbus_bms,adam_6017,1);
-EPOS * maxon2 = new EPOS(canbus_bms,adam_6017,2);
-EPOS * maxon4 = new EPOS(canbus_bms,adam_6017,4);
+EPOS * maxon1 = new EPOS(canbus_bms,adam_6017,1, FtoW_data);
+EPOS * maxon2 = new EPOS(canbus_bms,adam_6017,2, FtoW_data);
+EPOS * maxon4 = new EPOS(canbus_bms,adam_6017,4, FtoW_data);
 
 
 
@@ -276,41 +277,37 @@ typedef std::chrono::milliseconds mls;
 All three motors are going to home.
 ----------------------------------------------------------------------------- */    
 this_thread::sleep_for(chrono::milliseconds(2000));
-maxon1->Homing();
+maxon1->start_homing();
 this_thread::sleep_for(chrono::milliseconds(2000));
-maxon2->Homing();
+maxon2->start_homing();
 this_thread::sleep_for(chrono::milliseconds(2000));
-maxon4->Homing();
+maxon4->start_homing();
 this_thread::sleep_for(chrono::milliseconds(500));
 
-maxon1->HomingCheck();
-maxon2->HomingCheck();
-maxon4->HomingCheck();
+maxon1->check_homing();
+maxon2->check_homing();
+maxon4->check_homing();
 
 /* -----------------------------------------------------------------------------
 All three motors are going in the startpositionmode.
 ----------------------------------------------------------------------------- */    
-maxon1->StartPositionMode();
+maxon1->start_position_mode();
 this_thread::sleep_for(chrono::milliseconds(1000));      
-maxon2->StartPositionMode();
+maxon2->start_position_mode();
 this_thread::sleep_for(chrono::milliseconds(1000));
-maxon4->StartPositionMode();
+maxon4->start_position_mode();
 this_thread::sleep_for(chrono::milliseconds(1000));
 std::this_thread::sleep_for(std::chrono::milliseconds(500));  // wait 500 milliseconds, because otherwise the xsens can enter the configuration mode
   
 filter->m_ruwe_state_data = ruwe_data;     // (2)
 filter->m_filtered_data = filtered_data;        // (3)
-com_filter->m_filtered_data = filtered_data; //(4)
-com_filter->m_complementary_data = complementary_data; //(5)
 PIDAAN->m_complementary_data = complementary_data;  //(6)
 PIDAAN->m_PID_data = pid_data; //(7)
 FtoW->m_complementary_data = complementary_data; //(8)
 FtoW->m_PID_data = pid_data; //(9)
 FtoW->m_FtoW_data = FtoW_data; //(10)
 FtoW->m_xsens_state_data= xsens_data;
-maxon1->m_FtoW_data = FtoW_data; //(11)
-maxon2->m_FtoW_data = FtoW_data; //(12)
-maxon4->m_FtoW_data = FtoW_data; //(13)
+
     
 //Serial * m_serial = new Serial("/dev/xsense", 9600);
 //Xsens * m_xsens = new Xsens(); //initialise class Xsens
@@ -332,9 +329,9 @@ int counter_control_front = 4;        //80Hz waar de loop op loopt
       PIDAAN->PID_in();
       FtoW->MMA();
       
-      maxon1->Move();
-      maxon2->Move(); 
-      maxon4->Move();
+      maxon1->move();
+      maxon2->move(); 
+      maxon4->move();
       this_thread::sleep_for(chrono::milliseconds(5));
       counter_control_front = 5;
     }
