@@ -61,14 +61,14 @@ void RawDataFilter::filter_data() {
   inr = ruw.angle_right;
 
   //Not yet filtering the data therefore filtered == raw data;
-  m_filtered_data_.filtered_pitch = inp;//sump/array;
-  m_filtered_data_.filtered_roll = inroll;//sumroll/array;
-  m_filtered_data_.filtered_Z_accel = inz;//sumz/array;
-  m_filtered_data_.filtered_angle_left = inl;//suml/array;
-  m_filtered_data_.filtered_angle_right = inr;//sumr/array;
+  m_filtered_data_->filtered_pitch = inp;//sump/array;
+  m_filtered_data_->filtered_roll = inroll;//sumroll/array;
+  m_filtered_data_->filtered_Z_accel = inz;//sumz/array;
+  m_filtered_data_->filtered_angle_left = inl;//suml/array;
+  m_filtered_data_->filtered_angle_right = inr;//sumr/array;
     
-  M_INFO << "roll na filter is  "<<m_filtered_data_.filtered_roll;
-  M_INFO << "pitch na filter is "<<m_filtered_data_.filtered_pitch;
+  M_INFO << "roll na filter is  "<<m_filtered_data_->filtered_roll;
+  M_INFO << "pitch na filter is "<<m_filtered_data_->filtered_pitch;
   filtered_data_->PutFilteredData(m_filtered_data_);
 
 }

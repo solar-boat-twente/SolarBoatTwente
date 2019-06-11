@@ -11,7 +11,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "../DataStore.h"
+#include "../DataStore.h" 
 #include "Xsens.h"
 
 using namespace std;
@@ -26,7 +26,7 @@ public:
     virtual ~Sensor();
 
 
-    Sensor(DataStore * xsens_state_data, DataStore * raw_data, Serial * serial = NULL )
+    Sensor(DataStore * xsens_state_data, DataStore * raw_data)
         : xsens_state_data_(xsens_state_data), raw_data_(raw_data) {
       sensor_value = new DataStore::sensor_struct;
     };

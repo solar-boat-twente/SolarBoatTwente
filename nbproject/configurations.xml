@@ -96,7 +96,6 @@
           <itemPath>src-cpp/Control_System/Xsens/Sensor.h</itemPath>
           <itemPath>src-cpp/Control_System/Xsens/Xsens.cpp</itemPath>
           <itemPath>src-cpp/Control_System/Xsens/Xsens.h</itemPath>
-          <itemPath>src-cpp/Control_System/control_main.cpp</itemPath>
           <itemPath>src-cpp/Control_System/Calculation/pid.cpp</itemPath>
           <itemPath>src-cpp/Control_System/Calculation/pid.h</itemPath>
         </logicalFolder>
@@ -363,11 +362,6 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/control_main.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
       <item path="src-cpp/Control_Wheel/Control_Wheel.cpp"
             ex="false"
             tool="1"
@@ -619,11 +613,6 @@
       <item path="src-cpp/Control_System/Xsens/Xsens.h"
             ex="false"
             tool="3"
-            flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/control_main.cpp"
-            ex="false"
-            tool="1"
             flavor2="0">
       </item>
       <item path="src-cpp/Control_Wheel/Control_Wheel.cpp"

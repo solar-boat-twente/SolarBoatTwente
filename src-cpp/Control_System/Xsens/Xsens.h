@@ -12,9 +12,8 @@
  */
 #ifndef XSENS_H
 #define XSENS_H
-#include "../../lib-cpp/Serial/Serial.h"
 //#include "structures.h"
-#include "DataStore.h"
+#include "../DataStore.h"
 
 namespace MIO{
 namespace xsens{
@@ -41,7 +40,7 @@ struct XsensParser{
   int DATA_counter;
   int DATA_length;
   char DATA[256];
-  char CHECKSUM;
+  uint8_t CHECKSUM;
   bool Succesfull_received;
   };
 

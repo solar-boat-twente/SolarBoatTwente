@@ -1,6 +1,6 @@
 #include "EPOS.h"
-#include "../../lib-cpp/Canbus/canbus.h"
-#include "../../lib-cpp/ADAM/ADAM.hpp"
+#include "../../../lib-cpp/Canbus/canbus.h"
+#include "../../../lib-cpp/ADAM/ADAM.hpp"
 #define EPOS_DEBUG
 
 #include <stdio.h>      // standard input / output functions
@@ -14,10 +14,10 @@
 #include <chrono>
 #include <iostream>
 
-#include "../../lib-cpp/Debugging/easy_debugging.hpp"
+#include "../../../lib-cpp/Debugging/easy_debugging.hpp"
 #include "EPOS.h"
-#include "../../lib-cpp/Canbus/canbus.h"
-#include "../../lib-cpp/ADAM/ADAM.hpp"
+#include "../../../lib-cpp/Canbus/canbus.h"
+#include "../../../lib-cpp/ADAM/ADAM.hpp"
 
 using namespace std;
 using namespace MIO;

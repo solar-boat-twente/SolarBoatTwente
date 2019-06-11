@@ -1,10 +1,10 @@
 #ifndef DAAN_TEST1_MAXON_H
 #define DAAN_TEST1_MAXON_H
 
-#include "DataStore.h"
+#include "../DataStore.h"
 
-#include "../../lib-cpp/Canbus/canbus.h"
-#include "../../lib-cpp/ADAM/ADAM.hpp"
+#include "../../../lib-cpp/Canbus/canbus.h"
+#include "../../../lib-cpp/ADAM/ADAM.hpp"
 
 namespace MIO{
 namespace Control{

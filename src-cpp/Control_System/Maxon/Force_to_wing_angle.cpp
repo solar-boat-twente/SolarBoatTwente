@@ -70,7 +70,7 @@ void ForceToWingAngle::MMA() {
    DataStore::XsensData v = xsens_state_data_->GetXsensData();
 
    float velocity = v.velocity_x;
-   M_INFO<<"Acceleration x: "<<v.acceleration_x " | Speed x: "<<velocity;
+   M_INFO<<"Acceleration x: "<<v.acceleration_x << " | Speed x: "<<velocity;
    
    if (velocity>MIN_SPEED){    //snelheid hoger dan 3m/s
     
@@ -104,7 +104,7 @@ void ForceToWingAngle::MMA() {
             << "\nlift roll: "<<input.Force_roll << " | lift pitch: "<<input.Force_pitch
             << "\nlift links: "<<left_force << " | lift rechts: "<<right_force
             << "\nlift achter: "<<back_force << " | vleugelhoek links: "<<output.Wing_left
-            << "\nvleugelhoek rechts: "<<output.Wing_right " | vleugelhoek achter: "<<output.Wing_back;
+            << "\nvleugelhoek rechts: "<<output.Wing_right << " | vleugelhoek achter: "<<output.Wing_back;
      
      FtoW_data_->PutWingData(&output);
      return ;

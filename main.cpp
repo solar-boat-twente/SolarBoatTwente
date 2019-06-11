@@ -11,12 +11,11 @@
 #include "src-cpp/Temperature_Sensor/Temperature_Sensor.hpp"
 
 #include "src-cpp/Control_System/DataStore.h"
-#include "src-cpp/Control_System/Filtered_data.h"
-#include "src-cpp/Control_System/Sensor.h"
+#include "src-cpp/Control_System/Filter/Filtered_data.h"
+#include "src-cpp/Control_System/Xsens/Sensor.h"
 #include "src-cpp/Control_System/Filter/ComplementaryFilter.h"
-#include "src-cpp/Control_System/PID_caller.h"
-#include "src-cpp/Control_System/Force_to_wing_angle.h"
-#include "src-cpp/Control_System/EPOS.h"
+#include "src-cpp/Control_System/Calculation/PID_caller.h"
+#include "src-cpp/Control_System/Maxon/EPOS.h"
 #include "src-cpp/Control_System/Xsens/Xsens.h"
 #include "src-cpp/Control_System/Filter/Filtered_data.h"
 #include "src-cpp/Control_System/Calculation/PID_caller.h"
@@ -265,7 +264,8 @@ void sensor(){
     //serie->read_bytes(msg_bytes, 35);
     //serie->read_bytes(msg_bytes, 35);
     m_xsens->parse_message(msg_);
-    m_xsens->parse_data();  
+    m_xsens->parse_data(); 
+    this_thread::sleep_for(chrono::milliseconds(100));
 
   }    
 }

@@ -21,13 +21,15 @@
 #include <chrono>
 #include <iostream>
 #include <numeric>
+#include <cassert>
+
 
 #include "../../../lib-cpp/Debugging/easy_debugging.hpp"
-#include "DataStore.h"
+#include "../DataStore.h"
 #include "Xsens.h"
 
 using namespace MIO;
-
+using namespace std;
 
 xsens::Xsens::Xsens() {
 }
@@ -67,10 +69,11 @@ void xsens::Xsens::parse_message(uint8_t byte[]) {
     switch(Parser->Message){
       case Xsens_PREAMBLE:
         //printf("tstje2");
+        M_INFO<<"PREAMBLE; byte counter: "<<byte_counter;
+
         if (byte[byte_counter]==0xFA) {
           Parser->CHECKSUM = 0x00; //Preamble doet niet mee met de checksum vandaar 0x00
           Parser->Message = Xsens_BID;
-          printf("PREAMBLE\r\n");
           d++;
         }
         //d = 6;
@@ -78,20 +81,22 @@ void xsens::Xsens::parse_message(uint8_t byte[]) {
 
       case Xsens_BID:
         if (byte[byte_counter]==0xFF) {
-          Parser->CHECKSUM += byte[1]; //iedere keer de byte bij de checksum optellen
+          Parser->CHECKSUM = byte[byte_counter]; //iedere keer de byte bij de checksum optellen
           Parser->Message = Xsens_MID;
-          ///printf("BID\r\n");
+          cout<<"XSENS BID TRUE: "<<(int)byte[byte_counter]<<endl;
+          cout<<"CHECKSUM"<<(unsigned int)Parser->CHECKSUM;
           d++;
         } else {
           Parser->Succesfull_received = 0;
           Parser->Message = Xsens_PREAMBLE;
           d=0;
+          cout<<"XSENS BID FALSE"<<endl;
         }
         break;
 
       case Xsens_MID:
         if (byte[byte_counter]==0x36) {
-          Parser->CHECKSUM += byte[2];
+          Parser->CHECKSUM += byte[byte_counter];
           Parser->Message = Xsens_LENGTH;
          // printf("MID\r\n");
           d++;
@@ -104,7 +109,8 @@ void xsens::Xsens::parse_message(uint8_t byte[]) {
 
       case Xsens_LENGTH:
         Parser->CHECKSUM += byte[byte_counter];
-        Parser->DATA_length = (int)byte[3]; //lengte is gelijk aan de waarde in de byte (hier omgezet naar een integer)
+        Parser->DATA_length = (int)byte[byte_counter]; //lengte is gelijk aan de waarde in de byte (hier omgezet naar een integer)
+        std::cout<<"DATA LENGTH: "<<Parser->DATA_length<<endl;
         Parser->Message = Xsens_DATA; //volgende stap is naar de data
         Parser->DATA_counter = 0; //voordat we naar de data gaan ook de counter op 0 zetten zodat je straks de lengte met de counter kan vergelijken
         //printf("LENGTH\r\n");
@@ -113,10 +119,12 @@ void xsens::Xsens::parse_message(uint8_t byte[]) {
 
       case Xsens_DATA:
         Parser->DATA_counter = 0;
-        while (Parser->DATA_counter < Parser->DATA_length){
+        if (Parser->DATA_counter < Parser->DATA_length){
           Parser->CHECKSUM += byte[byte_counter];
           Parser->DATA[Parser->DATA_counter] = byte[byte_counter];
           Parser->DATA_counter++;
+          std::cout<<"read data number: "<<Parser->DATA_counter<<endl;
+          
         };
 
         if (Parser->DATA_length == Parser->DATA_counter){
@@ -128,7 +136,7 @@ void xsens::Xsens::parse_message(uint8_t byte[]) {
 
       case Xsens_CHECKSUM:
         Parser->CHECKSUM += byte[byte_counter];
-        //printf("CHECKSUM: %i", Parser->CHECKSUM);
+        std::cout<<"CHECKSUM from Checksum: "<<Parser->CHECKSUM;
         if (Parser->CHECKSUM == 0x00){
           Parser->Succesfull_received = 1;
           d=6;
@@ -143,8 +151,13 @@ void xsens::Xsens::parse_message(uint8_t byte[]) {
       default:
         Parser->Message = Xsens_PREAMBLE;
         d=0;
+        break;
     }
+    std::cout<<"Checksum: "<<(unsigned int)Parser->CHECKSUM<<std::endl;
     //Now start looking at the next byte.
+    if(byte_counter>300){
+      assert(false);
+    }
     byte_counter++;
  }
 }
@@ -156,8 +169,8 @@ void xsens::Xsens::parse_data(){
   if (Parser->Succesfull_received = 1){
     int i = 0;
     XsensStates State = ID;
-    char uint8_t = Parser->DATA[i];
-    char uint8_t = Parser->DATA[i+1];
+    uint8_t byte = Parser->DATA[i];
+    uint8_t byte2= Parser->DATA[i+1];
     while (i<Parser->DATA_length){
       //printf("lengte data: %i,%i\r\n", Parser->DATA_length,i);
 

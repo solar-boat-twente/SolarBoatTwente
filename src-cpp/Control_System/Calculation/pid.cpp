@@ -7,7 +7,7 @@
 #include <iostream>
 #include <cmath>
 
-#include "../../lib-cpp/Debugging/easy_debugging.hpp"
+#include "../../../lib-cpp/Debugging/easy_debugging.hpp"
 #include "pid.h"
 
 using namespace std;
