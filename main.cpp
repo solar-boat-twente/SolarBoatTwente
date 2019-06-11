@@ -17,6 +17,10 @@
 #include "src-cpp/Control_System/PID_caller.h"
 #include "src-cpp/Control_System/Force_to_wing_angle.h"
 #include "src-cpp/Control_System/EPOS.h"
+#include "src-cpp/Control_System/Xsens/Xsens.h"
+#include "src-cpp/Control_System/Filter/Filtered_data.h"
+#include "src-cpp/Control_System/Calculation/PID_caller.h"
+#include "src-cpp/Control_System/Maxon/Force_to_wing_angle.h"
 
 #define MOTOR_MODE 3; //Set the motor mode to rpm controlled
 const int SPEED_CORRECTION_FACTOR = 100; //value between 0 and 100, set correct for max current.
@@ -63,13 +67,14 @@ DataStore * filtered_data = new DataStore();
 DataStore * complementary_data= new DataStore();
 DataStore * pid_data = new DataStore();
 DataStore * FtoW_data = new DataStore();
-RuwDataFilter * filter = new RuwDataFilter();
+
+RawDataFilter * filter = new RawDataFilter();
 ComplementaryFilter * com_filter = new ComplementaryFilter(filtered_data, complementary_data);
 PID_caller * PIDAAN = new PID_caller();
-control::ForceToWingAngle * FtoW = new control::ForceToWingAngle();
+ForceToWingAngle * FtoW = new ForceToWingAngle();
 Serial * m_serial = new Serial("/dev/xsense", 9600);
-Xsens * m_xsens = new Xsens();
-Sensor * de_sensor = new Sensor(m_xsens,m_serial);
+xsens::Xsens * m_xsens = new xsens::Xsens();
+xsens::Sensor * de_sensor = new xsens::Sensor(xsens_data, ruwe_data);
     
 EPOS * maxon1 = new EPOS(canbus_bms,adam_6017,1, FtoW_data);
 EPOS * maxon2 = new EPOS(canbus_bms,adam_6017,2, FtoW_data);
@@ -252,79 +257,70 @@ void write_to_screen(){
 }
 
 void sensor(){
-    m_xsens->m_xsens_state_data = xsens_data; //(0)
-    uint8_t msg[50];
-    uint8_t msg_[350];
-    while (true){
+  m_xsens->m_xsens_state_data = xsens_data; //(0)
+  uint8_t msg[50];
+  uint8_t msg_[350];
+  while (true){
     m_serial->read_bytes(msg_, 350);
     //serie->read_bytes(msg_bytes, 35);
     //serie->read_bytes(msg_bytes, 35);
-    
-    for (int n = 0; n < 4; n++){
-        for (int m = 0; m < 50; m++) {
-            msg[m]=msg_[m];
-        }
-        m_xsens->ParseMessage(msg);
-        m_xsens->ParseData();  
-    }
-    }    
+    m_xsens->parse_message(msg_);
+    m_xsens->parse_data();  
+
+  }    
 }
 
 void controlsystem(){ 
-typedef std::chrono::microseconds ms;
-typedef std::chrono::milliseconds mls;
+  typedef std::chrono::microseconds ms;
+  typedef std::chrono::milliseconds mls;
+    /* -----------------------------------------------------------------------------
+  All three motors are going to home.
+  ----------------------------------------------------------------------------- */    
+  this_thread::sleep_for(chrono::milliseconds(2000));
+  maxon1->start_homing();
+  this_thread::sleep_for(chrono::milliseconds(2000));
+  maxon2->start_homing();
+  this_thread::sleep_for(chrono::milliseconds(2000));
+  maxon4->start_homing();
+  this_thread::sleep_for(chrono::milliseconds(500));
+
+  maxon1->check_homing();
+  maxon2->check_homing();
+  maxon4->check_homing();
+
   /* -----------------------------------------------------------------------------
-All three motors are going to home.
------------------------------------------------------------------------------ */    
-this_thread::sleep_for(chrono::milliseconds(2000));
-maxon1->start_homing();
-this_thread::sleep_for(chrono::milliseconds(2000));
-maxon2->start_homing();
-this_thread::sleep_for(chrono::milliseconds(2000));
-maxon4->start_homing();
-this_thread::sleep_for(chrono::milliseconds(500));
+  All three motors are going in the startpositionmode.
+  ----------------------------------------------------------------------------- */    
+  maxon1->start_position_mode();
+  this_thread::sleep_for(chrono::milliseconds(1000));      
+  maxon2->start_position_mode();
+  this_thread::sleep_for(chrono::milliseconds(1000));
+  maxon4->start_position_mode();
+  this_thread::sleep_for(chrono::milliseconds(1000));
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));  // wait 500 milliseconds, because otherwise the xsens can enter the configuration mode
 
-maxon1->check_homing();
-maxon2->check_homing();
-maxon4->check_homing();
-
-/* -----------------------------------------------------------------------------
-All three motors are going in the startpositionmode.
------------------------------------------------------------------------------ */    
-maxon1->start_position_mode();
-this_thread::sleep_for(chrono::milliseconds(1000));      
-maxon2->start_position_mode();
-this_thread::sleep_for(chrono::milliseconds(1000));
-maxon4->start_position_mode();
-this_thread::sleep_for(chrono::milliseconds(1000));
-std::this_thread::sleep_for(std::chrono::milliseconds(500));  // wait 500 milliseconds, because otherwise the xsens can enter the configuration mode
+  filter->add_data(ruwe_data, filtered_data);
   
-filter->m_ruwe_state_data = ruwe_data;     // (2)
-filter->m_filtered_data = filtered_data;        // (3)
-PIDAAN->m_complementary_data = complementary_data;  //(6)
-PIDAAN->m_PID_data = pid_data; //(7)
-FtoW->m_complementary_data = complementary_data; //(8)
-FtoW->m_PID_data = pid_data; //(9)
-FtoW->m_FtoW_data = FtoW_data; //(10)
-FtoW->m_xsens_state_data= xsens_data;
+  PIDAAN->add_data(complementary_data, pid_data);
+  
+  FtoW->add_data(pid_data, FtoW_data, complementary_data, xsens_data);
 
-    
-//Serial * m_serial = new Serial("/dev/xsense", 9600);
-//Xsens * m_xsens = new Xsens(); //initialise class Xsens
-//Sensor * de_sensor = new Sensor(m_xsens,m_serial);
 
-//m_xsens->m_xsens_state_data = xsens_data; //(0)
-de_sensor->m_xsens_state_data = xsens_data;
-de_sensor->m_ruwe_state_data = ruwe_data;  // (1)
-//de_sensor->start_receiving();
-int counter_control_front = 4;        //80Hz waar de loop op loopt
-//int counter_control_back = 8;
+  //Serial * m_serial = new Serial("/dev/xsense", 9600);
+  //Xsens * m_xsens = new Xsens(); //initialise class Xsens
+  //Sensor * de_sensor = new Sensor(m_xsens,m_serial);
+
+  //m_xsens->m_xsens_state_data = xsens_data; //(0)
+
+  //de_sensor->start_receiving();
+  int counter_control_front = 4;        //80Hz waar de loop op loopt
+  //int counter_control_back = 8;
   while (true) {
     std::chrono::high_resolution_clock::time_point t1= std::chrono::high_resolution_clock::now();
     de_sensor->get_data();
     
     if (counter_control_front == 0){     //Voorvleugels lopen op 20Hz
-      filter->FilterIt();
+      filter->filter_data();
       com_filter->CalculateRealHeight();            
       PIDAAN->PID_in();
       FtoW->MMA();

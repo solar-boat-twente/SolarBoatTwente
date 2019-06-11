@@ -30,6 +30,11 @@ class PID_caller {
 
   void PID_in(structures::FlyMode fly_mode = structures::FLY);
   
+  void add_data(DataStore * complementary_data, DataStore * PID_data){
+    m_complementary_data = complementary_data;
+    m_PID_data = PID_data;
+  }
+  
  private:
   DataStore* m_complementary_data;
   DataStore* m_PID_data;

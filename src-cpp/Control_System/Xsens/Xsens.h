@@ -88,14 +88,14 @@ public:
    * @param Parser this is a pointer that points to the structure XsensParser
    * @param byte the message is separated on the basis of bytes
    */
-  void ParseMessage(uint8_t byte[]);
+  void parse_message(uint8_t byte[]);
   
   /**
    * In this function the data is sorted in such a way that the different data types are sorted
    * @param data this is the data that comes from the xsens and has to be sorted
    * @return this returns the sorted data
    */
-  void ParseData();
+  void parse_data();
   
 private:
 

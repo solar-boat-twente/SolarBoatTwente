@@ -84,21 +84,21 @@
           <itemPath>src-cpp/Control_System/Filter/ComplementaryFilter.h</itemPath>
           <itemPath>src-cpp/Control_System/DataStore.cpp</itemPath>
           <itemPath>src-cpp/Control_System/DataStore.h</itemPath>
-          <itemPath>src-cpp/Control_System/EPOS.cpp</itemPath>
-          <itemPath>src-cpp/Control_System/EPOS.h</itemPath>
-          <itemPath>src-cpp/Control_System/Filtered_data.cpp</itemPath>
-          <itemPath>src-cpp/Control_System/Filtered_data.h</itemPath>
-          <itemPath>src-cpp/Control_System/Force_to_wing_angle.cpp</itemPath>
-          <itemPath>src-cpp/Control_System/Force_to_wing_angle.h</itemPath>
-          <itemPath>src-cpp/Control_System/PID_caller.cpp</itemPath>
-          <itemPath>src-cpp/Control_System/PID_caller.h</itemPath>
-          <itemPath>src-cpp/Control_System/Sensor.cpp</itemPath>
-          <itemPath>src-cpp/Control_System/Sensor.h</itemPath>
-          <itemPath>src-cpp/Control_System/Xsens.cpp</itemPath>
-          <itemPath>src-cpp/Control_System/Xsens.h</itemPath>
+          <itemPath>src-cpp/Control_System/Maxon/EPOS.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/Maxon/EPOS.h</itemPath>
+          <itemPath>src-cpp/Control_System/Filter/Filtered_data.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/Filter/Filtered_data.h</itemPath>
+          <itemPath>src-cpp/Control_System/Maxon/Force_to_wing_angle.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/Maxon/Force_to_wing_angle.h</itemPath>
+          <itemPath>src-cpp/Control_System/Calculation/PID_caller.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/Calculation/PID_caller.h</itemPath>
+          <itemPath>src-cpp/Control_System/Xsens/Sensor.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/Xsens/Sensor.h</itemPath>
+          <itemPath>src-cpp/Control_System/Xsens/Xsens.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/Xsens/Xsens.h</itemPath>
           <itemPath>src-cpp/Control_System/control_main.cpp</itemPath>
-          <itemPath>src-cpp/Control_System/pid.cpp</itemPath>
-          <itemPath>src-cpp/Control_System/pid.h</itemPath>
+          <itemPath>src-cpp/Control_System/Calculation/pid.cpp</itemPath>
+          <itemPath>src-cpp/Control_System/Calculation/pid.h</itemPath>
         </logicalFolder>
         <logicalFolder name="Control_Wheel"
                        displayName="Control_Wheel"
@@ -266,16 +266,32 @@
       </item>
       <item path="src-cpp/Button_Box/Encoders.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src-cpp/Control_System/Calculation/PID_caller.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Calculation/PID_caller.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Calculation/pid.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Calculation/pid.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="src-cpp/Control_System/DataStore.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
       <item path="src-cpp/Control_System/DataStore.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/EPOS.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/EPOS.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src-cpp/Control_System/Filter/Biquad.cpp"
             ex="false"
@@ -297,52 +313,60 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Filtered_data.cpp"
+      <item path="src-cpp/Control_System/Filter/Filtered_data.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Filtered_data.h"
+      <item path="src-cpp/Control_System/Filter/Filtered_data.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Force_to_wing_angle.cpp"
+      <item path="src-cpp/Control_System/Maxon/EPOS.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Force_to_wing_angle.h"
+      <item path="src-cpp/Control_System/Maxon/EPOS.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/PID_caller.cpp"
+      <item path="src-cpp/Control_System/Maxon/Force_to_wing_angle.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/PID_caller.h"
+      <item path="src-cpp/Control_System/Maxon/Force_to_wing_angle.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Sensor.cpp" ex="false" tool="1" flavor2="0">
+      <item path="src-cpp/Control_System/Xsens/Sensor.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Sensor.h" ex="false" tool="3" flavor2="0">
+      <item path="src-cpp/Control_System/Xsens/Sensor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Xsens.cpp" ex="false" tool="1" flavor2="0">
+      <item path="src-cpp/Control_System/Xsens/Xsens.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Xsens.h" ex="false" tool="3" flavor2="0">
+      <item path="src-cpp/Control_System/Xsens/Xsens.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="src-cpp/Control_System/control_main.cpp"
             ex="false"
             tool="1"
             flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/pid.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/pid.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src-cpp/Control_Wheel/Control_Wheel.cpp"
             ex="false"
@@ -500,16 +524,32 @@
       </item>
       <item path="src-cpp/Button_Box/Encoders.hpp" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="src-cpp/Control_System/Calculation/PID_caller.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Calculation/PID_caller.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Calculation/pid.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Calculation/pid.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="src-cpp/Control_System/DataStore.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
       <item path="src-cpp/Control_System/DataStore.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/EPOS.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/EPOS.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src-cpp/Control_System/Filter/Biquad.cpp"
             ex="false"
@@ -531,52 +571,60 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Filtered_data.cpp"
+      <item path="src-cpp/Control_System/Filter/Filtered_data.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Filtered_data.h"
+      <item path="src-cpp/Control_System/Filter/Filtered_data.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Force_to_wing_angle.cpp"
+      <item path="src-cpp/Control_System/Maxon/EPOS.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Force_to_wing_angle.h"
+      <item path="src-cpp/Control_System/Maxon/EPOS.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/PID_caller.cpp"
+      <item path="src-cpp/Control_System/Maxon/Force_to_wing_angle.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/PID_caller.h"
+      <item path="src-cpp/Control_System/Maxon/Force_to_wing_angle.h"
             ex="false"
             tool="3"
             flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Sensor.cpp" ex="false" tool="1" flavor2="0">
+      <item path="src-cpp/Control_System/Xsens/Sensor.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Sensor.h" ex="false" tool="3" flavor2="0">
+      <item path="src-cpp/Control_System/Xsens/Sensor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Xsens.cpp" ex="false" tool="1" flavor2="0">
+      <item path="src-cpp/Control_System/Xsens/Xsens.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
       </item>
-      <item path="src-cpp/Control_System/Xsens.h" ex="false" tool="3" flavor2="0">
+      <item path="src-cpp/Control_System/Xsens/Xsens.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="src-cpp/Control_System/control_main.cpp"
             ex="false"
             tool="1"
             flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/pid.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="src-cpp/Control_System/pid.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="src-cpp/Control_Wheel/Control_Wheel.cpp"
             ex="false"
