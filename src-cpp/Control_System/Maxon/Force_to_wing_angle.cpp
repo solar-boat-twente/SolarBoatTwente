@@ -68,11 +68,13 @@ void ForceToWingAngle::MMA() {
    DataStore::RealData input2 =complementary_data_-> GetComplementaryData();
    DataStore::AngleWings output;
    DataStore::XsensData v = xsens_state_data_->GetXsensData();
-
-   float velocity = v.velocity_x;
+   
+   
+//   velocity_ = v.velocity_x;
+   velocity_ += v.acceleration_x * pow(0.0125,2)
    M_INFO<<"Acceleration x: "<<v.acceleration_x << " | Speed x: "<<velocity;
    
-   if (velocity>MIN_SPEED){    //snelheid hoger dan 3m/s
+   if (velocity_>MIN_SPEED){    //snelheid hoger dan 3m/s
     
      
      

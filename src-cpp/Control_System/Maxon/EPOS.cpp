@@ -45,9 +45,9 @@ uint8_t MOVE_MESSAGE[8] = {0x23, 0x7a, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00};
 Additional EPOS commands that you need for going to a position, you can find 
 those in chapter 8.7 from the application node. 
 ----------------------------------------------------------------------------- */
-uint8_t EPOS_SET_POSITION_MODE[8] = {0x2F,0x60,0x60,0x00,0xFF,0x00,0x00,0x00};
+uint8_t EPOS_SET_POSITION_MODE[8] = {0x2F,0x60,0x60,0x00,0x01,0x00,0x00,0x00};
 
-uint8_t EPOS_ABSOLUTE_POSITION[8] = {0x2F,0x40,0x60,0x00,0x3F,0x00,0x00,0x00};
+uint8_t EPOS_ABSOLUTE_POSITION[8] = {0x2B,0x40,0x60,0x00,0x3F,0x00,0x00,0x00};
 }
 }
 /* -----------------------------------------------------------------------------
@@ -223,7 +223,7 @@ void EPOS::move(){
       break;
       
     case 2:
-      quartercircles=quartercircles + ((alphas.Wing_right*180/3.1415)*10000)+user_quatercircles;
+      quartercircles=quartercircles + ((alphas.Wing_right*180/3.1415)*10000);
       if (quartercircles < MIN_ANGLE_RIGHT) {
         quartercircles = MIN_ANGLE_RIGHT;
       } else if (quartercircles > MAX_ANGLE_RIGHT) {
@@ -233,7 +233,7 @@ void EPOS::move(){
       break;
       
     case 4:
-      quartercircles=quartercircles + ((alphas.Wing_back*180/3.1415)*125000)+user_quatercircles;   //absolute positie en start direct
+      quartercircles=quartercircles + ((alphas.Wing_back*180/3.1415)*125000);   //absolute positie en start direct
       if (quartercircles < MIN_ANGLE_BACK) {
         quartercircles = MIN_ANGLE_BACK;
       } else if (quartercircles > MAX_ANGLE_BACK) {

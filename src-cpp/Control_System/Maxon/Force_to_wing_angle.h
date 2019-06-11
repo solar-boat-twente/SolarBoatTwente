@@ -45,7 +45,8 @@ class ForceToWingAngle {
   const int kLiftSlope = 5;
   const float kZeroLiftAngle =0; //-0.05236;      //radians
     
-    void calculate_inverse_matrix();
+  float velocity_ = 0;
+  void calculate_inverse_matrix();
 };   
 }
 }
