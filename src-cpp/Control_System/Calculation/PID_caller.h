@@ -28,7 +28,7 @@ class PID_caller {
   PID_caller(const PID_caller& orig);
   virtual ~PID_caller();
 
-  void PID_in(structures::FlyMode fly_mode);
+  void PID_in(structures::FlyMode fly_mode = structures::FLY);
   
  private:
   DataStore* m_complementary_data;
