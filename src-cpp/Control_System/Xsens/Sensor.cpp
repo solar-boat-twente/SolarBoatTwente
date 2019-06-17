@@ -34,7 +34,7 @@ void xsens::Sensor::get_data(){
   sensor_value->pitch = x.pitch/180*3.1415;        //0.35 rad = 20 graden 
   sensor_value->roll = x.roll/180*3.1415;        
   sensor_value->Z_accel =x.acceleration_z; 
-  sensor_value->angle_left = 0;   //0.52 rad = 30 graden
-  sensor_value->angle_right = 0; 
+  sensor_value->angle_left = vlotter_->get_angle_deg(Control::ENCODER_LEFT);   //0.52 rad = 30 graden
+  sensor_value->angle_right = vlotter_->get_angle_deg(Control::ENCODER_RIGHT); 
   raw_data_->PutSensorData(sensor_value);
 }

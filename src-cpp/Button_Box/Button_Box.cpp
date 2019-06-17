@@ -22,7 +22,7 @@ ButtonBox::ButtonBox(ADAM * const adam): m_adam(adam) {
 }
 
 int ButtonBox::switch_led(int led_number, bool state) {
-  if(led_number<0 or led_number>4){
+  if(led_number<0 or led_number>5){
     M_ERR<<"ENTERED INVALID LED NUMBER"<<led_number;
   } else {
     if(state!=output_button_states[led_number]){
@@ -185,9 +185,15 @@ void ButtonBoxHandler::leds_thread_() {
       switch (button_states[i]) {
         case CONTINUOUS:
           button_box->switch_led(i, true);
+          if(i == 1){
+            button_box->switch_led(4, true);
+          }
           break;
         case NO_LIGHT:
           button_box->switch_led(i, false);
+          if(i==1){
+            button_box->switch_led(4, false);
+          }
           break;
         case BLINK_FAST:
           button_box->switch_led(i, !button_box->output_button_states[i]);

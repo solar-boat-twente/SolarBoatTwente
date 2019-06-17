@@ -57,7 +57,7 @@ void ForceToWingAngle::calculate_inverse_matrix() {
 }
 
 
-void ForceToWingAngle::MMA() {
+void ForceToWingAngle::MMA(structures::PowerInput * power_input) {
 
     /* First we will start with the MMA. This is the motor mixing algorithm that 
      * divides the incoming forces from the 3 PID controllers in 3 different 
@@ -69,10 +69,11 @@ void ForceToWingAngle::MMA() {
    DataStore::AngleWings output;
    DataStore::XsensData v = xsens_state_data_->GetXsensData();
    
-   
+   velocity_ = power_input->driver.motor_speed/216;
 //   velocity_ = v.velocity_x;
-   velocity_ += v.acceleration_x * pow(0.0125,2)
-   M_INFO<<"Acceleration x: "<<v.acceleration_x << " | Speed x: "<<velocity;
+   //velocity_ += v.acceleration_x *0.0125;
+   //velocity_ = 4;
+   M_INFO<<"Acceleration x: "<<v.acceleration_x << " | Speed x: "<<velocity_;
    
    if (velocity_>MIN_SPEED){    //snelheid hoger dan 3m/s
     
@@ -85,22 +86,22 @@ void ForceToWingAngle::MMA() {
     
     
      //devide the force by (0.5*density*surface*velocity) to get the lift coefficient 
-     float left_lift_coefficient = left_force / (0.5 * kDensity * kLeftSurface * pow(velocity,2)) ; 
-     float right_lift_coefficient = right_force / (0.5 * kDensity * kRightSurface  *pow(velocity,2)) ;
-     float back_lift_coefficient = back_force / (0.5 * kDensity * kBackSurface * pow(velocity,2)) ;
+     float left_lift_coefficient = left_force / (0.5 * kDensity * kLeftSurface * pow(velocity_,2)) ; 
+     float right_lift_coefficient = right_force / (0.5 * kDensity * kRightSurface  *pow(velocity_,2)) ;
+     float back_lift_coefficient = back_force / (0.5 * kDensity * kBackSurface * pow(velocity_,2)) ;
     
      float left_angle_total = left_lift_coefficient / kLiftSlope;
      float right_angle_total = right_lift_coefficient / kLiftSlope;
      float back_angle_total = back_lift_coefficient / kLiftSlope;
       
-     //calculate the final wing angles
+     //calculate the final wing angles*
      input2.Real_pitch = 0;
      output.Wing_left = left_angle_total - input2.Real_pitch - kZeroLiftAngle;
      output.Wing_right = right_angle_total - input2.Real_pitch - kZeroLiftAngle;
      output.Wing_back  = back_angle_total - input2.Real_pitch - kZeroLiftAngle;
      
      //Autoput the resulting data neatly
-     M_INFO << "acceleration x: "<<v.acceleration_x << " | snelheid x: "<< velocity 
+     M_INFO << "acceleration x: "<<v.acceleration_x << " | snelheid x: "<< velocity_ 
             << "\nlinks Cl: "<<left_lift_coefficient << " | rechts Cl: "<<right_lift_coefficient
             << "\nAchter Cl: "<<back_lift_coefficient << " | lift hoogte: "<<input.Force_height
             << "\nlift roll: "<<input.Force_roll << " | lift pitch: "<<input.Force_pitch
@@ -115,9 +116,9 @@ void ForceToWingAngle::MMA() {
       */
    }
    else{
-    output.Wing_left = -0.05236;//left_angle_total - input2.Real_pitch - kZeroLiftAngle;
-    output.Wing_right = -0.05236;//right_angle_total - input2.Real_pitch - kZeroLiftAngle;
-    output.Wing_back = -0.05236;//back_angle_total - input2.Real_pitch - kZeroLiftAngle;
+    output.Wing_left = -0.07;//left_angle_total - input2.Real_pitch - kZeroLiftAngle;
+    output.Wing_right = -0.07;//right_angle_total - input2.Real_pitch - kZeroLiftAngle;
+    output.Wing_back = -0.07;//back_angle_total - input2.Real_pitch - kZeroLiftAngle;
     cout << "Else statement bereikt"  << "\r\n";
     cout << "Wing_left in force to wing angle" << output.Wing_left << "\r\n";
     FtoW_data_->PutWingData(&output);

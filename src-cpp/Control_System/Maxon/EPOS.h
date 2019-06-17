@@ -6,10 +6,12 @@
 #include "../../../lib-cpp/Canbus/canbus.h"
 #include "../../../lib-cpp/ADAM/ADAM.hpp"
 
+#include <fstream>
+
 namespace MIO{
 namespace Control{
 
-const int POSITION_BUTTON_QUARTERCIRCLE_MULTIPLIER = 1000000;
+const int POSITION_BUTTON_QUARTERCIRCLE_MULTIPLIER = 6000000;//2000000;//2200000;
 
 const int MIN_ANGLE_LEFT = -100000;
 const int MAX_ANGLE_LEFT = 110000;
@@ -17,8 +19,8 @@ const int MAX_ANGLE_LEFT = 110000;
 const int MIN_ANGLE_RIGHT = -100000;
 const int MAX_ANGLE_RIGHT = 110000;
 
-const int MIN_ANGLE_BACK = -800000;
-const int MAX_ANGLE_BACK = 1500000;
+const int MIN_ANGLE_BACK = 0;//-2000000;
+const int MAX_ANGLE_BACK = 2950000;//1100000;
 
 /* -----------------------------------------------------------------------------
 EPOS commands that you need to home, you can find those in chapter 8.3 from the 
@@ -51,6 +53,34 @@ extern uint8_t EPOS_ABSOLUTE_POSITION[8];
 
 
 /* -----------------------------------------------------------------------------
+EPOS commands that you need to home, you can find those in chapter 8.3 from the 
+application node. 
+----------------------------------------------------------------------------- */
+const  unsigned char Shutdown_Data[8] = {0x2B,0x40,0x60,0x00,0x06,0x00,0x00,0x00};        //voorkomen dat je niet nog in een andere mode zit
+    
+const unsigned char Switch_On_And_Enable_Data[8] = {0x2B,0x40,0x60,0x00,0x0F,0x00,0x00,0x00}; //enable de motorcontroller (groene ledje constant aan)
+
+const unsigned char Homing_Mode_Data[8] = {0x2F,0x60,0x60,0x00,0x06,0x00,0x00,0x00};     //aan de 0x6060-00 geef je aan dat je nu gaat homen wat de waarde 06 heeft in de data bytes
+    
+const unsigned char Homing_Method_Data_Positive[8] = {0x2F,0x98,0x60,0x00,0xFD,0x00,0x00,0x00};  //bij de index 0x6098-00 geef je aan welke homing method je gaat gebruiken: 0xFD = -3 = current treshold positive speed
+
+const unsigned char Homing_Method_Data_Negative[8] = {0x2F,0x98,0x60,0x00,0xFC,0x00,0x00,0x00};  //bij de index 0x6098-00 geef je aan welke homing method je gaat gebruiken: 0xFC = -4 = current treshold negative speed
+    
+const unsigned char Start_Homing_Data[8] = {0x2B,0x40,0x60,0x00,0x1F,0x00,0x00,0x00}; //om te beginnen met homen geef je het controlword de waarde 0x001F om het homen te starten 
+
+const unsigned char Status_Word_Data[4] = {0x40,0x41,0x60,0x00};  //0x40, want ccs is 2: je upload iets van de controller om te kijken of het gelukt is. 
+
+const unsigned char Clear_Fault_Data[8] = {0x2B,0x40,0x60,0x00,0x80,0x00,0x00,0x00}; //Clear fault: 0x0080 versturen naar 0x6040-00    
+
+/* -----------------------------------------------------------------------------
+Additional EPOS commands that you need for going to a position, you can find 
+those in chapter 8.7 from the application node. 
+----------------------------------------------------------------------------- */
+const unsigned char Position_Mode_Data[8] = {0x2F,0x60,0x60,0x00,0xFF,0x00,0x00,0x00};
+
+const unsigned char Start_Absolute_Pos[8] = {0x2F,0x40,0x60,0x00,0x3F,0x00,0x00,0x00};
+
+/* -----------------------------------------------------------------------------
 Sends a CAN Message to the controller
 Returns 1 for succes. May be slow. a faster send message is build into Goto_Pos
 @param id The id to set the data to
@@ -76,10 +106,13 @@ class EPOS{
     
     moving_allowed = false;
     build_CAN_messages_();
+    
+    file_.open("/root/logfiles/epos_log_test_06_07.csv",std::ios::app);
       
       
   }
    
+      void Homing();
   /** Homes the EPOS with Current mode */
   void start_homing(bool home_positive = true);
 
@@ -92,7 +125,7 @@ class EPOS{
     
  private:
   
-  canmsg_t create_CAN_msg(int id, int length, uint8_t data[]);
+  canmsg_t create_CAN_msg(int id, int length, char * data);
 
   
   void build_CAN_messages_();
@@ -130,6 +163,7 @@ class EPOS{
   
   canmsg_t start_absolute_position_;
   
+  canmsg_t move_message;
   
   //Object to store all the data in, this is shared through all the object. 
   DataStore * const m_FtoW_data;
@@ -143,6 +177,8 @@ class EPOS{
   UI::ADAM * const adam_6017;
  
   bool moving_allowed;
+  
+  std::ofstream file_;
   
 };
 }

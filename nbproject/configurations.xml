@@ -98,6 +98,10 @@
             <itemPath>src-cpp/Control_System/Maxon/Force_to_wing_angle.cpp</itemPath>
             <itemPath>src-cpp/Control_System/Maxon/Force_to_wing_angle.h</itemPath>
           </logicalFolder>
+          <logicalFolder name="f4" displayName="Vlotter" projectFiles="true">
+            <itemPath>src-cpp/Control_System/Vlotter/Vlotter.cpp</itemPath>
+            <itemPath>src-cpp/Control_System/Vlotter/Vlotter.hpp</itemPath>
+          </logicalFolder>
           <logicalFolder name="f2" displayName="Xsens" projectFiles="true">
             <itemPath>src-cpp/Control_System/Xsens/Sensor.cpp</itemPath>
             <itemPath>src-cpp/Control_System/Xsens/Sensor.h</itemPath>
@@ -347,6 +351,16 @@
             flavor2="0">
       </item>
       <item path="src-cpp/Control_System/Maxon/Force_to_wing_angle.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Vlotter/Vlotter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Vlotter/Vlotter.hpp"
             ex="false"
             tool="3"
             flavor2="0">
@@ -605,6 +619,16 @@
             flavor2="0">
       </item>
       <item path="src-cpp/Control_System/Maxon/Force_to_wing_angle.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Vlotter/Vlotter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="src-cpp/Control_System/Vlotter/Vlotter.hpp"
             ex="false"
             tool="3"
             flavor2="0">

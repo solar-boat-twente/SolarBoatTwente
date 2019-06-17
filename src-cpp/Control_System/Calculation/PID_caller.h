@@ -8,6 +8,7 @@
 #define	PID_CALLER_H
 #include "pid.h"
 #include "../DataStore.h"
+#include <fstream>
 
 //#include "structures.h"
 namespace MIO{
@@ -41,6 +42,8 @@ class PID_caller {
   PID * pid_roll;
   PID * pid_pitch;
   PID * pid_height;
+  std::ofstream file;
+  
 };
 }
 }

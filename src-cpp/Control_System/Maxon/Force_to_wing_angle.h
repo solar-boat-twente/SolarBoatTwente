@@ -9,11 +9,12 @@
 #define	FORCE_TO_WING_ANGLE_H
 
 #include "../DataStore.h"
+#include "../../../solarboattwente.h"
 
 namespace MIO{
 namespace Control{
 
-const int MIN_SPEED = 3;
+const int MIN_SPEED = 2;
 
 class ForceToWingAngle {
  public:
@@ -30,7 +31,7 @@ class ForceToWingAngle {
       xsens_state_data_ = xsens_state_data;
     };
     
-    void MMA();    
+    void MMA(structures::PowerInput * power_input);    
  private:
   DataStore *PID_data_;
   DataStore *FtoW_data_;

@@ -79,35 +79,121 @@ the output is succes or failed.
     
 can.read? 
 ----------------------------------------------------------------------------- */ 
-canmsg_t EPOS::create_CAN_msg(int id, int length, uint8_t data[]){
+canmsg_t EPOS::create_CAN_msg(int id, int length, char * data){
   canmsg_t output;
-  output.id = id;
+  output.id = 0x600+1;
   output.length = length;
-  memcpy(&output.data, data, length);
+  memcpy(&output.data[0], data, length);
   return output;
   
 }
 
+
 void EPOS::build_CAN_messages_() {
+  shutdown_.id = 0x600+NODE_ID;
+  shutdown_.length = 8;
+  memcpy(&shutdown_.data[0],(char*)EPOS_SHUTDOWN, 8);
   
-  shutdown_ = create_CAN_msg(write_id_, 8, EPOS_SHUTDOWN);
-  switch_on_and_enable_ = create_CAN_msg(write_id_, 8, EPOS_SWITCH_ON);
-  get_status_word = create_CAN_msg(write_id_, 4, EPOS_GET_STATUS);
-  set_homing_mode_ = create_CAN_msg(write_id_, 8, EPOS_HOMING_MODE);
-  set_homing_method_positive_ = create_CAN_msg(write_id_, 8, EPOS_SET_HOMING_POSITIVE);
-  set_homing_method_negative_ = create_CAN_msg(write_id_, 8, EPOS_SET_HOMING_NEGATIVE);
-  start_homing_ = create_CAN_msg(write_id_, 8, EPOS_START_HOMING);
-  clear_faults_ = create_CAN_msg(write_id_, 8, EPOS_CLEAR_FAULT);
-  set_position_mode_ = create_CAN_msg(write_id_, 8, EPOS_SET_POSITION_MODE);
-  start_absolute_position_ = create_CAN_msg(write_id_, 8, EPOS_ABSOLUTE_POSITION);
+  switch_on_and_enable_.id = 0x600+NODE_ID;
+  switch_on_and_enable_.length = 8;
+  memcpy(&switch_on_and_enable_.data[0],(char*)EPOS_SWITCH_ON, 8);
+  
+  get_status_word.id = 0x600+NODE_ID;
+  get_status_word.length = 4;
+  memcpy(&get_status_word.data[0],(char*)EPOS_GET_STATUS, 4);
+  
+  set_homing_mode_.id = 0x600+NODE_ID;
+  set_homing_mode_.length = 8;
+  memcpy(&set_homing_mode_.data[0],(char*)EPOS_HOMING_MODE, 8);
+  
+  set_homing_method_positive_.id = 0x600+NODE_ID;
+  set_homing_method_positive_.length = 8;
+  memcpy(&set_homing_method_positive_.data[0],(char*)EPOS_SET_HOMING_POSITIVE, 8);
+  
+  set_homing_method_negative_.id = 0x600+NODE_ID;
+  set_homing_method_negative_.length = 8;
+  memcpy(&set_homing_method_negative_.data[0],(char*)EPOS_SET_HOMING_NEGATIVE, 8);
+  
+  start_homing_.id = 0x600+NODE_ID;
+  start_homing_.length = 8;
+  memcpy(&start_homing_.data[0],(char*)EPOS_START_HOMING, 8);
+  
+  set_position_mode_.id = 0x600+NODE_ID;
+  set_position_mode_.length = 8;
+  memcpy(&set_position_mode_.data[0],(char*)EPOS_SET_POSITION_MODE, 8);
+  
+  start_absolute_position_.id = 0x600+NODE_ID;
+  start_absolute_position_.length = 8;
+  memcpy(&start_absolute_position_.data[0],(char*)EPOS_ABSOLUTE_POSITION, 8);
+  
+  clear_faults_.id = 0x600+NODE_ID;
+  clear_faults_.length = 8;
+  memcpy(&clear_faults_.data[0],(char*)EPOS_CLEAR_FAULT, 8);
+  
+//  
+//  shutdown_ = create_CAN_msg(write_id_, 8, (char*)EPOS_SHUTDOWN);
+//  
+//  switch_on_and_enable_ = create_CAN_msg(write_id_, 8, (char*)EPOS_SWITCH_ON);
+//  get_status_word = create_CAN_msg(write_id_, 4, (char*)EPOS_GET_STATUS);
+//  set_homing_mode_ = create_CAN_msg(write_id_, 8, (char*)Homing_Mode_Data);
+//  set_homing_method_positive_ = create_CAN_msg(write_id_, 8, (char*)Homing_Method_Data_Positive);
+//  set_homing_method_negative_ = create_CAN_msg(write_id_, 8, (char*)EPOS_SET_HOMING_NEGATIVE);
+//  start_homing_ = create_CAN_msg(write_id_, 8, (char*)EPOS_START_HOMING);
+//  //clear_faults_ = create_CAN_msg(write_id_, 8, (char*)Clear_Fault_Data);
+//  
+//  set_position_mode_ = create_CAN_msg(write_id_, 8, (char*)EPOS_SET_POSITION_MODE);
+//  start_absolute_position_ = create_CAN_msg(write_id_, 8, (char*)EPOS_ABSOLUTE_POSITION);
 
   
  }
 
+void EPOS::Homing(){ 
+    canmsg_t m_Clear_Fault;
+    m_Clear_Fault.id = 0x600+NODE_ID;
+    m_Clear_Fault.length = 8;
+    memcpy(&m_Clear_Fault.data[0],(char*)Clear_Fault_Data, 8);
+    canbus->write_can(&m_Clear_Fault);
+   std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+   
+    canmsg_t m_Homing_Mode; 
+    m_Homing_Mode.id = 0x600+NODE_ID;
+    m_Homing_Mode.length = 8;
+    memcpy(&m_Homing_Mode.data[0],(char*)Homing_Mode_Data, 8);
+    canbus->write_can(&m_Homing_Mode);        
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+   
+    canmsg_t m_Homing_Mode_Positive; 
+    m_Homing_Mode_Positive.id = 0x600+NODE_ID;
+    m_Homing_Mode_Positive.length = 8;
+    memcpy(&m_Homing_Mode_Positive.data[0],(char*)Homing_Method_Data_Positive, 8);    
+    canbus->write_can(&m_Homing_Mode_Positive);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+   
+    canmsg_t m_Shutdown; 
+    m_Shutdown.id = 0x600+NODE_ID;
+    m_Shutdown.length = 8;
+    memcpy(&m_Shutdown.data[0],(char*)Shutdown_Data, 8);    
+    canbus->write_can(&m_Shutdown);      
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+   
+    canmsg_t m_SwitchOnAndEnable; 
+    m_SwitchOnAndEnable.id = 0x600+NODE_ID;
+    m_SwitchOnAndEnable.length = 8;
+    memcpy(&m_SwitchOnAndEnable.data[0],(char*)Switch_On_And_Enable_Data, 8);  
+    canbus->write_can(&m_SwitchOnAndEnable);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+   
+    canmsg_t m_StartHoming; 
+    m_StartHoming.id = 0x600+NODE_ID;
+    m_StartHoming.length = 8;
+    memcpy(&m_StartHoming.data[0],(char*)Start_Homing_Data, 8);
+    canbus->write_can(&m_StartHoming);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+}
 
-
-void EPOS::start_homing(bool home_positive){  //foo is een teller, als can.write lukt komt er een 1 uit en als het faalt een 0. Uiteindelijk moet foo in dit geval dus 5 zijn.  
+void EPOS::start_homing(bool home_positive){  
   //One shall first clear the faults and wait for this to be done 
+  
   canbus->write_can(&clear_faults_);
   std::this_thread::sleep_for(std::chrono::milliseconds(1500));
   
@@ -143,13 +229,13 @@ bool EPOS::check_homing(){
     canbus->write_can(&get_status_word);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     
-    
     canmsg_t buffer;
     canbus->read_can(read_id_, &buffer);
     
     if (buffer.data[5] == 0x95){ // case home found
         M_OK<<"Homing NODE: "<<NODE_ID<<" Successful!!";
         moving_allowed = 1;
+        file_<<"homing done"<< flush;
         return true;
     } else if ( !(buffer.data[4] == 0x37)){ // case homing failed
         M_WARN<<"NODE: "<<NODE_ID<<" FAILED!";
@@ -170,6 +256,7 @@ CAN line.
 
 void EPOS::start_position_mode(){
     //int tel=0;
+  
   if (moving_allowed=1){
         
     canbus->write_can(&clear_faults_);
@@ -194,8 +281,6 @@ float EPOS::get_angle_from_podmeter() {
   float button_position = (float)adam_6017->read_counter(5)/65536 - 0.5;
   
   return button_position * POSITION_BUTTON_QUARTERCIRCLE_MULTIPLIER;
-  
-
 
 }
 
@@ -212,34 +297,35 @@ void EPOS::move(){
   //float quartercircles= (-366889/alphas.Wing_right);
 
   switch (NODE_ID) {
-    case 1:
-      quartercircles=quartercircles + ((alphas.Wing_left*180/3.1415)*10000)+user_quatercircles;
+    case 1:   //maximale hoeveelheid qc die we positief kunnen maken is 1000000 dit hoort bij 0.5 user_quartercircles //node 1 is rechts, node 2 is links
+      quartercircles = ((alphas.Wing_left*180/3.1415)*10000) ;
       if (quartercircles < MIN_ANGLE_LEFT) {
         quartercircles = MIN_ANGLE_LEFT;
       } else if (quartercircles > MAX_ANGLE_LEFT) {
         quartercircles = MAX_ANGLE_LEFT;
       }
-      M_DEBUG<<"NODE: "<<NODE_ID<<"\nAlpha Left: "<<alphas.Wing_left <<" | POSITION LEFT: "<<quartercircles;
+      file_<<"NODE: "<<NODE_ID<<" Alpha: "<<alphas.Wing_left <<" | Position: "<<quartercircles<<flush;
       break;
       
     case 2:
-      quartercircles=quartercircles + ((alphas.Wing_right*180/3.1415)*10000);
+      quartercircles = ((alphas.Wing_right*180/3.1415)*10000);
       if (quartercircles < MIN_ANGLE_RIGHT) {
         quartercircles = MIN_ANGLE_RIGHT;
       } else if (quartercircles > MAX_ANGLE_RIGHT) {
         quartercircles = MAX_ANGLE_RIGHT;
       }
-      M_DEBUG<<"NODE: "<<NODE_ID<<"\nAlpha Right: "<<alphas.Wing_right <<" | Position Right: "<<quartercircles;
+      file_<<"\tNODE: "<<NODE_ID<<"Alpha: "<<alphas.Wing_right <<" | Position: "<<quartercircles<<"\n"<<flush;
       break;
       
     case 4:
-      quartercircles=quartercircles + ((alphas.Wing_back*180/3.1415)*125000);   //absolute positie en start direct
+      quartercircles = user_quatercircles;//quartercircles + ((alphas.Wing_back*180/3.1415)*125000);   //absolute positie en start direct
+      cout << "qc achter daadwerkelijk: " << quartercircles << endl;
       if (quartercircles < MIN_ANGLE_BACK) {
         quartercircles = MIN_ANGLE_BACK;
       } else if (quartercircles > MAX_ANGLE_BACK) {
         quartercircles = MAX_ANGLE_BACK;
       }
-      M_DEBUG<<"NODE: "<<NODE_ID<<"\nAlpha Back: "<<alphas.Wing_back <<" | Position Back: "<<quartercircles;
+      file_<<"\tNODE: "<<NODE_ID<<"Alpha: "<<alphas.Wing_back <<" | Position: "<<quartercircles<<"\n"<<flush;
       break;
       
     default:
@@ -266,15 +352,15 @@ void EPOS::move(){
 
   four_bytes absolute_position = {(int)quartercircles};
     
-  canmsg_t move_message = build_move_message_(absolute_position.byte);
+  build_move_message_(absolute_position.byte);
 
-  canbus->write_can(&move_message);
+  
 
   canbus->write_can(&start_absolute_position_);
 }
 
 canmsg_t EPOS::build_move_message_(uint8_t position_in_bytes[]) {
-  
+
   uint8_t move_data[8];
   move_data[0] = 0x23;
   move_data[1] = 0x7A;  //0x62;
@@ -285,7 +371,10 @@ canmsg_t EPOS::build_move_message_(uint8_t position_in_bytes[]) {
   move_data[6] = position_in_bytes[2];
   move_data[7] = position_in_bytes[3];  
   
-  return create_CAN_msg(write_id_, 8, move_data);
+  move_message.id = 0x600+NODE_ID;
+  move_message.length = 8;
+  memcpy(&move_message.data[0],(char*)move_data, 8);
+  canbus->write_can(&move_message);
  }
 
         

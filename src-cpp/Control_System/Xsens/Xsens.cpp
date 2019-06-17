@@ -57,7 +57,7 @@ bytes excluding the preamble are summed and the lower byte value of the result
 equals zero, the message is valid and it may be processed. The checksum value 
 of the message should be included in the summation. 
 ------------------------------------------------------------------------------*/
-void xsens::Xsens::parse_message(uint8_t byte[]) {
+bool xsens::Xsens::parse_message(uint8_t byte[]) {
   //xsens::XsensParser enumerator;
   //xsens::XsensParser * pointer_enum = &enumerator;
   //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -83,15 +83,12 @@ void xsens::Xsens::parse_message(uint8_t byte[]) {
         if (byte[byte_counter]==0xFF) {
           Parser->CHECKSUM = byte[byte_counter]; //iedere keer de byte bij de checksum optellen
           Parser->Message = Xsens_MID;
-          cout<<"XSENS BID TRUE: "<<(int)byte[byte_counter]<<endl;
-          cout<<"CHECKSUM"<<(unsigned int)Parser->CHECKSUM;
           d++;
         } else {
           Parser->Succesfull_received = 0;
           Parser->Message = Xsens_PREAMBLE;
           d=0;
-          cout<<"XSENS BID FALSE"<<endl;
-        }
+          }
         break;
 
       case Xsens_MID:
@@ -110,7 +107,6 @@ void xsens::Xsens::parse_message(uint8_t byte[]) {
       case Xsens_LENGTH:
         Parser->CHECKSUM += byte[byte_counter];
         Parser->DATA_length = (int)byte[byte_counter]; //lengte is gelijk aan de waarde in de byte (hier omgezet naar een integer)
-        std::cout<<"DATA LENGTH: "<<Parser->DATA_length<<endl;
         Parser->Message = Xsens_DATA; //volgende stap is naar de data
         Parser->DATA_counter = 0; //voordat we naar de data gaan ook de counter op 0 zetten zodat je straks de lengte met de counter kan vergelijken
         //printf("LENGTH\r\n");
@@ -118,20 +114,16 @@ void xsens::Xsens::parse_message(uint8_t byte[]) {
         break;
 
       case Xsens_DATA:
-        Parser->DATA_counter = 0;
         if (Parser->DATA_counter < Parser->DATA_length){
           Parser->CHECKSUM += byte[byte_counter];
           Parser->DATA[Parser->DATA_counter] = byte[byte_counter];
           Parser->DATA_counter++;
-          std::cout<<"read data number: "<<Parser->DATA_counter<<endl;
-          
         };
 
         if (Parser->DATA_length == Parser->DATA_counter){
           Parser->Message = Xsens_CHECKSUM;
         }
         //printf("DATA\r\n");
-        d++;
         break;
 
       case Xsens_CHECKSUM:
@@ -141,6 +133,7 @@ void xsens::Xsens::parse_message(uint8_t byte[]) {
           Parser->Succesfull_received = 1;
           d=6;
           M_OK<<"XSENS CHECKSUM SUCCESS";
+          return true;
         } else {
           d = 0;
           Parser->Message = Xsens_PREAMBLE;
@@ -153,10 +146,11 @@ void xsens::Xsens::parse_message(uint8_t byte[]) {
         d=0;
         break;
     }
-    std::cout<<"Checksum: "<<(unsigned int)Parser->CHECKSUM<<std::endl;
     //Now start looking at the next byte.
-    if(byte_counter>300){
-      assert(false);
+    if(byte_counter>150){
+      M_WARN<<"READ NOTHING FROM XSENS";
+      return false;
+      break;
     }
     byte_counter++;
  }
@@ -169,11 +163,11 @@ void xsens::Xsens::parse_data(){
   if (Parser->Succesfull_received = 1){
     int i = 0;
     XsensStates State = ID;
-    uint8_t byte = Parser->DATA[i];
-    uint8_t byte2= Parser->DATA[i+1];
+
     while (i<Parser->DATA_length){
       //printf("lengte data: %i,%i\r\n", Parser->DATA_length,i);
-
+      uint8_t byte = Parser->DATA[i];
+      uint8_t byte2= Parser->DATA[i+1];
       switch (State){
         case ID:
             //std::cout<<"Testing ID"<<std::endl;

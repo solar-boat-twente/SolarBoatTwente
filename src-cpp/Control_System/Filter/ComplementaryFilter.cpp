@@ -41,8 +41,8 @@ void ComplementaryFilter::CalculateRealHeight()
    roll_front=asin((height_left-height_right)*distance_between_vlotters);
    
    // Calculate the height from the XSens data
-   height_xsens=input.filtered_Z_accel+input.filtered_Z_accel*pow(dt,2); //TODO: Hier klopt niks van....
-   
+   //height_xsens=input.filtered_Z_accel+input.filtered_Z_accel*pow(dt,2); //TODO: Hier klopt niks van....
+   height_xsens = input.filtered_angle_right;
    //realData.Real_roll=(roll_front+input.filtered_roll)/2;
    real_data.Real_roll=input.filtered_roll;
    real_data.Real_height=height_xsens;//(height_left+height_right+height_xsens)/3; --> Dit is geen complementair filter.

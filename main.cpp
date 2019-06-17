@@ -1,5 +1,6 @@
 #include <time.h>
 #include <algorithm>
+#include <sys/ioctl.h>
 
 #include "solarboattwente.h"
 
@@ -20,6 +21,7 @@
 #include "src-cpp/Control_System/Filter/Filtered_data.h"
 #include "src-cpp/Control_System/Calculation/PID_caller.h"
 #include "src-cpp/Control_System/Maxon/Force_to_wing_angle.h"
+#include "src-cpp/Control_System/Vlotter/Vlotter.hpp"
 
 #define MOTOR_MODE 3; //Set the motor mode to rpm controlled
 const int SPEED_CORRECTION_FACTOR = 100; //value between 0 and 100, set correct for max current.
@@ -40,7 +42,9 @@ structures::TelemetryInput * telemetry_data = new structures::TelemetryInput;
 //Open up the data acquisition parts  
 Serial * serial_wheel = new Serial("/dev/steer");
 CANbus * canbus_bms = new CANbus("/dev/can1", 1); //CANbus for both the bms and the maxon motors
-CANbus * canbus_driver = new CANbus("/dev/can0", 1,STD_BAUD, O_RDWR|O_NONBLOCK); //CANbus for only the motor (has to be nonblocking)
+CANbus * canbus_driver = new CANbus("/dev/can0", 1, STD_BAUD, O_RDWR|O_NONBLOCK); //CANbus for only the motor (has to be nonblocking)
+//CANbus * canbus_driver = new CANbus("/dev/can0", 1); //CANbus for only the motor (has to be nonblocking)
+
 UI::ADAM * adam_6050 = new UI::ADAM("192.168.1.50", 502);
 UI::ADAM * adam_6017 = new UI::ADAM("192.168.1.127", 502);
 
@@ -73,12 +77,16 @@ PID_caller * PIDAAN = new PID_caller();
 ForceToWingAngle * FtoW = new ForceToWingAngle();
 Serial * m_serial = new Serial("/dev/xsense", 9600);
 xsens::Xsens * m_xsens = new xsens::Xsens();
-xsens::Sensor * de_sensor = new xsens::Sensor(xsens_data, ruwe_data);
     
-EPOS * maxon1 = new EPOS(canbus_bms,adam_6017,1, FtoW_data);
-EPOS * maxon2 = new EPOS(canbus_bms,adam_6017,2, FtoW_data);
-EPOS * maxon4 = new EPOS(canbus_bms,adam_6017,4, FtoW_data);
+Serial * serial_vlotter = new Serial("/dev/ttyACM0");
+Vlotter * vlotter = new Vlotter(serial_vlotter);
 
+xsens::Sensor * de_sensor = new xsens::Sensor(xsens_data, ruwe_data, vlotter);
+
+
+EPOS * maxon1 = new EPOS(canbus_bms,adam_6017, 1, FtoW_data);
+EPOS * maxon2 = new EPOS(canbus_bms,adam_6017, 2, FtoW_data);
+EPOS * maxon4 = new EPOS(canbus_bms,adam_6017,4, FtoW_data);
 
 
 void initiate_structures(){
@@ -92,10 +100,12 @@ void initiate_structures(){
   control_data->real_roll = 0;
   control_data->xsens.speed = 0;
   
+  power_input->battery.contactor_status = false;
   
   power_input->driver.motor_temp = 20;
   power_input->driver.driver_temp = 20;
   power_input->battery.max_temp = 20;
+  power_input->driver.motor_speed = 0;
   
   telemetry_data->advised_speed = 0;
 }
@@ -182,7 +192,7 @@ bool update_motor(){
     return false;
 
   }
-  return true;
+  return false;
 }
 
 void initiate_components(){
@@ -263,9 +273,10 @@ void sensor(){
     m_serial->read_bytes(msg_, 350);
     //serie->read_bytes(msg_bytes, 35);
     //serie->read_bytes(msg_bytes, 35);
-    m_xsens->parse_message(msg_);
-    m_xsens->parse_data(); 
-    this_thread::sleep_for(chrono::milliseconds(100));
+    if(m_xsens->parse_message(msg_)){ 
+      m_xsens->parse_data();
+    }
+    this_thread::sleep_for(chrono::milliseconds(10));
 
   }    
 }
@@ -277,11 +288,11 @@ void controlsystem(){
   All three motors are going to home.
   ----------------------------------------------------------------------------- */    
   this_thread::sleep_for(chrono::milliseconds(2000));
-  maxon1->start_homing();
+  maxon1->start_homing(true);
   this_thread::sleep_for(chrono::milliseconds(2000));
-  maxon2->start_homing();
+  maxon2->start_homing(true);
   this_thread::sleep_for(chrono::milliseconds(2000));
-  maxon4->start_homing();
+  maxon4->start_homing(false);
   this_thread::sleep_for(chrono::milliseconds(500));
 
   maxon1->check_homing();
@@ -292,11 +303,11 @@ void controlsystem(){
   All three motors are going in the startpositionmode.
   ----------------------------------------------------------------------------- */    
   maxon1->start_position_mode();
-  this_thread::sleep_for(chrono::milliseconds(1000));      
+  this_thread::sleep_for(chrono::milliseconds(2000));      
   maxon2->start_position_mode();
-  this_thread::sleep_for(chrono::milliseconds(1000));
+  this_thread::sleep_for(chrono::milliseconds(2000));
   maxon4->start_position_mode();
-  this_thread::sleep_for(chrono::milliseconds(1000));
+  //this_thread::sleep_for(chrono::milliseconds(1000));
   std::this_thread::sleep_for(std::chrono::milliseconds(500));  // wait 500 milliseconds, because otherwise the xsens can enter the configuration mode
 
   filter->add_data(ruwe_data, filtered_data);
@@ -305,30 +316,37 @@ void controlsystem(){
   
   FtoW->add_data(pid_data, FtoW_data, complementary_data, xsens_data);
 
-
+  vlotter->start_reading();
   //Serial * m_serial = new Serial("/dev/xsense", 9600);
   //Xsens * m_xsens = new Xsens(); //initialise class Xsens
   //Sensor * de_sensor = new Sensor(m_xsens,m_serial);
 
   //m_xsens->m_xsens_state_data = xsens_data; //(0)
-
+  DataStore::FilteredData * vlotter_data = new DataStore::FilteredData();
+    DataStore::RealData * vlotter_real_data = new DataStore::RealData();
   //de_sensor->start_receiving();
   int counter_control_front = 4;        //80Hz waar de loop op loopt
   //int counter_control_back = 8;
   while (true) {
     std::chrono::high_resolution_clock::time_point t1= std::chrono::high_resolution_clock::now();
     de_sensor->get_data();
+    vlotter_data->filtered_angle_left = vlotter->get_angle_deg(ENCODER_LEFT);
+    vlotter_data->filtered_angle_right = vlotter->get_angle_deg(ENCODER_RIGHT);
+    //vlotter_real_data->Real_height = vlotter->get_angle_deg(ENCODER_RIGHT);
+    
+    //filtered_data->PutFilteredData(vlotter_data);
     
     if (counter_control_front == 0){     //Voorvleugels lopen op 20Hz
       filter->filter_data();
       com_filter->CalculateRealHeight();            
       PIDAAN->PID_in();
-      FtoW->MMA();
+      FtoW->MMA(power_input);
+      
+      
       
       maxon1->move();
       maxon2->move(); 
       maxon4->move();
-      this_thread::sleep_for(chrono::milliseconds(5));
       counter_control_front = 5;
     }
 //    if (counter_control_back == 0){ //achtervleugel op 10 Hz
@@ -350,9 +368,13 @@ void controlsystem(){
 }
 
 int main(int argc, const char** argv) { 
+  typedef std::chrono::microseconds ms;
+  typedef std::chrono::milliseconds mls;
   time_t start = time(0);
   
   std::thread thread_controlsystem(controlsystem);
+  canbus_bms->start(0);
+  canbus_driver->start(0);
   std::thread thread_sensor(sensor);
   
   //Leds us first make the led blink before we do anything else
@@ -369,13 +391,13 @@ int main(int argc, const char** argv) {
    
   //Initiate the two files for logging
   ofstream file;
-  file.open("/root/logfiles/power_log_test_06_07.csv", std::ios::app);
+  file.open("/root/logfiles/power_log_test_06_14.csv", std::ios::app);
   
   ofstream driver_file;
-  driver_file.open("/root/logfiles/driver_log_test_06_07.csv", std::ios::app);
+  driver_file.open("/root/logfiles/driver_log_test_06_14.csv", std::ios::app);
   
   ofstream control_file;
-  control_file.open("/root/logfiles/control_log_test_06_07", std::ios::app);
+  control_file.open("/root/logfiles/control_log_test_06_13.csv", std::ios::app);
   
   int loop_counter = 0;
   //buffers for driver data;
@@ -386,9 +408,14 @@ int main(int argc, const char** argv) {
     this_thread::sleep_for(chrono::milliseconds(100));
   }
   stop_leds();
+  std::chrono::high_resolution_clock::time_point t1, t2;
+  ms duration;
   while (true){
+    
+    t1 = std::chrono::high_resolution_clock::now();
+
     loop_counter++;
-    this_thread::sleep_for(chrono::milliseconds(50));
+    this_thread::sleep_for(chrono::milliseconds(30));
 
     //Get current speed and update driver_tx
     generate_driver_message(driver_tx, get_speed());    
@@ -399,23 +426,29 @@ int main(int argc, const char** argv) {
     
     update_leds();
     
+    if(loop_counter%30 == 1){
+      motor_state = update_motor();
+      if (motor_state==false){
+        ioctl(canbus_driver->status()->file_descriptor, TCFLSH, 1);
+      }
+    }
+    
     if (loop_counter%10 == 1){
-            
-      motor_state = update_motor();    
+      //adam_6017->read_counter(5);
+      //motor_state = update_motor();  
+ 
       
+      power_input->driver.motor_speed = (float)motor->values.rotor_speed;
       driver_file<<motor_state<<","<<seconds_since_start(start)<<","<<(int)motor->values.driver_temp<<","<<motor->values.link_voltage<<","<<motor->values.phase_current<<","<<motor->values.motor_power<<","<<motor->values.rotor_speed
-          <<","<<motor->values.supply_current<<","<<motor->values.supply_voltage<<","<<motor->values.torque<<","<<(int)motor->values.motor_mode<<","<<(int)get_speed()<<"\n"<<flush; 
+          <<","<<power_input->driver.motor_speed/216<<","<<motor->values.supply_current<<","<<motor->values.supply_voltage<<","<<motor->values.torque<<","<<(int)motor->values.motor_mode<<","<<(int)get_speed()<<"\n"<<flush; 
       
       file<<seconds_since_start(start)<<","<<power_input->battery.max_temp << ","<<power_input->battery.total_current << ","<<power_input->battery.total_voltage << ","
           <<power_input->battery.state_of_charge << ","<<user_input->steer.raw_throttle<<"\n"<<flush;
       
-     DataStore *m_PID_data;
-     DataStore *m_complementary_data;
-     DataStore *m_xsens_state_data;
      
-     DataStore::PIDDataTotal log_OUTPUT_PID  = m_PID_data-> GetPIDData(); 
-     DataStore::RealData log_INPUT_PID = m_complementary_data-> GetComplementaryData();
-     DataStore::XsensData log_xsens = m_xsens_state_data->GetXsensData();
+     DataStore::PIDDataTotal log_OUTPUT_PID  = pid_data-> GetPIDData(); 
+     DataStore::RealData log_INPUT_PID = complementary_data-> GetComplementaryData();
+     DataStore::XsensData log_xsens = xsens_data->GetXsensData();
      
      control_file<<seconds_since_start(start)<<log_OUTPUT_PID.Force_height << ","<<log_OUTPUT_PID.Force_pitch << ","<<log_OUTPUT_PID.Force_roll << ","
          <<log_INPUT_PID.Real_height << ","<<log_INPUT_PID.Real_pitch<< ","<<log_INPUT_PID.Real_roll<< ","
@@ -427,6 +460,6 @@ int main(int argc, const char** argv) {
       
       write_to_screen();
     } 
-  }
+   }
   return 0;
 }

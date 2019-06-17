@@ -13,6 +13,7 @@
 
 #include "../DataStore.h" 
 #include "Xsens.h"
+#include "../Vlotter/Vlotter.hpp"
 
 using namespace std;
 
@@ -26,8 +27,8 @@ public:
     virtual ~Sensor();
 
 
-    Sensor(DataStore * xsens_state_data, DataStore * raw_data)
-        : xsens_state_data_(xsens_state_data), raw_data_(raw_data) {
+    Sensor(DataStore * xsens_state_data, DataStore * raw_data, Control::Vlotter * vlotter)
+        : xsens_state_data_(xsens_state_data), raw_data_(raw_data), vlotter_(vlotter) {
       sensor_value = new DataStore::sensor_struct;
     };
     /**
@@ -42,6 +43,7 @@ private:
     DataStore * const raw_data_;
     DataStore *xsens_state_data_;
     DataStore::sensor_struct * sensor_value;
+    Control::Vlotter * vlotter_;
 
 };
 }

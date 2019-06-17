@@ -20,8 +20,8 @@ MIO::Control::PID_caller::PID_caller(){
   pid_roll = new PID();
   pid_height = new PID();
   pid_pitch = new PID();
+  file.open("/root/logfiles/pd_log_test_06_07.csv");
 }
-
 
 MIO::Control::PID_caller::~PID_caller() {
 }
@@ -30,11 +30,14 @@ void MIO::Control::PID_caller::PID_in(structures::FlyMode fly_mode){
   DataStore::RealData inputdata = m_complementary_data->GetComplementaryData();
   DataStore::PIDDataTotal PIDData;
   
-  pid_roll->set_PID_roll(STATE8);
+  pid_roll->set_PID_roll(STATE7);
   PIDData.Force_roll = pid_roll->calculate(0, inputdata.Real_roll);
 
-  pid_pitch->set_PID_pitch(STATE5);            //0, val = reference, previous value
+  pid_pitch->set_PID_pitch(STATE1);            //0, val = reference, previous value
   PIDData.Force_pitch = pid_pitch->calculate(0, inputdata.Real_pitch);
+  
+  pid_height->set_PID_height(STATE1);
+  PIDData.Force_height = pid_height->calculate(0.2, inputdata.Real_height);
 
   switch(fly_mode) {
     case NO_FLY: 
@@ -58,6 +61,14 @@ void MIO::Control::PID_caller::PID_in(structures::FlyMode fly_mode){
       << inputdata.Real_pitch<<" | Height: "<<inputdata.Real_height;
   M_INFO<<"\nPID FORCES: \n"<<"Roll: "<<PIDData.Force_roll<<" | Pitch: "
       << PIDData.Force_pitch<<" | Height: "<<PIDData.Force_height;
+  
+  M_INFO<<"SPLIT VALUES HEIGHT: \n"
+      <<"Pout: "<<pid_height->get_PID_values().Pout<<" | Iout: "<<pid_height->get_PID_values().Iout
+      <<" | Dout: "<< pid_height->get_PID_values().Dout;
+  
+  file<<"SPLIT VALUES ROLL: "
+    <<"Pout: "<<pid_roll->get_PID_values().Pout<<"\tIout: "<<pid_roll->get_PID_values().Iout<<"\tIntegral: "<<pid_roll->get_PID_values().intergral
+    <<"\tDout: "<< pid_roll->get_PID_values().Dout<< "\tRoll: "<<inputdata.Real_roll<<"\nAngle_right: "<<inputdata.Real_height <<"\n"<< flush  ;
 
   //Finally copy the PIDData into the DataStore object
   m_PID_data-> PutPIDData(&PIDData);

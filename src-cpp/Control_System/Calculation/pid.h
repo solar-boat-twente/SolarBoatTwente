@@ -13,14 +13,24 @@
 
 namespace MIO{
 namespace Control{
+
+struct PIDValues {
+  float Pout;
+  float Iout;
+  float Dout;
+  float intergral;
+};
+  
 class PIDImpl {
  public:
-  PIDImpl( float dt, float Kp, float Kd, float Ki, float Fc );
+  PIDImpl( float dt, float Kp, float Kd, float Ki );
   ~PIDImpl();
   
-  void update_values(float dt, float Kp, float Kd, float Ki, float Fc);
+  void update_values(float dt, float Kp, float Kd, float Ki);
   
   float calculate( float setpoint, float pv );
+  
+  PIDValues get_PID_values();
   
  private: 
   float dt_;
@@ -29,12 +39,16 @@ class PIDImpl {
   float Kp_;
   float Kd_;
   float Ki_;
-  float Fc_;
   float pre_error_;
   float integral_;
+  
+  PIDValues PID_values_;
 };
 
 class PID {
+  
+
+  
  public:
   /**
    * Class which is used to calculate the required forces using PID controllers
@@ -51,7 +65,7 @@ class PID {
    *  \\Wait a certain dt.
    */
   PID() {
-    pimpl = new PIDImpl(0,0,0,0,0);
+    pimpl = new PIDImpl(0,0,0,0);
   };
   // Kp -  proportional gain
   // Ki -  Integral gain
@@ -67,8 +81,13 @@ class PID {
   float calculate( float setpoint, float pv );
   ~PID();
   
+  PIDValues get_PID_values();
+  
  private:
   PIDImpl *pimpl;
+  
+  PIDValues PID_values_;
+
 };
 }
 }
