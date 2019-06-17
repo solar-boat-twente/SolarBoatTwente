@@ -33,17 +33,36 @@ enum EncoderNumber{
 class Vlotter{
   
  public:
+  /**
+   * Class defining both the vlotters, one shall start reading out the function using the
+   * start_reading function.
+   * After the thread as started one can get the angle (NOT YET THE HEIGHT) in  radians
+   * using the get_angle_rad. This one is updated every 50 ms (as defined in the nucleo)
+   * @example 
+   * #include "src-cpp/Control_System/Vlotter/Vlotter.hpp"\n
+   * Serial * serial_vlotter = new Serial("/dev/ACM0");\n
+   * Vlotter vlotter(serial_vlotter);\n
+   * vlotter.start_reading();\n
+   * float angle\n
+   * while (true) {\n
+   * angle = get_angle_rad();\n
+   * (Do some other stuff)\n
+   * (wait for some time)\n
+   * }
+   * vlotter.stop_reading();\n
+   * @param serial
+   */
   Vlotter(Serial * serial) : serial_(serial) {
 
   };
   
-  void start_reading(short int delay = 50);
+  void start_reading(short int delay = 0);
   
   void stop_reading();
   
-  float get_angle_deg(EncoderNumber encoder);
+  float get_angle_rad(EncoderNumber encoder);
   
-  float get_height_deg(EncoderNumber encoder);
+  float get_height(EncoderNumber encoder);
   
  private:
   
