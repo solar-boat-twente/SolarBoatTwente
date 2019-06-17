@@ -307,7 +307,7 @@ void controlsystem(){
   maxon2->start_position_mode();
   this_thread::sleep_for(chrono::milliseconds(2000));
   maxon4->start_position_mode();
-  //this_thread::sleep_for(chrono::milliseconds(1000));
+  this_thread::sleep_for(chrono::milliseconds(1000));
   std::this_thread::sleep_for(std::chrono::milliseconds(500));  // wait 500 milliseconds, because otherwise the xsens can enter the configuration mode
 
   filter->add_data(ruwe_data, filtered_data);
@@ -341,8 +341,6 @@ void controlsystem(){
       com_filter->CalculateRealHeight();            
       PIDAAN->PID_in();
       FtoW->MMA(power_input);
-      
-      
       
       maxon1->move();
       maxon2->move(); 

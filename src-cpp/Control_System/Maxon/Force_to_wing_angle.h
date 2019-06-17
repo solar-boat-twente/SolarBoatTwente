@@ -44,7 +44,7 @@ class ForceToWingAngle {
   const float kBackSurface = 0.5*(37297+37930+10794+10794) * 0.000006;
   const float kDensity = 1025; //kg/m3 density salt water
   const int kLiftSlope = 5;
-  const float kZeroLiftAngle =0; //-0.05236;      //radians
+  const float kZeroLiftAngle = 0.08; //-0.05236;      //radians
     
   float velocity_ = 0;
   void calculate_inverse_matrix();

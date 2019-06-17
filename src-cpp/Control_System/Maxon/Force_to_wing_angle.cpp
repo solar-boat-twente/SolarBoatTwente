@@ -75,16 +75,12 @@ void ForceToWingAngle::MMA(structures::PowerInput * power_input) {
    //velocity_ = 4;
    M_INFO<<"Acceleration x: "<<v.acceleration_x << " | Speed x: "<<velocity_;
    
-   if (velocity_>MIN_SPEED){    //snelheid hoger dan 3m/s
+   if (velocity_>MIN_SPEED){    //snelheid hoger dan 2m/s
     
-     
-     
      float left_force = inverse_matrix_MMA_[0][0] * input.Force_height + inverse_matrix_MMA_[0][1] * input.Force_pitch + inverse_matrix_MMA_[0][2] * input.Force_roll;
      float right_force = inverse_matrix_MMA_[1][0] * input.Force_height + inverse_matrix_MMA_[1][1] * input.Force_pitch + inverse_matrix_MMA_[1][2] * input.Force_roll;
      float back_force = inverse_matrix_MMA_[2][0] * input.Force_height + inverse_matrix_MMA_[2][1] * input.Force_pitch + inverse_matrix_MMA_[2][2] * input.Force_roll;
      
-    
-    
      //devide the force by (0.5*density*surface*velocity) to get the lift coefficient 
      float left_lift_coefficient = left_force / (0.5 * kDensity * kLeftSurface * pow(velocity_,2)) ; 
      float right_lift_coefficient = right_force / (0.5 * kDensity * kRightSurface  *pow(velocity_,2)) ;
