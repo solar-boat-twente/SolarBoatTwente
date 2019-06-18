@@ -35,7 +35,7 @@ public:
 
     Sensor(Sensor&&) = delete;
 
-    Sensor&& operator=(Sensor&&) = delete;
+    Sensor& operator=(Sensor&&) = delete;
 
 
     /**

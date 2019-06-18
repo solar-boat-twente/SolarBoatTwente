@@ -194,7 +194,7 @@ void EPOS::Homing(){
     canbus->write_can(&m_StartHoming);
     std::this_thread::sleep_for(std::chrono::milliseconds(1500));
 }
-
+// TODO Make waits configurable (params or from configuration class)
 void EPOS::start_homing(bool home_positive){  
   //One shall first clear the faults and wait for this to be done 
   

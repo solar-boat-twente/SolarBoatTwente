@@ -143,6 +143,7 @@ int CANbus::stop(){
 }
 
 
+// TODO: return reference instead of pointer
 CANbus::CanStatus * CANbus::status(){
   return can_status;
 }
@@ -166,31 +167,31 @@ int CANbus::set_baudrate(unsigned int baudrate) {
  }
 
 
-
+// TODO: delete this
 int CANbus::add_message_(canmsg_t* const message){
-  canmsg_t * new_message = new canmsg_t;
-  *new_message = *message;
-  _add_message(new_message);
+  canmsg_t new_message = *message;
+  _add_message(&new_message);
 }
 
 int CANbus::_read_CAN(){
   //Makes a new dynamic canmsg_t, this is deleted once the message is overwritten.
-  canmsg_t * rx = new canmsg_t;
-  int got = read(file_descriptor, rx, can_status->total_buffer);
+  // TODO: no naked new
+  canmsg_t rx;
+  int got = read(file_descriptor, &rx, can_status->total_buffer);
   
   for(int i = 0; i<got; i++){
-    _add_message(rx);
+    _add_message(&rx);
   }
   
   return got;
 }
 
 /*Private:*/
-int CANbus::_add_message(canmsg_t* rx){
+// TODO: replace argument with const reference
+int CANbus::_add_message(canmsg_t * rx){
   // Update old message
   for(m_canmsg_t &message: received_message){
     if(message.msg->id == rx->id){
-      delete message.msg;
       message.msg = rx;
       message.FIRST_READER = true;
       M_INFO<<"UPDATED MESSAGE WITH ID: "<<(short int)rx->id<<" AND DATA: ";

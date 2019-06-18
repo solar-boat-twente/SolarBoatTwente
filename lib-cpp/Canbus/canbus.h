@@ -22,6 +22,7 @@
 
 namespace MIO {
 
+// TODO: constexprs
 #define STD_CAN_DELAY 500 //delay between can searches in ms
 #define STD_BAUD 250 // standard baudrate
 #define STD_BUFFER 100
@@ -49,33 +50,34 @@ Example:
 class CANbus {
   
  public:
+   // TODO: use uint16_t or something
   struct CanStatus {
-  // Baudrate of the CANbus in bits so 250kb/s is 250
-  unsigned int baudrate;
+    // Baudrate of the CANbus in bits so 250kb/s is 250
+    unsigned int baudrate;
 
-  // Name of the device ex: "can0", "can1" 
-  const char * device;
+    // Name of the device ex: "can0", "can1" 
+    const char * device;
 
-  // Amount of buffer left before max length of buffer is gone
-  // TODO(Sander): Implement the use of this
-  unsigned int buffer_left;
+    // Amount of buffer left before max length of buffer is gone
+    // TODO(Sander): Implement the use of this
+    unsigned int buffer_left;
 
-  // Amount the total buffer was initially set to
-  // TODO(Sander): Implemenent the use of this
-  unsigned int total_buffer;
+    // Amount the total buffer was initially set to
+    // TODO(Sander): Implemenent the use of this
+    unsigned int total_buffer;
 
-  // Amount of times something was read two time without needing to.
-  // TODO(Sander): Implement the use of this
-  unsigned int double_reads;
+    // Amount of times something was read two time without needing to.
+    // TODO(Sander): Implement the use of this
+    unsigned int double_reads;
 
-  // True if the CANbus is currently running, false otherwise
-  bool status;
+    // True if the CANbus is currently running, false otherwise
+    bool status;
   
-  // The standard file descriptor
-  int file_descriptor = -1;
+    // The standard file descriptor
+    int file_descriptor = -1;
   
-  // True if the canbus has been succesfully opened
-  bool open;
+    // True if the canbus has been succesfully opened
+    bool open;
   };
 
   const char STANDARD_MESSAGE[5] = {'c', 'p', 'l', '2', '5'}; //'vo
@@ -106,8 +108,10 @@ class CANbus {
   CANbus(const char * device_name, unsigned int buffer_size = STD_BUFFER, unsigned int baudrate = STD_BAUD, int flag = STD_FLAG);
   
   
+  // TODO: use in constructor
   int open_can(int flag = O_RDWR);
   
+  // TODO: use in desctructor
   int close_can();
   
   /*
@@ -194,6 +198,7 @@ class CANbus {
   
   std::vector<CANbus::m_canmsg_t> received_message;
 
+  // TODO: don't use pointer
   CanStatus *can_status = new CanStatus;  
   
   int file_descriptor = -1;

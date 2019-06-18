@@ -115,6 +115,8 @@ class Debug
 //typedef  debug::Debug(__FUNCTION__, "HELLO: ", "INFO", true) MY_INFO;
 }
 #ifdef PRETTY_PRINT
+// TODO: check if this works, but operator<< may need to be const
+// constexpr debug::Debug M_INFO = debug::Debug(__PRETTY_FUNCTION__, KBLU, INFO_STR, DEBUG_INFO)
 #define M_INFO debug::Debug(__PRETTY_FUNCTION__, KBLU, INFO_STR, DEBUG_INFO)
 #define M_WARN debug::Debug(__PRETTY_FUNCTION__, KYEL, WARN_STR, DEBUG_WARN)
 #define M_ERR debug::Debug(__PRETTY_FUNCTION__, KRED, ERR_STR, DEBUG_ERR)
