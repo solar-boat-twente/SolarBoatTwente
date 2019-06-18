@@ -24,6 +24,9 @@ using namespace MIO;
 using namespace Control;
 namespace MIO{
 namespace Control{
+
+// TODO: make this const
+
 uint8_t EPOS_SHUTDOWN[8] = {0x2b, 0x40, 0x60, 0x00, 0x06, 0x00, 0x00, 0x00};        //voorkomen dat je niet nog in een andere mode zit
     
 uint8_t EPOS_SWITCH_ON[8] = {0x2b, 0x40, 0x60, 0x00, 0x0f, 0x00, 0x00, 0x00}; //enable de motorcontroller (groene ledje constant aan)
@@ -81,16 +84,17 @@ can.read?
 ----------------------------------------------------------------------------- */ 
 canmsg_t EPOS::create_CAN_msg(int id, int length, char * data){
   canmsg_t output;
-  output.id = 0x600+1;
+  output.id = id;
   output.length = length;
-  memcpy(&output.data[0], data, length);
+  memcpy(output.data, data, length);
   return output;
   
 }
 
 
+// TODO: replace memcpy(&foo.x[0], ..) --> memcpy(foo.x, ...)
 void EPOS::build_CAN_messages_() {
-  shutdown_.id = 0x600+NODE_ID;
+  shutdown_.id = 0x600 + NODE_ID;
   shutdown_.length = 8;
   memcpy(&shutdown_.data[0],(char*)EPOS_SHUTDOWN, 8);
   
@@ -153,7 +157,7 @@ void EPOS::Homing(){
     m_Clear_Fault.length = 8;
     memcpy(&m_Clear_Fault.data[0],(char*)Clear_Fault_Data, 8);
     canbus->write_can(&m_Clear_Fault);
-   std::this_thread::sleep_for(std::chrono::milliseconds(1500));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
    
     canmsg_t m_Homing_Mode; 
     m_Homing_Mode.id = 0x600+NODE_ID;
@@ -190,7 +194,7 @@ void EPOS::Homing(){
     canbus->write_can(&m_StartHoming);
     std::this_thread::sleep_for(std::chrono::milliseconds(1500));
 }
-
+// TODO Make waits configurable (params or from configuration class)
 void EPOS::start_homing(bool home_positive){  
   //One shall first clear the faults and wait for this to be done 
   
@@ -254,6 +258,7 @@ With tel we built in a test to see if all the can messages are written on the
 CAN line. 
 ----------------------------------------------------------------------------- */
 
+// TODO: make wait times configurable -- constexpr size_t kHomingWaitTime = ...;, or as a parameter
 void EPOS::start_position_mode(){
     //int tel=0;
   
@@ -277,13 +282,13 @@ void EPOS::start_position_mode(){
   
 }  //end of StartPositionMode 
 
+// TODO: replace magic numbers --> std::numeric_limits for 65536
 float EPOS::get_angle_from_podmeter() {
   float button_position = (float)adam_6017->read_counter(5)/65536 - 0.5;
   
   return button_position * POSITION_BUTTON_QUARTERCIRCLE_MULTIPLIER;
 
 }
-
 
 void EPOS::move(){
     
@@ -296,6 +301,9 @@ void EPOS::move(){
     //366889 qc bij 1 rad hoekverdraaiing
   //float quartercircles= (-366889/alphas.Wing_right);
 
+  // TODO: refactor into something better --> derive from EPOS, or use parameters/members
+  // Use enum class to keep track of which wing this EPOS manages,
+  // and set quartercircles appropriately
   switch (NODE_ID) {
     case 1:   //maximale hoeveelheid qc die we positief kunnen maken is 1000000 dit hoort bij 0.5 user_quartercircles //node 1 is rechts, node 2 is links
       quartercircles = ((alphas.Wing_left*180/3.1415)*10000) ;

@@ -22,7 +22,7 @@
 using namespace MIO;
 using namespace std;
 
-Serial::Serial(const char port[], int baudrate) {
+Serial::Serial(const std::string& port, int baudrate) {
   file_descriptor = open(port, O_FLAGS);
   
   
@@ -40,6 +40,7 @@ Serial::Serial(const char port[], int baudrate) {
 Serial::~Serial(){
   M_WARN<<"CLOSING THE SERIAL PORT";
   serial_status->status = false;
+  close(file_descriptor);
 }
 
 int MIO::Serial::read_bytes(uint8_t buf[], short int max_bytes) {

@@ -40,6 +40,7 @@ xsens::Xsens::Xsens(const Xsens& orig) {
 xsens::Xsens::~Xsens() {
 }
 
+// TODO: replace with *reinterpret_cast<float*>(loc), with correct endianness
 float xsens::Xsens::pointer2float(char loc[]){
     union {
         char c[4];
@@ -57,63 +58,63 @@ bytes excluding the preamble are summed and the lower byte value of the result
 equals zero, the message is valid and it may be processed. The checksum value 
 of the message should be included in the summation. 
 ------------------------------------------------------------------------------*/
-bool xsens::Xsens::parse_message(uint8_t byte[]) {
+bool xsens::Xsens::parse_message(const uint8_t byte[]) {
   //xsens::XsensParser enumerator;
   //xsens::XsensParser * pointer_enum = &enumerator;
   //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  Parser->Message = Xsens_PREAMBLE;
+  Parser->Message = XsensMessage::Xsens_PREAMBLE;
   //printf("testjeee\r\n");
   int d=0;
   int byte_counter = 0;
   while (d<6){
     switch(Parser->Message){
-      case Xsens_PREAMBLE:
+      case XsensMessage::Xsens_PREAMBLE:
         //printf("tstje2");
         M_INFO<<"PREAMBLE; byte counter: "<<byte_counter;
 
         if (byte[byte_counter]==0xFA) {
           Parser->CHECKSUM = 0x00; //Preamble doet niet mee met de checksum vandaar 0x00
-          Parser->Message = Xsens_BID;
+          Parser->Message = XsensMessage::Xsens_BID;
           d++;
         }
         //d = 6;
         break;
 
-      case Xsens_BID:
+      case XsensMessage::Xsens_BID:
         if (byte[byte_counter]==0xFF) {
           Parser->CHECKSUM = byte[byte_counter]; //iedere keer de byte bij de checksum optellen
-          Parser->Message = Xsens_MID;
+          Parser->Message = XsensMessage::Xsens_MID;
           d++;
         } else {
           Parser->Succesfull_received = 0;
-          Parser->Message = Xsens_PREAMBLE;
+          Parser->Message = XsensMessage::Xsens_PREAMBLE;
           d=0;
           }
         break;
 
-      case Xsens_MID:
+      case XsensMessage::Xsens_MID:
         if (byte[byte_counter]==0x36) {
           Parser->CHECKSUM += byte[byte_counter];
-          Parser->Message = Xsens_LENGTH;
+          Parser->Message = XsensMessage::Xsens_LENGTH;
          // printf("MID\r\n");
           d++;
         } else{
           Parser->Succesfull_received = 0;
-          Parser->Message = Xsens_PREAMBLE;
+          Parser->Message = XsensMessage::Xsens_PREAMBLE;
           d=0;
         }
         break;
 
-      case Xsens_LENGTH:
+      case XsensMessage::Xsens_LENGTH:
         Parser->CHECKSUM += byte[byte_counter];
         Parser->DATA_length = (int)byte[byte_counter]; //lengte is gelijk aan de waarde in de byte (hier omgezet naar een integer)
-        Parser->Message = Xsens_DATA; //volgende stap is naar de data
+        Parser->Message = XsensMessage::Xsens_DATA; //volgende stap is naar de data
         Parser->DATA_counter = 0; //voordat we naar de data gaan ook de counter op 0 zetten zodat je straks de lengte met de counter kan vergelijken
         //printf("LENGTH\r\n");
         d++;
         break;
 
-      case Xsens_DATA:
+      case XsensMessage::Xsens_DATA:
         if (Parser->DATA_counter < Parser->DATA_length){
           Parser->CHECKSUM += byte[byte_counter];
           Parser->DATA[Parser->DATA_counter] = byte[byte_counter];
@@ -121,12 +122,12 @@ bool xsens::Xsens::parse_message(uint8_t byte[]) {
         };
 
         if (Parser->DATA_length == Parser->DATA_counter){
-          Parser->Message = Xsens_CHECKSUM;
+          Parser->Message = XsensMessage::Xsens_CHECKSUM;
         }
         //printf("DATA\r\n");
         break;
 
-      case Xsens_CHECKSUM:
+      case XsensMessage::Xsens_CHECKSUM:
         Parser->CHECKSUM += byte[byte_counter];
         std::cout<<"CHECKSUM from Checksum: "<<Parser->CHECKSUM;
         if (Parser->CHECKSUM == 0x00){
@@ -136,13 +137,13 @@ bool xsens::Xsens::parse_message(uint8_t byte[]) {
           return true;
         } else {
           d = 0;
-          Parser->Message = Xsens_PREAMBLE;
+          Parser->Message = XsensMessage::Xsens_PREAMBLE;
         }
 
         break;
 
       default:
-        Parser->Message = Xsens_PREAMBLE;
+        Parser->Message = XsensMessage::Xsens_PREAMBLE;
         d=0;
         break;
     }

@@ -29,6 +29,7 @@ ForceToWingAngle::ForceToWingAngle(const ForceToWingAngle& orig) {
 ForceToWingAngle::~ForceToWingAngle() { }
 
 void ForceToWingAngle::calculate_inverse_matrix() {
+   // TODO: replace magic numbers!
   float matrix_MMA[3][3] = {
         {1, 1, 1},
         {1.54, 1.54, -2.83},
@@ -75,13 +76,15 @@ void ForceToWingAngle::MMA(structures::PowerInput * power_input) {
    velocity_ = 4;
    M_INFO<<"Acceleration x: "<<v.acceleration_x << " | Speed x: "<<velocity_;
    
-   if (velocity_>MIN_SPEED){    //snelheid hoger dan 2m/s
+   if (velocity_ > MIN_SPEED) {    //snelheid hoger dan 2m/s
     
+     // TODO: replace with function like `float compute_force(...)`
      float left_force = inverse_matrix_MMA_[0][0] * input.Force_height + inverse_matrix_MMA_[0][1] * input.Force_pitch + inverse_matrix_MMA_[0][2] * input.Force_roll;
      float right_force = inverse_matrix_MMA_[1][0] * input.Force_height + inverse_matrix_MMA_[1][1] * input.Force_pitch + inverse_matrix_MMA_[1][2] * input.Force_roll;
      float back_force = inverse_matrix_MMA_[2][0] * input.Force_height + inverse_matrix_MMA_[2][1] * input.Force_pitch + inverse_matrix_MMA_[2][2] * input.Force_roll;
      
      //devide the force by (0.5*density*surface*velocity) to get the lift coefficient 
+     // TODO: replace with function like `float compute_lift_coefficient(float area)`
      float left_lift_coefficient = left_force / (0.5 * kDensity * kLeftSurface * pow(velocity_,2)) ; 
      float right_lift_coefficient = right_force / (0.5 * kDensity * kRightSurface  *pow(velocity_,2)) ;
      float back_lift_coefficient = back_force / (0.5 * kDensity * kBackSurface * pow(velocity_,2)) ;
@@ -105,19 +108,15 @@ void ForceToWingAngle::MMA(structures::PowerInput * power_input) {
             << "\nvleugelhoek rechts: "<<output.Wing_right << " | vleugelhoek achter: "<<output.Wing_back;
      
      FtoW_data_->PutWingData(&output);
-     return ;
      /*Now we can calculate the angle that the maxon motor should make in such 
       * a way that the wing is making the right angle.   
       */
-   }
-   else{
+   } else {
     output.Wing_left = -0.07;//left_angle_total - input2.Real_pitch - kZeroLiftAngle;
     output.Wing_right = -0.07;//right_angle_total - input2.Real_pitch - kZeroLiftAngle;
     output.Wing_back = -0.07;//back_angle_total - input2.Real_pitch - kZeroLiftAngle;
     cout << "Else statement bereikt"  << "\r\n";
     cout << "Wing_left in force to wing angle" << output.Wing_left << "\r\n";
     FtoW_data_->PutWingData(&output);
-    return ;  
    }
-   
 }

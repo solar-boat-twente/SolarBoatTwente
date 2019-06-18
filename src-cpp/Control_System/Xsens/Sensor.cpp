@@ -21,7 +21,26 @@ using namespace MIO;
 xsens::Sensor::Sensor():raw_data_(NULL), data_is_op(false) {
 }
 
-xsens::Sensor::~Sensor(){
+xsens::Sensor::Sensor(DataStore * xsens_state_data, DataStore * raw_data, Control::Vlotter * vlotter)
+: xsens_state_data_(xsens_state_data), 
+  raw_data_(raw_data), 
+  vlotter_(vlotter), 
+  sensor_value(new DataStore::sensor_struct)
+{}
+
+xsens::Sensor::Sensor(const Sensor& other) 
+: xsens_state_data_(other.xsens_state_data_),
+  raw_data_(other.raw_data),
+  vlotter_(other.vlotter),
+  sensor_value(new DataStore::sensor_struct(other.sensor_value))
+{}
+
+Sensor xsens::Sensor::operator=(const Sensor& other) {
+  return Sensor(other);
+}
+
+xsens::Sensor::~Sensor() {
+  delete sensor_struct;
 }
 
 void xsens::Sensor::get_data(){

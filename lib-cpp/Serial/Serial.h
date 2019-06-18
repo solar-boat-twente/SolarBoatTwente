@@ -16,6 +16,7 @@
 
 #include <fcntl.h>
 #include <termios.h>
+#include <string>
 
 
 namespace MIO{
@@ -45,6 +46,7 @@ class Serial {
     
     int baudrate;
     
+    // TODO: don't use pointer here
     termios * tty = new termios;
     
   };
@@ -56,12 +58,20 @@ class Serial {
    * @param port port name for the serial example: "/dev/ttyUSB0"
    * @param baudrate speed of the port in kbps, standard is 9600
    */
-  Serial(const char port[20], int baudrate = 9600);
+  Serial(const std::string& port, int baudrate = 9600);
    
   /**
    * Destructor for the Serial port, closes the serial port mostly
    */
   ~Serial();
+   
+  Serial(const Serial&) = delete;
+
+  Serial operator=(const Serial&) = delete;
+
+  Serial(Serial&&) = delete;
+
+  Serial& operator=(Serial&&) = delete;
       
   
   /**
@@ -108,6 +118,7 @@ class Serial {
  */
   int apply_settings_();
   
+  // TODO: don't use pointer
   SerialStatus * const serial_status = new SerialStatus; 
 };
 }
