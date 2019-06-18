@@ -296,12 +296,12 @@ void controlsystem(){
   this_thread::sleep_for(chrono::milliseconds(2000));
   maxon2->start_homing(true);
   this_thread::sleep_for(chrono::milliseconds(2000));
-  //maxon4->start_homing(false);
-  //this_thread::sleep_for(chrono::milliseconds(500));
+  maxon4->start_homing(false);
+  this_thread::sleep_for(chrono::milliseconds(500));
 
   maxon1->check_homing();
   maxon2->check_homing();
-  //maxon4->check_homing();
+  maxon4->check_homing();
 
   /* -----------------------------------------------------------------------------
   All three motors are going in the startpositionmode.
@@ -310,7 +310,7 @@ void controlsystem(){
   this_thread::sleep_for(chrono::milliseconds(2000));      
   maxon2->start_position_mode();
   this_thread::sleep_for(chrono::milliseconds(2000));
-  //maxon4->start_position_mode();
+  maxon4->start_position_mode();
   this_thread::sleep_for(chrono::milliseconds(1000));
   std::this_thread::sleep_for(std::chrono::milliseconds(500));  // wait 500 milliseconds, because otherwise the xsens can enter the configuration mode
 
@@ -348,7 +348,7 @@ void controlsystem(){
       
       maxon1->move();
       maxon2->move(); 
-      //maxon4->move();
+      maxon4->move();
       counter_control_front = 5;
     }
 //    if (counter_control_back == 0){ //achtervleugel op 10 Hz

@@ -111,9 +111,9 @@ void ForceToWingAngle::MMA(structures::PowerInput * power_input) {
       */
    }
    else{
-    output.Wing_left = 0.1396;//-0.07;//left_angle_total - input2.Real_pitch - kZeroLiftAngle;
-    output.Wing_right = 0.1369;//-0.07;//right_angle_total - input2.Real_pitch - kZeroLiftAngle;
-    output.Wing_back = 0.1369;//-0.07;//back_angle_total - input2.Real_pitch - kZeroLiftAngle;
+    output.Wing_left = -0.07;//left_angle_total - input2.Real_pitch - kZeroLiftAngle;
+    output.Wing_right = -0.07;//right_angle_total - input2.Real_pitch - kZeroLiftAngle;
+    output.Wing_back = -0.07;//back_angle_total - input2.Real_pitch - kZeroLiftAngle;
     cout << "Else statement bereikt"  << "\r\n";
     cout << "Wing_left in force to wing angle" << output.Wing_left << "\r\n";
     FtoW_data_->PutWingData(&output);
