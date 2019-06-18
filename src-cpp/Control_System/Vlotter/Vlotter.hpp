@@ -25,6 +25,9 @@ const int VLOTTER_STOP_LENGTH = 2;
 const int VLOTTER_MSG_LENGTH = 4;
 const int VLOTTER_BEAM_LENGTH = 1;
 
+const float PHI_0_ANGLE_LEFT = 5.97775;
+const float PHI_0_ANGLE_RIGHT = 4.70765;
+
 enum EncoderNumber{
   ENCODER_LEFT,
   ENCODER_RIGHT
@@ -60,9 +63,9 @@ class Vlotter{
   
   void stop_reading();
   
-  float get_angle_rad(EncoderNumber encoder);
+  float get_angle_deg(EncoderNumber encoder);
   
-  float get_height(EncoderNumber encoder);
+  float get_height_deg(EncoderNumber encoder);
   
  private:
   

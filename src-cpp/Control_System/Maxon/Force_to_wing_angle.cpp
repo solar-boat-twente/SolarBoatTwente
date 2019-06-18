@@ -69,10 +69,10 @@ void ForceToWingAngle::MMA(structures::PowerInput * power_input) {
    DataStore::AngleWings output;
    DataStore::XsensData v = xsens_state_data_->GetXsensData();
    
-   velocity_ = power_input->driver.motor_speed/216;
+   //velocity_ = power_input->driver.motor_speed/216;
 //   velocity_ = v.velocity_x;
    //velocity_ += v.acceleration_x *0.0125;
-   //velocity_ = 4;
+   velocity_ = 4;
    M_INFO<<"Acceleration x: "<<v.acceleration_x << " | Speed x: "<<velocity_;
    
    if (velocity_>MIN_SPEED){    //snelheid hoger dan 2m/s
@@ -91,10 +91,9 @@ void ForceToWingAngle::MMA(structures::PowerInput * power_input) {
      float back_angle_total = back_lift_coefficient / kLiftSlope;
       
      //calculate the final wing angles*
-     input2.Real_pitch = 0;
-     output.Wing_left = left_angle_total - input2.Real_pitch - kZeroLiftAngle;
-     output.Wing_right = right_angle_total - input2.Real_pitch - kZeroLiftAngle;
-     output.Wing_back  = back_angle_total - input2.Real_pitch - kZeroLiftAngle;
+     output.Wing_left = left_angle_total + input2.Real_pitch - kZeroLiftAngle;
+     output.Wing_right = right_angle_total + input2.Real_pitch - kZeroLiftAngle;
+     output.Wing_back  = back_angle_total + input2.Real_pitch - kZeroLiftAngle;
      
      //Autoput the resulting data neatly
      M_INFO << "acceleration x: "<<v.acceleration_x << " | snelheid x: "<< velocity_ 
@@ -112,9 +111,9 @@ void ForceToWingAngle::MMA(structures::PowerInput * power_input) {
       */
    }
    else{
-    output.Wing_left = -0.07;//left_angle_total - input2.Real_pitch - kZeroLiftAngle;
-    output.Wing_right = -0.07;//right_angle_total - input2.Real_pitch - kZeroLiftAngle;
-    output.Wing_back = -0.07;//back_angle_total - input2.Real_pitch - kZeroLiftAngle;
+    output.Wing_left = 0.1396;//-0.07;//left_angle_total - input2.Real_pitch - kZeroLiftAngle;
+    output.Wing_right = 0.1369;//-0.07;//right_angle_total - input2.Real_pitch - kZeroLiftAngle;
+    output.Wing_back = 0.1369;//-0.07;//back_angle_total - input2.Real_pitch - kZeroLiftAngle;
     cout << "Else statement bereikt"  << "\r\n";
     cout << "Wing_left in force to wing angle" << output.Wing_left << "\r\n";
     FtoW_data_->PutWingData(&output);

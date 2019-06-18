@@ -55,10 +55,10 @@ void Control::Vlotter::reading_thread_(short int delay) {
     encoder_right = bytes_to_int_(&(bytes[2]));
     
     angle_left_ = calculate_angle_(encoder_left);
-    height_left_ = calculate_height_(angle_left_);
+    height_left_ = calculate_height_(PHI_0_ANGLE_LEFT-angle_left_);
     
     angle_right_ = calculate_angle_(encoder_right);
-    height_right_ = calculate_height_(angle_right_);
+    height_right_ = calculate_height_(PHI_0_ANGLE_RIGHT-angle_right_);
       
     
     std::this_thread::sleep_for(std::chrono::milliseconds(delay));
@@ -102,7 +102,8 @@ float Control::Vlotter::calculate_angle_(int value) {
  * @return 
  */
 float Control::Vlotter::calculate_height_(float angle) {
-  return std::sin(angle/180 * 3.1415) * VLOTTER_BEAM_LENGTH;
+    float height = 0.7 * std::cos(angle);
+  return height;  
  }
 
 

@@ -20,8 +20,7 @@ ComplementaryFilter::~ComplementaryFilter() {
 }
 
 void ComplementaryFilter::CalculateRealHeight()
-{
-  
+{  
    float Length_vlotter=0.7;
    float height_left=0;
    float height_right=0;
@@ -34,19 +33,15 @@ void ComplementaryFilter::CalculateRealHeight()
    DataStore::RealData real_data;
    
    // Calculate the height of the left and right side of the boat
-   height_left= sin(input.filtered_angle_left)*VLOTTER_LENGTH;
-   height_right= sin(input.filtered_angle_right)*VLOTTER_LENGTH;
+   height_left = vlot->get_height_deg(Control::ENCODER_LEFT);
+   height_right = vlot->get_height_deg(Control::ENCODER_RIGHT);
    
    // Calculate the roll from the difference in heights
    roll_front=asin((height_left-height_right)*distance_between_vlotters);
    
-   // Calculate the height from the XSens data
-   //height_xsens=input.filtered_Z_accel+input.filtered_Z_accel*pow(dt,2); //TODO: Hier klopt niks van....
-   height_xsens = input.filtered_angle_right;
-   //realData.Real_roll=(roll_front+input.filtered_roll)/2;
-   real_data.Real_roll=input.filtered_roll;
-   real_data.Real_height=height_xsens;//(height_left+height_right+height_xsens)/3; --> Dit is geen complementair filter.
-   real_data.Real_pitch=input.filtered_pitch;
+   real_data.Real_roll = input.filtered_roll;
+   real_data.Real_height = (height_left+height_right)/2;// --> Dit is geen complementair filter.
+   real_data.Real_pitch = input.filtered_pitch;
    M_INFO<<"Roll front equal to: "<< roll_front;
    M_INFO<<"Real height: "<<real_data.Real_height<<" Real Roll: "<<real_data.Real_roll
        <<" Real Pitch: "<<real_data.Real_pitch;

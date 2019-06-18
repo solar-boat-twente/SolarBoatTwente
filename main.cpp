@@ -39,7 +39,10 @@ structures::UserInput * user_input = new structures::UserInput;
 structures::ControlData * control_data = new structures::ControlData;
 structures::TelemetryInput * telemetry_data = new structures::TelemetryInput;
 
-//Open up the data acquisition parts  
+//Open up the data acquisition parts 
+//Serial * vlotter_serial = new Serial("/dev/ttyACM0");
+//    Control::Vlotter vlotter(m_serial);
+//    vlotter.start_reading(10);
 Serial * serial_wheel = new Serial("/dev/steer");
 CANbus * canbus_bms = new CANbus("/dev/can1", 1); //CANbus for both the bms and the maxon motors
 CANbus * canbus_driver = new CANbus("/dev/can0", 1, STD_BAUD, O_RDWR|O_NONBLOCK); //CANbus for only the motor (has to be nonblocking)
@@ -63,6 +66,8 @@ Thread * screen_threads = new Thread;
 
 //Create Temperature Sensor for MIO object
 MIO::TemperatureSensor * temp_sens = new MIO::TemperatureSensor;
+Serial * serial_vlotter = new Serial("/dev/ttyACM0");
+Vlotter * vlotter = new Vlotter(serial_vlotter);
 
 DataStore * xsens_data = new DataStore();
 DataStore * ruwe_data = new DataStore();
@@ -72,14 +77,13 @@ DataStore * pid_data = new DataStore();
 DataStore * FtoW_data = new DataStore();
 
 RawDataFilter * filter = new RawDataFilter();
-ComplementaryFilter * com_filter = new ComplementaryFilter(filtered_data, complementary_data);
+ComplementaryFilter * com_filter = new ComplementaryFilter(filtered_data, complementary_data,vlotter);
 PID_caller * PIDAAN = new PID_caller();
 ForceToWingAngle * FtoW = new ForceToWingAngle();
 Serial * m_serial = new Serial("/dev/xsense", 9600);
 xsens::Xsens * m_xsens = new xsens::Xsens();
     
-Serial * serial_vlotter = new Serial("/dev/ttyACM0");
-Vlotter * vlotter = new Vlotter(serial_vlotter);
+
 
 xsens::Sensor * de_sensor = new xsens::Sensor(xsens_data, ruwe_data, vlotter);
 
@@ -292,12 +296,12 @@ void controlsystem(){
   this_thread::sleep_for(chrono::milliseconds(2000));
   maxon2->start_homing(true);
   this_thread::sleep_for(chrono::milliseconds(2000));
-  maxon4->start_homing(false);
-  this_thread::sleep_for(chrono::milliseconds(500));
+  //maxon4->start_homing(false);
+  //this_thread::sleep_for(chrono::milliseconds(500));
 
   maxon1->check_homing();
   maxon2->check_homing();
-  maxon4->check_homing();
+  //maxon4->check_homing();
 
   /* -----------------------------------------------------------------------------
   All three motors are going in the startpositionmode.
@@ -306,7 +310,7 @@ void controlsystem(){
   this_thread::sleep_for(chrono::milliseconds(2000));      
   maxon2->start_position_mode();
   this_thread::sleep_for(chrono::milliseconds(2000));
-  maxon4->start_position_mode();
+  //maxon4->start_position_mode();
   this_thread::sleep_for(chrono::milliseconds(1000));
   std::this_thread::sleep_for(std::chrono::milliseconds(500));  // wait 500 milliseconds, because otherwise the xsens can enter the configuration mode
 
@@ -323,7 +327,7 @@ void controlsystem(){
 
   //m_xsens->m_xsens_state_data = xsens_data; //(0)
   DataStore::FilteredData * vlotter_data = new DataStore::FilteredData();
-    DataStore::RealData * vlotter_real_data = new DataStore::RealData();
+  DataStore::RealData * vlotter_real_data = new DataStore::RealData();
   //de_sensor->start_receiving();
   int counter_control_front = 4;        //80Hz waar de loop op loopt
   //int counter_control_back = 8;
@@ -344,7 +348,7 @@ void controlsystem(){
       
       maxon1->move();
       maxon2->move(); 
-      maxon4->move();
+      //maxon4->move();
       counter_control_front = 5;
     }
 //    if (counter_control_back == 0){ //achtervleugel op 10 Hz

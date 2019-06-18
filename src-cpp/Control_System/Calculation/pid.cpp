@@ -74,7 +74,7 @@ void PID::set_PID_height(structures::PIDState state){
       M_INFO<<"Height State 1 is used";
       break;
     case STATE2:
-      pimpl->update_values(0.0125,900,200,0); //demping toevoegen zodat er tijd is om de achtervleugel bij te stellen
+      pimpl->update_values(0.0125,27000,0,0); //demping toevoegen zodat er tijd is om de achtervleugel bij te stellen
       M_INFO<<"Height State 2 is used";
       break;
     case STATE3: 

@@ -9,6 +9,7 @@
 #define	COMPLEMENTARYFILTER_H
 
 #include "../DataStore.h"
+#include "../../Control_System/Vlotter/Vlotter.hpp"
 
 #include <stdio.h>      /* printf */
 #include <math.h>       /* sin */
@@ -29,8 +30,8 @@ class ComplementaryFilter {
    * @param filtered_data Pointer to a DataStore object including filtered data
    * @param complementary_data Pointer to DataStore object in which the complemenatary data will be written.
    */
-  ComplementaryFilter(DataStore * filtered_data, DataStore * complementary_data)
-    : m_filtered_data(filtered_data), m_complementary_data(complementary_data) {
+  ComplementaryFilter(DataStore * filtered_data, DataStore * complementary_data,Vlotter * vlotter)
+    : m_filtered_data(filtered_data), m_complementary_data(complementary_data),vlot(vlotter) {
       
     };
   ComplementaryFilter(const ComplementaryFilter& orig);
@@ -45,6 +46,7 @@ class ComplementaryFilter {
  private:
   DataStore * const m_filtered_data;
   DataStore * const m_complementary_data;
+  Vlotter * const vlot;
 };
 }
 }
