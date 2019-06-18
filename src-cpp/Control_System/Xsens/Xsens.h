@@ -18,7 +18,7 @@
 namespace MIO{
 namespace xsens{
 
-enum XsensMessage{
+enum class XsensMessage {
   Xsens_PREAMBLE,
   Xsens_BID,
   Xsens_MID,
@@ -27,7 +27,8 @@ enum XsensMessage{
   Xsens_CHECKSUM  
 };
 
-enum XsensStates{
+// TODO replace with enum class
+enum XsensStates {
   ID,
   Euler_Angle,
   Acceleration,
@@ -36,7 +37,7 @@ enum XsensStates{
 };
 
 struct XsensParser{
-  enum XsensMessage Message;
+  enum class XsensMessage Message;
   int DATA_counter;
   int DATA_length;
   char DATA[256];
@@ -58,6 +59,8 @@ struct XsensParser{
 //  float longitude;            
 //};
 
+// TODO: this is not being used?
+// TODO: make array lengths configurable?
 struct Array_Output{
   float arr_roll[10];
   float arr_yaw[10];
@@ -87,7 +90,7 @@ public:
    * @param Parser this is a pointer that points to the structure XsensParser
    * @param byte the message is separated on the basis of bytes
    */
-  bool parse_message(uint8_t byte[]);
+  bool parse_message(const uint8_t byte[]);
   
   /**
    * In this function the data is sorted in such a way that the different data types are sorted

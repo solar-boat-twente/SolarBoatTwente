@@ -15,31 +15,38 @@
 #include "Xsens.h"
 #include "../Vlotter/Vlotter.hpp"
 
-using namespace std;
-
 namespace MIO{
 namespace xsens{
+
 class Sensor {
 
 public:
     
     Sensor();   // Voor testen met data in een file
+
+    Sensor(DataStore * xsens_state_data, DataStore * raw_data, Control::Vlotter * vlotter);
+
     virtual ~Sensor();
 
+    // rule of 5:
+    Sensor(const Sensor&)
 
-    Sensor(DataStore * xsens_state_data, DataStore * raw_data, Control::Vlotter * vlotter)
-        : xsens_state_data_(xsens_state_data), raw_data_(raw_data), vlotter_(vlotter) {
-      sensor_value = new DataStore::sensor_struct;
-    };
+    Sensor operator=(const Sensor&);
+
+    Sensor(Sensor&&) = delete;
+
+    Sensor&& operator=(Sensor&&) = delete;
+
+
     /**
      * Get the data from the xsens and write it to the 
      */
     void get_data();
-    bool data_op();
+    //bool data_op();
 
 private:
     // Alleen voor testen.
-    bool data_is_op;
+    //bool data_is_op;
     DataStore * const raw_data_;
     DataStore *xsens_state_data_;
     DataStore::sensor_struct * sensor_value;

@@ -9,7 +9,6 @@
 
 class DataStore {
   
-
     public:
         
         struct sensor_struct {
@@ -63,18 +62,18 @@ class DataStore {
         
         virtual ~DataStore();
         
-        void PutSensorData(sensor_struct * data);
-        void PutFilteredData(FilteredData * data3);
-        void PutComplementaryData(RealData * data4);
-        void PutPIDData(PIDDataTotal * data5);
-        void PutWingData(AngleWings * data6);
-        void PutXsensData(XsensData * data7);
-        sensor_struct GetSensorData();
-        FilteredData GetFilteredData();
-        RealData GetComplementaryData();
-        PIDDataTotal GetPIDData();
-        AngleWings GetWingData();
-        XsensData GetXsensData();
+        void PutSensorData(sensor_struct * const data);
+        void PutFilteredData(FilteredData * const data3);
+        void PutComplementaryData(RealData * const data4);
+        void PutPIDData(PIDDataTotal * const data5);
+        void PutWingData(AngleWings * const data6);
+        void PutXsensData(XsensData * const data7);
+        sensor_struct GetSensorData() const;
+        FilteredData GetFilteredData() const;
+        RealData GetComplementaryData() const;
+        PIDDataTotal GetPIDData() const;
+        AngleWings GetWingData() const;
+        XsensData GetXsensData() const;
 
     private:
         XsensData xsens_data;
