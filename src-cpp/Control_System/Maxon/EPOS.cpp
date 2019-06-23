@@ -19,8 +19,6 @@ using namespace MIO;
 using namespace control;
 
 
-std::string EPOS::file_name = " ";
-
 /* -----------------------------------------------------------------------------
 You are going to open the function create_CAN_message. In this function, a 
 message is made that consists of the right NODE_ID, Length and the data. 
@@ -55,13 +53,14 @@ canmsg_t EPOS::create_CAN_msg(int id, int length, const uint8_t data[]){
   output.id = id;
   output.length = length;
   memcpy(output.data, data, length);
-  return output;
+  return output; 
   
 }
-EPOS::EPOS(CANbus * can, UI::ADAM * adam, int node_id, DataStore * const control_data) 
+
+EPOS::EPOS(CANbus * can, UI::ADAM * adam, int node_id, DataStore * const control_data, std::time_t now) 
   : canbus_(can), 
     adam_6017(adam), 
-    control_data_(control_data) 
+    control_data_(control_data)
 {      
   node_id_ = node_id;
   write_id_ = 0x600 + node_id;
@@ -70,13 +69,16 @@ EPOS::EPOS(CANbus * can, UI::ADAM * adam, int node_id, DataStore * const control
   moving_allowed = false;
   
   build_CAN_messages_();
+  file_name_ = "/root/logfiles/epos_" + std::to_string(now) + ".txt";
+  std::cout<<file_name_;
   
-  if (file_name == " "){
-    std::time_t now = time(nullptr);
-    file_name = "/root/logfiles/epos_" + std::to_string(now) + ".txt";
-  }
-  
-  file_.open(file_name, std::ios::app);  
+  file_.open(file_name_, std::ios::app);  
+}
+
+EPOS::EPOS()
+ :  canbus_(nullptr), 
+    adam_6017(nullptr), 
+    control_data_(nullptr){
 }
 
 EPOS::~EPOS(){

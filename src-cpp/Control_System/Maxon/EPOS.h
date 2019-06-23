@@ -76,7 +76,9 @@ class EPOS{
   
   
  public:
-  EPOS(CANbus * can, UI::ADAM * adam, int node_id, DataStore * control_data);
+  EPOS(CANbus * can, UI::ADAM * adam, int node_id, DataStore * control_data, std::time_t now);
+  
+  EPOS();
   
   ~EPOS();
    
@@ -154,7 +156,7 @@ class EPOS{
   
   std::ofstream file_;
   
-  static std::string file_name;
+  std::string file_name_;
   
 };
 }

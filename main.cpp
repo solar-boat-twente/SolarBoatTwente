@@ -90,9 +90,11 @@ xsens::Xsens * xsens_object = new xsens::Xsens(control_data);
 
 xsens::Sensor * sensor = new xsens::Sensor(control_data, vlotter);
 
-EPOS * maxon_right = new EPOS(canbus_bms, adam_6017, 1, control_data);
-EPOS * maxon_left = new EPOS(canbus_bms,adam_6017, 2, control_data);
-EPOS * maxon_back = new EPOS(canbus_bms,adam_6017,4, control_data);
+time_t now = time(nullptr);
+
+EPOS * maxon_right = new EPOS(canbus_bms, adam_6017, 1, control_data, now);
+EPOS * maxon_left = new EPOS(canbus_bms,adam_6017, 2, control_data, now);
+EPOS * maxon_back = new EPOS(canbus_bms,adam_6017,4, control_data, now);
 
 
 void initiate_structures(){
