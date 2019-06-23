@@ -18,42 +18,43 @@
 using namespace std;
 using namespace MIO;
 
-xsens::Sensor::Sensor():raw_data_(NULL), data_is_op(false) {
+
+
+xsens::Sensor::Sensor(DataStore * const control_data, control::Vlotter * const vlotter)
+: control_data_(control_data), 
+    vlotter_(vlotter), 
+    sensor_data_(new DataStore::sensor_struct)
+{
+  
 }
 
-xsens::Sensor::Sensor(DataStore * xsens_state_data, DataStore * raw_data, Control::Vlotter * vlotter)
-: xsens_state_data_(xsens_state_data), 
-  raw_data_(raw_data), 
-  vlotter_(vlotter), 
-  sensor_value(new DataStore::sensor_struct)
-{}
-
 xsens::Sensor::Sensor(const Sensor& other) 
-: xsens_state_data_(other.xsens_state_data_),
-  raw_data_(other.raw_data),
-  vlotter_(other.vlotter),
-  sensor_value(new DataStore::sensor_struct(other.sensor_value))
+: control_data_(other.control_data_),
+  vlotter_(other.vlotter_),
+    sensor_data_(new DataStore::sensor_struct)
 {}
 
-Sensor xsens::Sensor::operator=(const Sensor& other) {
-  return Sensor(other);
+xsens::Sensor xsens::Sensor::operator=(const Sensor& other) {
+  return *this;
 }
 
 xsens::Sensor::~Sensor() {
-  delete sensor_struct;
+  delete sensor_data_;
 }
 
-void xsens::Sensor::get_data(){
+void xsens::Sensor::update_data(){
   //get data from xsens
-  DataStore::XsensData x = xsens_state_data_->GetXsensData();
-  M_OK<<"GOTTEN DATA FROM XSENS: CHECK ROLL EQUAL TO: "<<x.roll;
+  DataStore::XsensData xsens_data = control_data_->GetXsensData();
+  M_OK<<"GOTTEN DATA FROM XSENS: CHECK ROLL EQUAL TO: "<<xsens_data.roll;
+  
   
   
   //Convert sensor_values to radials and write it to raw_data Datastore object
-  sensor_value->pitch = x.pitch/180*3.1415;        //0.35 rad = 20 graden 
-  sensor_value->roll = x.roll/180*3.1415;        
-  sensor_value->Z_accel =x.acceleration_z; 
-  sensor_value->angle_left = vlotter_->get_angle_deg(Control::ENCODER_LEFT);   //0.52 rad = 30 graden
-  sensor_value->angle_right = vlotter_->get_angle_deg(Control::ENCODER_RIGHT); 
-  raw_data_->PutSensorData(sensor_value);
+  sensor_data_->pitch = xsens_data.pitch/180*3.1415;        //0.35 rad = 20 graden 
+  sensor_data_->roll = xsens_data.roll/180*3.1415;        
+  sensor_data_->Z_accel =xsens_data.acceleration_z; 
+  sensor_data_->angle_left = vlotter_->get_angle_rad(control::EncoderNumber::ENCODER_LEFT);   //0.52 rad = 30 graden
+  sensor_data_->angle_right = vlotter_->get_angle_rad(control::EncoderNumber::ENCODER_RIGHT); 
+  
+  control_data_->PutSensorData(sensor_data_);
 }

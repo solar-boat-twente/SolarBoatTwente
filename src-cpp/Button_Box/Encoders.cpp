@@ -20,19 +20,26 @@ using namespace UI;
 using namespace structures;
 using namespace std;
 
-ButtonEncoder::ButtonEncoder(Serial* serial):serial_(serial) {
-  button_encoder_status->serial_state = serial->status();
-  if (!button_encoder_status->serial_state->status){
+ButtonEncoder::ButtonEncoder(Serial* const serial, structures::UserInput * const user_input) 
+  : serial_(serial) {
+  button_encoder_status.serial_state = &(serial->get_status());
+  
+  if (!button_encoder_status.serial_state->status){
     M_WARN<<"SERIAL NOT OPENED!";
   } else {
+    start_reading(user_input);
     M_OK<<"BUTTON ENCODER SUCCESSFULLY INITIALIZED ";
   }
 }
 
+ButtonEncoder::~ButtonEncoder(){
+  stop_reading();
+}
+
 int ButtonEncoder::start_reading(structures::UserInput* user_input, short int delay) {
-  if(button_encoder_status->serial_state->status){
-    if(!button_encoder_status->read_state){
-      button_encoder_status->read_state = true;
+  if(button_encoder_status.serial_state->status){
+    if(!button_encoder_status.read_state){
+      button_encoder_status.read_state = true;
       M_OK<<"BUTTON ENCODER WAS STARTED";
       m_reading_thread_ = thread(&ButtonEncoder::reading_thread_, this, user_input, delay);
       return 1;
@@ -46,33 +53,41 @@ int ButtonEncoder::start_reading(structures::UserInput* user_input, short int de
   }  
 }
 
-int ButtonEncoder::get_data_(structures::UserInput* user_input) {
+int ButtonEncoder::stop_reading() {
+  if(button_encoder_status.read_state){
+    button_encoder_status.read_state = false;
+    m_reading_thread_.join();
+    M_OK<<"BUTTON ENCODER WAS STOPPED";
+  } else {
+    M_WARN<<"BUTTON ENCODER WAS ALREADY STOPPED!";
+  }
+}
+
+
+int ButtonEncoder::get_data_(structures::UserInput* const user_input) {
   uint8_t read_bytes[8];
-  int receive_result = serial_->read_stop(read_bytes, BUTTON_STOP_BYTES, BUTTON_STOP_LENGTH, 8);
-  if(receive_result==BUTTON_MSG_LENGTH){
-    std::vector<uint8_t> *data = new std::vector<uint8_t>;
-    for(int i = 0; i<BUTTON_MSG_LENGTH;i++){
-      data->push_back(read_bytes[i]);
-    }
-    parse_data_(data, user_input);
-    delete data;
+  int receive_result = serial_->read_stop(read_bytes, kStandardEncoderStopBytes, kStandardEncoderStopLength, 8);
+  if(receive_result==kButtonMsgLength){
+    std::vector<uint8_t> data;
     
+    for(int i = 0; i<kButtonMsgLength;i++){
+      data.push_back(read_bytes[i]);
+    }
+    
+    parse_data_(data, user_input);
     return 1;
   } else if (receive_result > 0){
     M_ERR<<"BUTTON ENCODER MESSAGE SIZE NOT CORRECT; SIZE EQUAL TO: "<<receive_result<<" ";
     return -1;      
   } else {
     return -1;
-  }
-  
-  
-  
+  }  
 }
 
-int ButtonEncoder::parse_data_(std::vector<uint8_t>* bytes, structures::UserInput* user_input) {
+int ButtonEncoder::parse_data_(std::vector<uint8_t>& bytes, structures::UserInput* const user_input) {
  
     // parse data depending on state of boat from Button Encoder 1
-    switch ((*bytes)[0]*256){
+    switch (bytes[0]){
         case 1:
             user_input->control.PID_roll = structures::STATE1;
             break;
@@ -100,7 +115,7 @@ int ButtonEncoder::parse_data_(std::vector<uint8_t>* bytes, structures::UserInpu
      };
     
        // parse data depending on state of boat from Button Encoder 2
-    switch ((*bytes)[1]*256){
+    switch (bytes[1]){
         case 1:
             user_input->control.PID_pitch = structures::STATE1;
             break;
@@ -128,7 +143,7 @@ int ButtonEncoder::parse_data_(std::vector<uint8_t>* bytes, structures::UserInpu
      };
 
        // parse data depending on state of boat from Button Encoder 3
-    switch ((*bytes)[2]*256){
+    switch (bytes[2]){
         case 1:
             user_input->control.PID_height = structures::STATE1;
             break;
@@ -164,7 +179,7 @@ int ButtonEncoder::parse_data_(std::vector<uint8_t>* bytes, structures::UserInpu
 
 void ButtonEncoder::reading_thread_(structures::UserInput* user_input, short int delay) {
   M_INFO<<"BUTTON ENCODER READING THREAD HAS STARTED WITH DELAY: "<<(long)delay<<"ms ";
-  while(button_encoder_status->read_state){
+  while(button_encoder_status.read_state){
     get_data_(user_input);
     std::this_thread::sleep_for(chrono::milliseconds(delay));
   }

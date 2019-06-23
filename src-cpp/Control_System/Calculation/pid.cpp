@@ -12,7 +12,7 @@
 
 using namespace std;
 using namespace MIO;
-using namespace Control;
+using namespace control;
 using namespace structures;
 //float dt, float Kp, float Kd, float Ki, float Fc
 void PID::set_PID_roll(structures::PIDState state){

@@ -23,23 +23,23 @@ using namespace MIO;
 using namespace std;
 
 Serial::Serial(const std::string& port, int baudrate) {
-  file_descriptor = open(port, O_FLAGS);
+  file_descriptor = open(port.c_str(), O_FLAGS);
   
   
   //get the termios structure from the file_descriptor
-  if(tcgetattr(file_descriptor, serial_status->tty)!=0){
+  if(tcgetattr(file_descriptor, &serial_status.tty)!=0){
     M_ERR<<errno<<" from tcgetattr: "<<strerror(errno);
   } else {
-    make_settings_(serial_status->tty);
+    make_settings_(&serial_status.tty);
     apply_settings_();
     M_INFO<<"OPENED SERIAL DEVICE WITH FILE DESCRIPTOR: "<<file_descriptor;
-    serial_status->status = true;
+    serial_status.status = true;
   }
 }
 
 Serial::~Serial(){
   M_WARN<<"CLOSING THE SERIAL PORT";
-  serial_status->status = false;
+  serial_status.status = false;
   close(file_descriptor);
 }
 
@@ -54,10 +54,6 @@ int MIO::Serial::read_bytes(uint8_t buf[], short int max_bytes) {
   for(int i = 0; i<max_bytes; i++){  // hier blijven we in hangen als we niet de 350 hebben bereikt
     n_read = read(file_descriptor, &m_buffer_, 1);
     buf[i]=m_buffer_;
-    
-    //if(max_bytes>1){
-    //  cout<<BOLD<<"\b\b\b\b\b\b\b\b\b\b\b\b\b\b"<<flush<<"MESSAGE: "<<i<<"/"<<max_bytes;
-    //}
     
     if (n_read<0){
       M_ERR<<"ERROR READING: "<<strerror(errno);
@@ -86,7 +82,7 @@ int MIO::Serial::read_bytes(uint8_t buf[], short int max_bytes) {
   }
 }
 
-int Serial::read_stop(uint8_t buf[], const char stop[], int stop_length, short int max_bytes) {
+int Serial::read_stop(uint8_t buf[],const char stop[], int stop_length, short int max_bytes) {
   uint8_t temp_buffer[max_bytes];
   uint8_t read_byte[1];
   for(int i = 0; i<max_bytes; i++){
@@ -123,7 +119,7 @@ int Serial::write_byte(uint8_t byte) {
 }
 
 
-int Serial::make_settings_(termios * tty) {
+int Serial::make_settings_(termios*  tty) {
     cfsetospeed(tty, (speed_t)B9600);
     cfsetispeed(tty, (speed_t)B9600);
 
@@ -146,7 +142,7 @@ int Serial::make_settings_(termios * tty) {
 
 int Serial::apply_settings_() {
   tcflush(file_descriptor, TCIFLUSH);
-  if ( tcsetattr ( file_descriptor, TCSANOW, serial_status->tty ) != 0) {
+  if ( tcsetattr ( file_descriptor, TCSANOW, &serial_status.tty ) != 0) {
     M_ERR<< errno << " FROM TCSETATTR";
     return -1;
   } else {

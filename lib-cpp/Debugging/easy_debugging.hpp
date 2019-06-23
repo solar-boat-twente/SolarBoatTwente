@@ -33,10 +33,6 @@
 
 #define BOLD  "\e[1m"
 
-#define ERR(x) KRED x RST
-#define WARN(x) KYEL x RST
-#define INFO(x) KBLU x RST
-#define OK(x)   KGRN x RST
 
 #define INFO_STR "INFO"
 #define WARN_STR "WARNING"
@@ -44,11 +40,11 @@
 #define DEBUG_STR "DEBUG"
 #define OK_STR "OK"
 
-#define DEBUG_INFO  true
-#define DEBUG_WARN  true
-#define DEBUG_ERR  true
-#define DEBUG_DEBUG  true
-#define DEBUG_OK  true
+constexpr bool DEBUG_INFO = true;
+constexpr bool DEBUG_WARN = true;
+constexpr bool DEBUG_ERR = true;
+constexpr bool DEBUG_DEBUG = true;
+constexpr bool DEBUG_OK = true;
 
 //#define PRETTY_PRINT
 

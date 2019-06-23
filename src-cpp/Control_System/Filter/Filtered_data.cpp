@@ -13,62 +13,47 @@
 
 using namespace std;
 using namespace MIO;
-using namespace Control;
+using namespace control;
 
 // Constructor die geen file opent.
-RawDataFilter::RawDataFilter(double Fc, double sample_rate) {
-    cout << "Called constructor RuwDataFilter()" << endl;
+RawDataFilter::RawDataFilter(DataStore * const control_data,double Fc, double sample_rate) 
+: control_data_(control_data), filtered_data_(new DataStore::FilteredData){
 
-    // Create a Biquad, lpFilter.
+  // Create a Biquad, lpFilter.
     low_pass_filter = new Biquad(bq_type_highpass, Fc / sample_rate, 0.707, 0);  
     low_pass_filter->setBiquad(bq_type_highpass, Fc / sample_rate, 0.707, 0);
     
-    m_filtered_data_ = new DataStore::FilteredData;
 }
 
 RawDataFilter::~RawDataFilter() {
-   // cout << "Called destructor RuwDataFilter()" << endl;
+  
+  delete filtered_data_;
+  delete low_pass_filter;
 }
 
 void RawDataFilter::filter_data() {
-    // Haal de data op.
-  DataStore::sensor_struct ruw = raw_state_data_->GetSensorData();
+    // retreive data from control data
+  DataStore::sensor_struct raw_data = control_data_->GetSensorData();
 
-  // Filter het.
-  int array = 1;
-  float inp;
-  float inroll;
-  float inz;
-  float inl;
-  float inr;
-//    float inp[array];
-//    float inroll[array];
-//    float inz[array];
-//    float inl[array];
-//    float inr[array];
-  float sump=0;
-  float sumroll=0;
-  float sumz=0;
-  float suml=0;
-  float sumr=0;
 
-  M_INFO << "roll voor filter is  "<<ruw.roll;
-  M_INFO << "pitch voor filter is  "<<ruw.pitch;
-  inp = ruw.pitch;
-  inroll = ruw.roll;
-  inz = ruw.Z_accel;
-  inl = ruw.angle_left;
-  inr = ruw.angle_right;
+
+  M_INFO << "roll voor filter is  "<<raw_data.roll;
+  M_INFO << "pitch voor filter is  "<<raw_data.pitch;
+  float input_pitch = raw_data.pitch;
+  float input_roll = raw_data.roll;
+  float input_z_acceleration = raw_data.Z_accel;
+  float input_left_angle = raw_data.angle_left;
+  float input_right_angle = raw_data.angle_right;
 
   //Not yet filtering the data therefore filtered == raw data;
-  m_filtered_data_->filtered_pitch = inp;//sump/array;
-  m_filtered_data_->filtered_roll = inroll;//sumroll/array;
-  m_filtered_data_->filtered_Z_accel = inz;//sumz/array;
-  m_filtered_data_->filtered_angle_left = inl;//suml/array;
-  m_filtered_data_->filtered_angle_right = inr;//sumr/array;
+  filtered_data_->filtered_pitch = input_pitch;//sump/array;
+  filtered_data_->filtered_roll = input_roll;//sumroll/array;
+  filtered_data_->filtered_Z_accel = input_z_acceleration;//sumz/array;
+  filtered_data_->filtered_angle_left = input_left_angle;//suml/array;
+  filtered_data_->filtered_angle_right = input_right_angle;//sumr/array;
     
-  M_INFO << "roll na filter is  "<<m_filtered_data_->filtered_roll;
-  M_INFO << "pitch na filter is "<<m_filtered_data_->filtered_pitch;
-  filtered_data_->PutFilteredData(m_filtered_data_);
+  M_INFO << "roll na filter is  "<<filtered_data_->filtered_roll;
+  M_INFO << "pitch na filter is "<<filtered_data_->filtered_pitch;
+  control_data_->PutFilteredData(filtered_data_);
 
 }

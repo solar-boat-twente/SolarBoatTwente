@@ -12,7 +12,7 @@
 #include "../../../solarboattwente.h"
 
 namespace MIO{
-namespace Control{
+namespace control{
 
 struct PIDValues {
   float Pout;
@@ -53,7 +53,6 @@ class PID {
   /**
    * Class which is used to calculate the required forces using PID controllers
    * You required a seperate PID object for each of the three directions: height, pitch and roll.
-   * TODO: make a PID object which inherets this and is for the seperate directions..
    * Example use:
    * PID * roll_pid = new PID();
    * roll_pid.set_PID_roll(STATE2);

@@ -24,8 +24,10 @@ namespace MIO{
 
 namespace PowerElectronics{
 
-const short int MAX_CELLS = 12;
-
+constexpr short int kMaxCells = 12;
+constexpr float kBmsVoltageMultiplier = 0.002; //Precision of data is 2mV
+constexpr float kBmsCurrentMultiplier = 0.02; //Precision is 20mA
+constexpr float kBmsCellVoltageMultiplier = 0.001; //Precisiono of 1mV
 
 
 
@@ -61,7 +63,9 @@ class BMS {
    *  BMS.stop_writing();
    *  
    */
-  BMS(CANbus * const m_canbus);
+  BMS(CANbus * const m_canbus, structures::PowerInput * power_input, structures::PowerOutput * power_output);
+  
+  virtual ~BMS();
   
   /*
    * Public function which starts the reading thread.
@@ -93,7 +97,7 @@ class BMS {
    * Mimics the canbus function;
    * 
    */
-  int write(canmsg_t* const msg);
+  int write(canmsg_t &msg);
   /*
    * Stops the reading thread
    * 
@@ -118,16 +122,16 @@ class BMS {
    * Returns:
    *  Pointer to a BmsStatus structure (see above)
    */
-  BmsStatus * status();
+  BmsStatus status();
     
  private:
   int get_data_(structures::PowerInput * const power_input);
   
-  int parse_response1_(std::vector<uint8_t> *bytes, structures::PowerInput * const power_input);
+  int parse_response1_(std::vector<uint8_t> &bytes, structures::PowerInput * const power_input);
   
-  int parse_response2_(std::vector<uint8_t> *bytes, structures::PowerInput * const power_input);
+  int parse_response2_(std::vector<uint8_t> &bytes, structures::PowerInput * const power_input);
   
-  int parse_cell_voltages(std::vector<uint8_t> *bytes, structures::PowerInput * const power_input);
+  int parse_cell_voltages(std::vector<uint8_t> &bytes, structures::PowerInput * const power_input);
    
 
   int write_data_(structures::PowerOutput * const power_output);
@@ -141,7 +145,7 @@ class BMS {
     
   CANbus * const canbus_;
   
-  BmsStatus * const bms_status = new BmsStatus;
+  BmsStatus bms_status;
   
   std::thread m_reading_thread_;
   

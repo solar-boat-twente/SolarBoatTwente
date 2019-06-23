@@ -30,13 +30,13 @@ using namespace std;
 using namespace MIO;
 using namespace PowerElectronics;
 using namespace UI;
-using namespace Control;
+using namespace control;
 
 //Open up the global structures
 structures::PowerInput * power_input = new structures::PowerInput;
 structures::PowerOutput * power_output = new structures::PowerOutput;
 structures::UserInput * user_input = new structures::UserInput;
-structures::ControlData * control_data = new structures::ControlData;
+structures::ControlData * logging_control_data = new structures::ControlData;
 structures::TelemetryInput * telemetry_data = new structures::TelemetryInput;
 
 //Open up the data acquisition parts 
@@ -58,7 +58,7 @@ structures::PowerOutputHandler * power_output_handler = new structures::PowerOut
 //Now start the objects which handle the different components
 UI::ButtonBoxHandler * button_box = new UI::ButtonBoxHandler(adam_6050, user_input);
 UI::ControlWheel * control_wheel = new UI::ControlWheel(serial_wheel);
-PowerElectronics::BMS * bms = new PowerElectronics::BMS(canbus_bms);
+PowerElectronics::BMS * bms = new PowerElectronics::BMS(canbus_bms, power_input, power_output);
 PowerElectronics::Motor * motor  = new PowerElectronics::Motor(canbus_driver, RD_SUPPLY1|RD_MOTOR1|RD_MOTOR2|RD_DRIVERSTATE|RD_RANGEREF);
 
 //Create the Threads opbject for the screen
@@ -69,28 +69,30 @@ MIO::TemperatureSensor * temp_sens = new MIO::TemperatureSensor;
 Serial * serial_vlotter = new Serial("/dev/ttyACM0");
 Vlotter * vlotter = new Vlotter(serial_vlotter);
 
+/*
 DataStore * xsens_data = new DataStore();
 DataStore * ruwe_data = new DataStore();
 DataStore * filtered_data = new DataStore();
 DataStore * complementary_data= new DataStore();
 DataStore * pid_data = new DataStore();
 DataStore * FtoW_data = new DataStore();
+*/
 
-RawDataFilter * filter = new RawDataFilter();
-ComplementaryFilter * com_filter = new ComplementaryFilter(filtered_data, complementary_data,vlotter);
-PID_caller * PIDAAN = new PID_caller();
-ForceToWingAngle * FtoW = new ForceToWingAngle();
-Serial * m_serial = new Serial("/dev/xsense", 9600);
-xsens::Xsens * m_xsens = new xsens::Xsens();
-    
+DataStore * control_data = new DataStore();
 
+RawDataFilter * raw_data_filter = new RawDataFilter(control_data);
+ComplementaryFilter * complementary_filter = new ComplementaryFilter(control_data, vlotter);
+PID_caller * pid_caller = new PID_caller(control_data);
+ForceToWingAngle * force_to_wing = new ForceToWingAngle(control_data);
 
-xsens::Sensor * de_sensor = new xsens::Sensor(xsens_data, ruwe_data, vlotter);
+Serial * serial_xsens = new Serial("/dev/xsense", 9600);
+xsens::Xsens * xsens_object = new xsens::Xsens(control_data);
 
+xsens::Sensor * sensor = new xsens::Sensor(control_data, vlotter);
 
-EPOS * maxon1 = new EPOS(canbus_bms,adam_6017, 1, FtoW_data);
-EPOS * maxon2 = new EPOS(canbus_bms,adam_6017, 2, FtoW_data);
-EPOS * maxon4 = new EPOS(canbus_bms,adam_6017,4, FtoW_data);
+EPOS * maxon_right = new EPOS(canbus_bms, adam_6017, 1, control_data);
+EPOS * maxon_left = new EPOS(canbus_bms,adam_6017, 2, control_data);
+EPOS * maxon_back = new EPOS(canbus_bms,adam_6017,4, control_data);
 
 
 void initiate_structures(){
@@ -100,9 +102,9 @@ void initiate_structures(){
   user_input->buttons.solar_on = false;
   user_input->control.PID_roll = structures::STATE1;
   
-  control_data->real_height = 0;
-  control_data->real_roll = 0;
-  control_data->xsens.speed = 0;
+  logging_control_data->real_height = 0;
+  logging_control_data->real_roll = 0;
+  logging_control_data->xsens.speed = 0;
   
   power_input->battery.contactor_status = false;
   
@@ -224,13 +226,13 @@ void initiate_screen(){
   screen_threads->CreateThreads();
 }
 
-void generate_driver_message(canmsg_t * driver_tx, int speed){
-  driver_tx->id = 0xcf;
-  driver_tx->length = 4;
-  driver_tx->data[0] = 0;
-  driver_tx->data[1] = MOTOR_MODE;
-  driver_tx->data[2] = speed>>8;
-  driver_tx->data[3] = speed&0xFF;
+void generate_driver_message(canmsg_t & driver_tx, int speed){
+  driver_tx.id = 0xcf;
+  driver_tx.length = 4;
+  driver_tx.data[0] = 0;
+  driver_tx.data[1] = MOTOR_MODE;
+  driver_tx.data[2] = speed>>8;
+  driver_tx.data[3] = speed&0xFF;
 }
 
 int get_speed(){
@@ -248,14 +250,14 @@ double seconds_since_start(time_t start){
 
 void write_to_screen(){
   //Write power data to the control structure for reading it on the screen.
-  control_data->real_roll=power_input->battery.total_current*power_input->battery.total_voltage*-1/10;
-  control_data->real_height=power_input->battery.state_of_charge;
-  if (control_data->real_roll<0){
-    control_data->real_roll = -control_data->real_roll;  
+  logging_control_data->real_roll=power_input->battery.total_current*power_input->battery.total_voltage*-1/10;
+  logging_control_data->real_height=power_input->battery.state_of_charge;
+  if (logging_control_data->real_roll<0){
+    logging_control_data->real_roll = -logging_control_data->real_roll;  
   }
-  control_data->xsens.speed = (float)get_speed()/32768 * 100;
-  if(control_data->xsens.speed<0){
-    control_data->xsens.speed = -control_data->xsens.speed;
+  logging_control_data->xsens.speed = (float)get_speed()/32768 * 100;
+  if(logging_control_data->xsens.speed<0){
+    logging_control_data->xsens.speed = -logging_control_data->xsens.speed;
   }
   if(motor->values.driver_temp!=255){
     power_input->driver.driver_temp = motor->values.driver_temp;
@@ -266,19 +268,16 @@ void write_to_screen(){
   power_input->driver.motor_temp = max<float>(temp_sens->get_core_temp_1(),temp_sens->get_core_temp_2());
   power_input->battery.max_temp = temp_sens->get_temp_zone();
   screen_threads->writeUserPower(power_input, power_output, user_input, 0, 1);
-  screen_threads->writeControlData(control_data,0,1);
+  screen_threads->writeControlData(logging_control_data,0,1);
 }
 
-void sensor(){
-  m_xsens->m_xsens_state_data = xsens_data; //(0)
-  uint8_t msg[50];
+void sensor_thread(){
   uint8_t msg_[350];
   while (true){
-    m_serial->read_bytes(msg_, 350);
-    //serie->read_bytes(msg_bytes, 35);
-    //serie->read_bytes(msg_bytes, 35);
-    if(m_xsens->parse_message(msg_)){ 
-      m_xsens->parse_data();
+    serial_xsens->read_bytes(msg_, 350);
+
+    if(xsens_object->parse_message(msg_)){ 
+      xsens_object->parse_data();
     }
     this_thread::sleep_for(chrono::milliseconds(10));
 
@@ -291,64 +290,36 @@ void controlsystem(){
     /* -----------------------------------------------------------------------------
   All three motors are going to home.
   ----------------------------------------------------------------------------- */    
-  this_thread::sleep_for(chrono::milliseconds(2000));
-  maxon1->start_homing(true);
-  this_thread::sleep_for(chrono::milliseconds(2000));
-  maxon2->start_homing(true);
-  this_thread::sleep_for(chrono::milliseconds(2000));
-  maxon4->start_homing(false);
-  this_thread::sleep_for(chrono::milliseconds(500));
+  maxon_right->start_homing(true);
+  maxon_left->start_homing(true);
+  maxon_back->start_homing(false);
 
-  maxon1->check_homing();
-  maxon2->check_homing();
-  maxon4->check_homing();
+  maxon_right->check_homing();
+  maxon_left->check_homing();
+  maxon_back->check_homing();
 
   /* -----------------------------------------------------------------------------
   All three motors are going in the startpositionmode.
   ----------------------------------------------------------------------------- */    
-  maxon1->start_position_mode();
-  this_thread::sleep_for(chrono::milliseconds(2000));      
-  maxon2->start_position_mode();
-  this_thread::sleep_for(chrono::milliseconds(2000));
-  maxon4->start_position_mode();
-  this_thread::sleep_for(chrono::milliseconds(1000));
-  std::this_thread::sleep_for(std::chrono::milliseconds(500));  // wait 500 milliseconds, because otherwise the xsens can enter the configuration mode
+  maxon_right->start_position_mode();
+  maxon_left->start_position_mode();
+  maxon_back->start_position_mode();
 
-  filter->add_data(ruwe_data, filtered_data);
-  
-  PIDAAN->add_data(complementary_data, pid_data);
-  
-  FtoW->add_data(pid_data, FtoW_data, complementary_data, xsens_data);
 
-  vlotter->start_reading();
-  //Serial * m_serial = new Serial("/dev/xsense", 9600);
-  //Xsens * m_xsens = new Xsens(); //initialise class Xsens
-  //Sensor * de_sensor = new Sensor(m_xsens,m_serial);
-
-  //m_xsens->m_xsens_state_data = xsens_data; //(0)
-  DataStore::FilteredData * vlotter_data = new DataStore::FilteredData();
-  DataStore::RealData * vlotter_real_data = new DataStore::RealData();
-  //de_sensor->start_receiving();
   int counter_control_front = 4;        //80Hz waar de loop op loopt
-  //int counter_control_back = 8;
   while (true) {
     std::chrono::high_resolution_clock::time_point t1= std::chrono::high_resolution_clock::now();
-    de_sensor->get_data();
-    vlotter_data->filtered_angle_left = vlotter->get_angle_deg(ENCODER_LEFT);
-    vlotter_data->filtered_angle_right = vlotter->get_angle_deg(ENCODER_RIGHT);
-    //vlotter_real_data->Real_height = vlotter->get_angle_deg(ENCODER_RIGHT);
-    
-    //filtered_data->PutFilteredData(vlotter_data);
+    sensor->update_data();
     
     if (counter_control_front == 0){     //Voorvleugels lopen op 20Hz
-      filter->filter_data();
-      com_filter->CalculateRealHeight();            
-      PIDAAN->PID_in();
-      FtoW->MMA(power_input);
+      raw_data_filter->filter_data();
+      complementary_filter->CalculateRealHeight();            
+      pid_caller->PID_in();
+      force_to_wing->MMA(power_input);
       
-      maxon1->move();
-      maxon2->move(); 
-      maxon4->move();
+      maxon_right->move();
+      maxon_left->move(); 
+      maxon_back->move();
       counter_control_front = 5;
     }
 //    if (counter_control_back == 0){ //achtervleugel op 10 Hz
@@ -372,12 +343,12 @@ void controlsystem(){
 int main(int argc, const char** argv) { 
   typedef std::chrono::microseconds ms;
   typedef std::chrono::milliseconds mls;
-  time_t start = time(0);
+  time_t start = time(nullptr);
   
   std::thread thread_controlsystem(controlsystem);
   canbus_bms->start(0);
   canbus_driver->start(0);
-  std::thread thread_sensor(sensor);
+  std::thread thread_sensor(sensor_thread);
   
   //Leds us first make the led blink before we do anything else
   blink_leds();
@@ -388,7 +359,7 @@ int main(int argc, const char** argv) {
   initiate_screen();
   
   //Initiate the driver_tx message
-  canmsg_t * driver_tx = new canmsg_t;
+  canmsg_t driver_tx;
   generate_driver_message(driver_tx, 0);
    
   //Initiate the two files for logging
@@ -431,7 +402,7 @@ int main(int argc, const char** argv) {
     if(loop_counter%30 == 1){
       motor_state = update_motor();
       if (motor_state==false){
-        ioctl(canbus_driver->status()->file_descriptor, TCFLSH, 1);
+        ioctl(canbus_driver->get_status().file_descriptor, TCFLSH, 1);
       }
     }
     
@@ -446,20 +417,7 @@ int main(int argc, const char** argv) {
       
       file<<seconds_since_start(start)<<","<<power_input->battery.max_temp << ","<<power_input->battery.total_current << ","<<power_input->battery.total_voltage << ","
           <<power_input->battery.state_of_charge << ","<<user_input->steer.raw_throttle<<"\n"<<flush;
-      
-     
-     DataStore::PIDDataTotal log_OUTPUT_PID  = pid_data-> GetPIDData(); 
-     DataStore::RealData log_INPUT_PID = complementary_data-> GetComplementaryData();
-     DataStore::XsensData log_xsens = xsens_data->GetXsensData();
-     
-     control_file<<seconds_since_start(start)<<log_OUTPUT_PID.Force_height << ","<<log_OUTPUT_PID.Force_pitch << ","<<log_OUTPUT_PID.Force_roll << ","
-         <<log_INPUT_PID.Real_height << ","<<log_INPUT_PID.Real_pitch<< ","<<log_INPUT_PID.Real_roll<< ","
-         <<log_xsens.roll<< ","<<log_xsens.acceleration_z<< ","<<log_xsens.acceleration_x<<"\n"<<flush;
-     
-  
-  
-      
-      
+
       write_to_screen();
     } 
    }

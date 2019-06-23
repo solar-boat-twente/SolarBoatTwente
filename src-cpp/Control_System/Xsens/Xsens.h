@@ -37,7 +37,7 @@ enum XsensStates {
 };
 
 struct XsensParser{
-  enum class XsensMessage Message;
+  XsensMessage message;
   int DATA_counter;
   int DATA_length;
   char DATA[256];
@@ -79,10 +79,9 @@ struct Array_Output{
 
 class Xsens {
 public:
-  Xsens();
+  Xsens(DataStore * const control_data);
   Xsens(const Xsens& orig);
   
-  DataStore *m_xsens_state_data;
   virtual ~Xsens();
   
   /**
@@ -108,7 +107,9 @@ private:
    */
   float pointer2float(char *loc);
   
-  XsensParser * Parser = new XsensParser;
+  DataStore * const control_data_;
+  
+  XsensParser * const parser_;
 };
 }
 }

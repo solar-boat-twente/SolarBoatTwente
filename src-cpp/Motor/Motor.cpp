@@ -163,7 +163,7 @@ void Motor::setup_sampling() {
   driver_sample.data[6] = 0x0;
   driver_sample.data[7] = 0x10;
 
-  driver_can_->write_can(&driver_sample);
+  driver_can_->write_can(driver_sample);
 }
 
 

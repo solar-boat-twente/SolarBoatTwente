@@ -25,7 +25,6 @@ namespace MIO{
  * Example use:
  *  
  *  Serial * m_serial = new Serial(port);
- *  //TODO (sander); Implement the bottom three things
  *  // tty_old = m_serial.get_tty();
  *  // m_serial.tty_set(tty file);
  *  m_serial.start();
@@ -40,14 +39,13 @@ class Serial {
  public:
   struct SerialStatus{
     
-    char port[20];
+    std::string port;
     
     bool status;
     
     int baudrate;
     
-    // TODO: don't use pointer here
-    termios * tty = new termios;
+    termios tty;
     
   };
  public:
@@ -95,7 +93,7 @@ class Serial {
   
   int write_byte(uint8_t byte);
   
-  SerialStatus * status(){
+  SerialStatus& get_status(){
     return serial_status;
   }
  private:
@@ -118,8 +116,7 @@ class Serial {
  */
   int apply_settings_();
   
-  // TODO: don't use pointer
-  SerialStatus * const serial_status = new SerialStatus; 
+  SerialStatus serial_status; 
 };
 }
 

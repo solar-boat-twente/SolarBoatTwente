@@ -27,9 +27,9 @@ MPPT_Box::MPPT_Box(CANbus * const canbus, uint8_t number_of_mppts, unsigned long
   start_address_ = start_address;
   relay_address_ = relay_address;
   
-  if(canbus->status()->open){
+  if(canbus->get_status().open){
     canbus_ = canbus;
-    if(canbus->status()->status){
+    if(canbus->get_status().status){
       M_OK<<"MPPT SUCCESFULLY INITIALIZED ^_^";
     } else {
       M_WARN<<"THE CANBUS IS NOT RUNNING SO YOU WILL NOT RECEIVE DATA! (ー_ー)!!";
@@ -41,7 +41,7 @@ MPPT_Box::MPPT_Box(CANbus * const canbus, uint8_t number_of_mppts, unsigned long
 }
 
 int MPPT_Box::get_bytes_from_address(uint8_t buf[], unsigned long address) {
-  if(canbus_->status()->open){
+  if(canbus_->get_status().open){
     canmsg_t raw_receive;
     int success = canbus_->read_can(address, &raw_receive);
     if(success!=-1){
@@ -177,11 +177,11 @@ int MPPT_Box::get_all_float_data(float buf[][4]) {
 
 int MPPT_Box::set_relay_from_number(bool state, int cell_number) {
   if (set_relay_states_from_number_(cell_number, state)==1) {
-    canmsg_t * send_relays = new canmsg_t;
-    send_relays->length = 2;
-    send_relays->id = relay_address_;
-    for(int i = 0; i<send_relays->length; i++){
-      send_relays->data[i] = relay_states[i];
+    canmsg_t send_relays;;
+    send_relays.length = 2;
+    send_relays.id = relay_address_;
+    for(int i = 0; i<send_relays.length; i++){
+      send_relays.data[i] = relay_states[i];
     }
     canbus_->write_can(send_relays);
     
@@ -198,11 +198,11 @@ int MPPT_Box::set_relay_from_number(bool state, int cell_number[], int number_of
     }
   }
   
-  canmsg_t * send_relays = new canmsg_t;
-  send_relays->length = 2;
-  send_relays->id = relay_address_;
-  for(int i = 0; i<send_relays->length; i++){
-    send_relays->data[i] = relay_states[i];
+  canmsg_t send_relays;
+  send_relays.length = 2;
+  send_relays.id = relay_address_;
+  for(int i = 0; i<send_relays.length; i++){
+    send_relays.data[i] = relay_states[i];
   }
   canbus_->write_can(send_relays);
   return 1;
@@ -278,11 +278,11 @@ int MPPT_Box::set_relay_from_array(bool state[]) {
 }
 
 int MPPT_Box::set_relay_from_relay_states_() {
-  canmsg_t * send_relays = new canmsg_t;
-  send_relays->length = 2;
-  send_relays->id = relay_address_;
-  for(int i = 0; i<send_relays->length; i++){
-    send_relays->data[i] = relay_states[i];
+  canmsg_t  send_relays;
+  send_relays.length = 2;
+  send_relays.id = relay_address_;
+  for(int i = 0; i<send_relays.length; i++){
+    send_relays.data[i] = relay_states[i];
   }
   canbus_->write_can(send_relays);
   return 1;
@@ -294,7 +294,7 @@ int MPPT_Box::set_relay_from_relay_states_() {
 MPPT_Controller::MPPT_Controller(MPPT_Box * const m_mppt, structures::PowerInput* const m_power_input, structures::PowerOutput* const m_power_output) : 
     mppt(m_mppt), power_input(m_power_input), power_output(m_power_output){
   
-  if(mppt->canbus_->status()){
+  if(mppt->canbus_->get_status().status){
     M_OK<<"MPPT_CONTROLLER START UP SUCCESSFUL!";
   } else {
     M_ERR<<"TRYING TO START MPPT_CONTROLLER WITHOUT RUNNING CANBUS!";
@@ -302,7 +302,7 @@ MPPT_Controller::MPPT_Controller(MPPT_Box * const m_mppt, structures::PowerInput
 }
 
 int MPPT_Controller::start_reading(const int delay) {
-  if(mppt->canbus_->status()->status){
+  if(mppt->canbus_->get_status().status){
     if(!reading_state){
       reading_state = true;
       M_OK<<"MPPT_CONTROLLER HAS STARTED READING( ◞･౪･)";
@@ -318,7 +318,7 @@ int MPPT_Controller::start_reading(const int delay) {
 }
 
 int MPPT_Controller::start_writing(const int delay) {
-  if(mppt->canbus_->status()->open){
+  if(mppt->canbus_->get_status().open){
     if(!writing_state){
       writing_state = true;
       M_OK<<"MPPT_CONTROLLER WAS STARTED WRITING ( ◞･౪･)";

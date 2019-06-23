@@ -15,8 +15,8 @@ using namespace UI;
 using namespace std;
 
 ControlWheel::ControlWheel(Serial* serial):serial_(serial) {
-  control_wheel_status->serial_state = serial->status();
-  if (!control_wheel_status->serial_state->status){
+  control_wheel_status.serial_state = &serial->get_status();
+  if (!control_wheel_status.serial_state->status){
     M_WARN<<"SERIAL NOT OPENED! ( ̵˃﹏˂̵ )";
   } else {
     M_OK<<"CONTROL WHEEL SUCCESSFULLY INITIALIZED ( ◞･౪･)";
@@ -24,9 +24,9 @@ ControlWheel::ControlWheel(Serial* serial):serial_(serial) {
 }
 
 int ControlWheel::start_reading(structures::UserInput* user_input, short int delay) {
-  if(control_wheel_status->serial_state->status){
-    if(!control_wheel_status->read_state){
-      control_wheel_status->read_state = true;
+  if(control_wheel_status.serial_state->status){
+    if(!control_wheel_status.read_state){
+      control_wheel_status.read_state = true;
       M_OK<<"CONTROL WHEEL WAS STARTED ( ◞･౪･)";
       m_reading_thread_ = thread(&ControlWheel::reading_thread_, this, user_input, delay);
       return 1;
@@ -82,7 +82,7 @@ int ControlWheel::parse_data_(std::vector<uint8_t>* bytes, structures::UserInput
 
 void ControlWheel::reading_thread_(structures::UserInput* user_input, short int delay) {
   M_INFO<<"CONTROL WHEEL READING THREAD HAS STARTED WITH DELAY: "<<(long)delay<<"ms ( ͡° ͜ʖ ͡°)";
-  while(control_wheel_status->read_state){
+  while(control_wheel_status.read_state){
     get_data_(user_input);
     std::this_thread::sleep_for(chrono::milliseconds(delay));
   }

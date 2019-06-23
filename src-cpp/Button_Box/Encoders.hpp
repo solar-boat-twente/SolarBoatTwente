@@ -31,13 +31,11 @@ namespace MIO{
 
 namespace UI{
 
-const short int STD_BUTTON_DELAY = 10;
-const char BUTTON_STOP_BYTES[2] = {'\r', '\n'};
-const short int BUTTON_STOP_LENGTH = 2;
-const short int BUTTON_MSG_LENGTH = 3;
+constexpr short int kStandardEncoderDelay = 10;
+constexpr char kStandardEncoderStopBytes[2] = {'\r', '\n'};
+constexpr short int kStandardEncoderStopLength = 2;
+constexpr short int kButtonMsgLength = 3;
 
-//TODO (sander): THIS NEEDS TO BE CHANGED FOR THE REAL VALUE
-const short int BUTTON_DELAY = 500;
 
 class ButtonEncoder{
   
@@ -50,26 +48,29 @@ class ButtonEncoder{
   };
   
  public:
-  ButtonEncoder(Serial * serial);
+  ButtonEncoder(Serial * serial, structures::UserInput * const user_input);
   
-  int start_reading(structures::UserInput * user_input, short int delay = STD_BUTTON_DELAY);
+  ~ButtonEncoder();
+  
+  int start_reading(structures::UserInput * user_input, short int delay = kStandardEncoderDelay);
   
   int stop_reading();
   
  private:
   int get_data_(structures::UserInput * const user_input);
   
-  int parse_data_(std::vector<uint8_t> *bytes, structures::UserInput * const user_input);
+  int parse_data_(std::vector<uint8_t> &bytes, structures::UserInput * const user_input);
   
   void reading_thread_(structures::UserInput * const user_input, short int delay);
   
+  // Pointer to a serial object used for the encoders
   Serial * const serial_;
   
-  ButtonEncoderStatus * const button_encoder_status = new ButtonEncoderStatus;
+  
+  ButtonEncoderStatus button_encoder_status;
   
   std::thread m_reading_thread_;
   
-  structures::UserInput * user_input = NULL; 
   
 }; 
 }

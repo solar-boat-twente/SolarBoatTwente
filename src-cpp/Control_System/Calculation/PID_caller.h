@@ -12,7 +12,7 @@
 
 //#include "structures.h"
 namespace MIO{
-namespace Control{
+namespace control{
 class PID_caller {
   
   struct PIDRoll {
@@ -25,24 +25,21 @@ class PID_caller {
 
  public:
 
-  PID_caller();
+  PID_caller(DataStore * const control_data);
+  
   PID_caller(const PID_caller& orig);
+  
   virtual ~PID_caller();
 
   void PID_in(structures::FlyMode fly_mode = structures::FLY);
-  
-  void add_data(DataStore * complementary_data, DataStore * PID_data){
-    m_complementary_data = complementary_data;
-    m_PID_data = PID_data;
-  }
+
   
  private:
-  DataStore* m_complementary_data;
-  DataStore* m_PID_data;
+  DataStore* const control_data_;
   PID * pid_roll;
   PID * pid_pitch;
   PID * pid_height;
-  std::ofstream file;
+  std::ofstream file_;
   
 };
 }

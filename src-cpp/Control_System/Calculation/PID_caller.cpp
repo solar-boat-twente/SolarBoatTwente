@@ -13,52 +13,54 @@
 
 using namespace MIO;
 using namespace structures;
-using namespace Control;
+using namespace control;
 using namespace std;
 
-MIO::Control::PID_caller::PID_caller(){
+MIO::control::PID_caller::PID_caller(DataStore * const control_data) : control_data_(control_data){
   pid_roll = new PID();
   pid_height = new PID();
   pid_pitch = new PID();
-  file.open("/root/logfiles/pd_log_test_06_07.csv", std::ios::app);
+  file_.open("/root/logfiles/pd_log_test_06_07.csv", std::ios::app);
 }
 
-MIO::Control::PID_caller::~PID_caller() {
+MIO::control::PID_caller::~PID_caller() {
+  delete pid_height;
+  delete pid_pitch;
+  delete pid_pitch;
+  file_.close();
 }
 
-void MIO::Control::PID_caller::PID_in(structures::FlyMode fly_mode){ 
-  DataStore::RealData inputdata = m_complementary_data->GetComplementaryData();
+void MIO::control::PID_caller::PID_in(structures::FlyMode fly_mode){ 
+  DataStore::RealData data_from_complementary_filter = control_data_->GetComplementaryData();
+  
   DataStore::PIDDataTotal PIDData;
   
   pid_roll->set_PID_roll(STATE7);
-  PIDData.Force_roll = pid_roll->calculate(0, inputdata.Real_roll);
+  PIDData.Force_roll = pid_roll->calculate(0, data_from_complementary_filter.Real_roll);
 
   pid_pitch->set_PID_pitch(STATE1);            //0, val = reference, previous value
-  PIDData.Force_pitch = pid_pitch->calculate(0, inputdata.Real_pitch);
+  PIDData.Force_pitch = pid_pitch->calculate(0, data_from_complementary_filter.Real_pitch);
   
-  pid_height->set_PID_height(STATE2);
-  PIDData.Force_height = pid_height->calculate(0.2, inputdata.Real_height);
-
   switch(fly_mode) {
     case NO_FLY: 
-      PIDData.Force_height = pid_height->calculate(0, inputdata.Real_height); 
+      PIDData.Force_height = pid_height->calculate(0, data_from_complementary_filter.Real_height); 
       M_INFO<<"USING STATE NO_FLY";
       break;
     case FLY: 
-      PIDData.Force_height = pid_height->calculate(0.3, inputdata.Real_height);  
+      PIDData.Force_height = pid_height->calculate(0.3, data_from_complementary_filter.Real_height);  
       M_INFO<<"USING STATE FLY";
       break;
     case BRIDGE: 
-      PIDData.Force_height = pid_height->calculate(0.1, inputdata.Real_height); 
+      PIDData.Force_height = pid_height->calculate(0.1, data_from_complementary_filter.Real_height); 
       M_INFO<<"USING STATE BRIDGE";
       break;
     case SLALOM: 
-      PIDData.Force_height = pid_height->calculate(-0.05, inputdata.Real_height); 
+      PIDData.Force_height = pid_height->calculate(-0.05, data_from_complementary_filter.Real_height); 
       M_INFO<<"USING STATE SLALOM";
       break;
   }
-  M_INFO<<"PID INPUT VALUES:\n"<<"Roll: "<<inputdata.Real_roll<<" | Pitch: "
-      << inputdata.Real_pitch<<" | Height: "<<inputdata.Real_height;
+  M_INFO<<"PID INPUT VALUES:\n"<<"Roll: "<<data_from_complementary_filter.Real_roll<<" | Pitch: "
+      << data_from_complementary_filter.Real_pitch<<" | Height: "<<data_from_complementary_filter.Real_height;
   M_INFO<<"\nPID FORCES: \n"<<"Roll: "<<PIDData.Force_roll<<" | Pitch: "
       << PIDData.Force_pitch<<" | Height: "<<PIDData.Force_height;
   
@@ -66,15 +68,15 @@ void MIO::Control::PID_caller::PID_in(structures::FlyMode fly_mode){
       <<"Pout: "<<pid_height->get_PID_values().Pout<<" | Iout: "<<pid_height->get_PID_values().Iout
       <<" | Dout: "<< pid_height->get_PID_values().Dout;
   
-  file<<"SPLIT VALUES ROLL: "
+  file_<<"SPLIT VALUES ROLL: "
     <<"Pout: "<<pid_roll->get_PID_values().Pout<<"\tIout: "<<pid_roll->get_PID_values().Iout<<"\tIntegral: "<<pid_roll->get_PID_values().intergral
-    <<"\tDout: "<< pid_roll->get_PID_values().Dout<< "\tRoll: "<<inputdata.Real_roll<<"\n"<< flush  ;
-  file<<"SPLIT VALUES HEIGHT: "
+    <<"\tDout: "<< pid_roll->get_PID_values().Dout<< "\tRoll: "<<data_from_complementary_filter.Real_roll<<"\n"<< flush  ;
+  file_<<"SPLIT VALUES HEIGHT: "
     <<"Pout: "<<pid_height->get_PID_values().Pout<<"\tIout: "<<pid_height->get_PID_values().Iout<<"\tIntegral: "<<pid_height->get_PID_values().intergral
-    <<"\tDout: "<< pid_height->get_PID_values().Dout<< "\tHeight: " <<inputdata.Real_height <<"\n"<< flush  ;
+    <<"\tDout: "<< pid_height->get_PID_values().Dout<< "\tHeight: " <<data_from_complementary_filter.Real_height <<"\n"<< flush  ;
 
   //Finally copy the PIDData into the DataStore object
-  m_PID_data-> PutPIDData(&PIDData);
+  control_data_ -> PutPIDData(&PIDData);
 }
     
 

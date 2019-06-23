@@ -18,17 +18,21 @@
 #include <thread>
 
 namespace MIO{
-namespace Control{
+namespace control{
 
-const char VLOTTER_STOP_BYTES[2] = {'\r', '\n'};
-const int VLOTTER_STOP_LENGTH = 2;
-const int VLOTTER_MSG_LENGTH = 4;
-const int VLOTTER_BEAM_LENGTH = 1;
+constexpr char kVlotterStopBytes[2] = {'\r', '\n'};
+constexpr int kVlotterStopLength = 2;
+constexpr int kVlotterMsgLength = 4;
 
-const float PHI_0_ANGLE_LEFT = 5.97775;
-const float PHI_0_ANGLE_RIGHT = 4.70765;
+constexpr int kVlotterBeamLength = 0.7;
+constexpr int kVlotterDistance = 1.3;
 
-enum EncoderNumber{
+constexpr float kPhiZeroAngleLeft = 5.97775;
+constexpr float kPhiZeroAngleRight = 4.70765;
+
+constexpr auto kVlotterSerialPort = "/dev/vlotter";
+
+enum class EncoderNumber{
   ENCODER_LEFT,
   ENCODER_RIGHT
 };
@@ -55,18 +59,22 @@ class Vlotter{
    * vlotter.stop_reading();\n
    * @param serial
    */
-  Vlotter(Serial * serial) : serial_(serial) {
-
-  };
+  Vlotter(Serial * const serial);
+  
+  Vlotter();
+  
+  ~Vlotter();
   
   void start_reading(short int delay = 0);
   
   void stop_reading();
   
-  float get_angle_deg(EncoderNumber encoder);
+  float get_angle_rad(EncoderNumber encoder);
   
-  float get_height_deg(EncoderNumber encoder);
+  float get_height(EncoderNumber encoder);
   
+  float get_roll_rad();
+   
  private:
   
   void reading_thread_(short int delay);
@@ -75,9 +83,11 @@ class Vlotter{
   
   int bytes_to_int_(uint8_t bytes[]);
   
-  float calculate_angle_(int value);
+  float compute_angle_(int value);
   
-  float calculate_height_(float angle);
+  float compute_height_(float angle);
+  
+  float compute_roll_(float height_left, float height_right);
   
   Serial * const serial_;
   
@@ -88,14 +98,9 @@ class Vlotter{
   float angle_right_;
   
   float height_left_;
-  float height_right_;
+  float height_right_; 
   
-  
-  
-  
-  
-    
-  
+  float roll_;
 };
 
 

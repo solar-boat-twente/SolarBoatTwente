@@ -31,13 +31,16 @@
 using namespace MIO;
 using namespace std;
 
-xsens::Xsens::Xsens() {
-}
+xsens::Xsens::Xsens(DataStore * const control_data) 
+  : control_data_(control_data), parser_(new XsensParser) 
+{}
 
-xsens::Xsens::Xsens(const Xsens& orig) {
+xsens::Xsens::Xsens(const Xsens& orig) : control_data_(orig.control_data_), parser_(orig.parser_) {
+  
 }
 
 xsens::Xsens::~Xsens() {
+  delete(parser_);
 }
 
 // TODO: replace with *reinterpret_cast<float*>(loc), with correct endianness
@@ -62,19 +65,19 @@ bool xsens::Xsens::parse_message(const uint8_t byte[]) {
   //xsens::XsensParser enumerator;
   //xsens::XsensParser * pointer_enum = &enumerator;
   //std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-  Parser->Message = XsensMessage::Xsens_PREAMBLE;
+  parser_->message = XsensMessage::Xsens_PREAMBLE;
   //printf("testjeee\r\n");
   int d=0;
   int byte_counter = 0;
   while (d<6){
-    switch(Parser->Message){
+    switch(parser_->message){
       case XsensMessage::Xsens_PREAMBLE:
         //printf("tstje2");
         M_INFO<<"PREAMBLE; byte counter: "<<byte_counter;
 
         if (byte[byte_counter]==0xFA) {
-          Parser->CHECKSUM = 0x00; //Preamble doet niet mee met de checksum vandaar 0x00
-          Parser->Message = XsensMessage::Xsens_BID;
+          parser_->CHECKSUM = 0x00; //Preamble doet niet mee met de checksum vandaar 0x00
+          parser_->message = XsensMessage::Xsens_BID;
           d++;
         }
         //d = 6;
@@ -82,68 +85,68 @@ bool xsens::Xsens::parse_message(const uint8_t byte[]) {
 
       case XsensMessage::Xsens_BID:
         if (byte[byte_counter]==0xFF) {
-          Parser->CHECKSUM = byte[byte_counter]; //iedere keer de byte bij de checksum optellen
-          Parser->Message = XsensMessage::Xsens_MID;
+          parser_->CHECKSUM = byte[byte_counter]; //iedere keer de byte bij de checksum optellen
+          parser_->message = XsensMessage::Xsens_MID;
           d++;
         } else {
-          Parser->Succesfull_received = 0;
-          Parser->Message = XsensMessage::Xsens_PREAMBLE;
+          parser_->Succesfull_received = 0;
+          parser_->message = XsensMessage::Xsens_PREAMBLE;
           d=0;
           }
         break;
 
       case XsensMessage::Xsens_MID:
         if (byte[byte_counter]==0x36) {
-          Parser->CHECKSUM += byte[byte_counter];
-          Parser->Message = XsensMessage::Xsens_LENGTH;
+          parser_->CHECKSUM += byte[byte_counter];
+          parser_->message = XsensMessage::Xsens_LENGTH;
          // printf("MID\r\n");
           d++;
         } else{
-          Parser->Succesfull_received = 0;
-          Parser->Message = XsensMessage::Xsens_PREAMBLE;
+          parser_->Succesfull_received = 0;
+          parser_->message = XsensMessage::Xsens_PREAMBLE;
           d=0;
         }
         break;
 
       case XsensMessage::Xsens_LENGTH:
-        Parser->CHECKSUM += byte[byte_counter];
-        Parser->DATA_length = (int)byte[byte_counter]; //lengte is gelijk aan de waarde in de byte (hier omgezet naar een integer)
-        Parser->Message = XsensMessage::Xsens_DATA; //volgende stap is naar de data
-        Parser->DATA_counter = 0; //voordat we naar de data gaan ook de counter op 0 zetten zodat je straks de lengte met de counter kan vergelijken
+        parser_->CHECKSUM += byte[byte_counter];
+        parser_->DATA_length = (int)byte[byte_counter]; //lengte is gelijk aan de waarde in de byte (hier omgezet naar een integer)
+        parser_->message = XsensMessage::Xsens_DATA; //volgende stap is naar de data
+        parser_->DATA_counter = 0; //voordat we naar de data gaan ook de counter op 0 zetten zodat je straks de lengte met de counter kan vergelijken
         //printf("LENGTH\r\n");
         d++;
         break;
 
       case XsensMessage::Xsens_DATA:
-        if (Parser->DATA_counter < Parser->DATA_length){
-          Parser->CHECKSUM += byte[byte_counter];
-          Parser->DATA[Parser->DATA_counter] = byte[byte_counter];
-          Parser->DATA_counter++;
+        if (parser_->DATA_counter < parser_->DATA_length){
+          parser_->CHECKSUM += byte[byte_counter];
+          parser_->DATA[parser_->DATA_counter] = byte[byte_counter];
+          parser_->DATA_counter++;
         };
 
-        if (Parser->DATA_length == Parser->DATA_counter){
-          Parser->Message = XsensMessage::Xsens_CHECKSUM;
+        if (parser_->DATA_length == parser_->DATA_counter){
+          parser_->message = XsensMessage::Xsens_CHECKSUM;
         }
         //printf("DATA\r\n");
         break;
 
       case XsensMessage::Xsens_CHECKSUM:
-        Parser->CHECKSUM += byte[byte_counter];
-        std::cout<<"CHECKSUM from Checksum: "<<Parser->CHECKSUM;
-        if (Parser->CHECKSUM == 0x00){
-          Parser->Succesfull_received = 1;
+        parser_->CHECKSUM += byte[byte_counter];
+        std::cout<<"CHECKSUM from Checksum: "<<parser_->CHECKSUM;
+        if (parser_->CHECKSUM == 0x00){
+          parser_->Succesfull_received = 1;
           d=6;
           M_OK<<"XSENS CHECKSUM SUCCESS";
           return true;
         } else {
           d = 0;
-          Parser->Message = XsensMessage::Xsens_PREAMBLE;
+          parser_->message = XsensMessage::Xsens_PREAMBLE;
         }
 
         break;
 
       default:
-        Parser->Message = XsensMessage::Xsens_PREAMBLE;
+        parser_->message = XsensMessage::Xsens_PREAMBLE;
         d=0;
         break;
     }
@@ -161,14 +164,14 @@ void xsens::Xsens::parse_data(){
 //  xsens::XsensData Xsens_data;
 //  xsens::XsensData * DataStruct = &Xsens_data;
   DataStore::XsensData xsensor;  
-  if (Parser->Succesfull_received = 1){
+  if (parser_->Succesfull_received = 1){
     int i = 0;
     XsensStates State = ID;
 
-    while (i<Parser->DATA_length){
+    while (i<parser_->DATA_length){
       //printf("lengte data: %i,%i\r\n", Parser->DATA_length,i);
-      uint8_t byte = Parser->DATA[i];
-      uint8_t byte2= Parser->DATA[i+1];
+      uint8_t byte = parser_->DATA[i];
+      uint8_t byte2= parser_->DATA[i+1];
       switch (State){
         case ID:
             //std::cout<<"Testing ID"<<std::endl;
@@ -192,53 +195,55 @@ void xsens::Xsens::parse_data(){
           break;
 
         case Euler_Angle:
-
-          xsensor.roll = pointer2float(Parser->DATA + i + 2);
-          xsensor.pitch = pointer2float(Parser->DATA + i + 6); 
-          xsensor.yaw = pointer2float(Parser->DATA + i + 10); 
+          //The angles of the xsens are all pointed exactly the opposite to how we defined them
+          // Counter clockwise should be a positive roll!
+          // Bow (Boeg) of the boat up is positive pitch!
+          xsensor.roll = pointer2float(parser_->DATA + i + 2)*-1;
+          xsensor.pitch = pointer2float(parser_->DATA + i + 6)*-1; 
+          xsensor.yaw = pointer2float(parser_->DATA + i + 10); 
           M_INFO <<"xsens roll is "<<xsensor.roll;
           M_INFO << "xsens pitch is  "<<xsensor.pitch;
           i = i + 13;
-          m_xsens_state_data->PutXsensData(&xsensor);
+          control_data_->PutXsensData(&xsensor);
           State = ID;
           break;
 
         case Acceleration:
 
-          xsensor.acceleration_x = pointer2float(Parser->DATA + i + 2);
-          xsensor.acceleration_y = pointer2float(Parser->DATA + i + 6);
-          xsensor.acceleration_z = pointer2float(Parser->DATA + i + 10);
+          xsensor.acceleration_x = pointer2float(parser_->DATA + i + 2);
+          xsensor.acceleration_y = pointer2float(parser_->DATA + i + 6);
+          xsensor.acceleration_z = pointer2float(parser_->DATA + i + 10);
 
 
           i = i + 13;
           State = ID;
-          m_xsens_state_data->PutXsensData(&xsensor);
+          control_data_->PutXsensData(&xsensor);
           break;
 
         case Velocity:
-          xsensor.velocity_x = pointer2float(Parser->DATA + i + 2);
-          xsensor.velocity_y = pointer2float(Parser->DATA + i + 6);
-          xsensor.velocity_z = pointer2float(Parser->DATA + i + 10);
+          xsensor.velocity_x = pointer2float(parser_->DATA + i + 2);
+          xsensor.velocity_y = pointer2float(parser_->DATA + i + 6);
+          xsensor.velocity_z = pointer2float(parser_->DATA + i + 10);
           //printf("vel_x: %f\r\n", DataStruct->velocity_x);
           //printf("vel_y: %f\r\n", DataStruct->velocity_y);
           //printf("vel_z: %f\r\n", DataStruct->velocity_z);
           State = ID;
           i = i + 13;
           //mtx.lock();
-          m_xsens_state_data->PutXsensData(&xsensor);
+          control_data_->PutXsensData(&xsensor);
           //mtx.unlock();
           break;
 
         case LatLon:
 
-          xsensor.latitude = pointer2float(Parser->DATA + i + 2);
-          xsensor.longitude = pointer2float(Parser->DATA + i + 6);
+          xsensor.latitude = pointer2float(parser_->DATA + i + 2);
+          xsensor.longitude = pointer2float(parser_->DATA + i + 6);
           //printf("lat: %f\r\n", DataStruct->latitude);
           //printf("lon: %f\r\n", DataStruct->longitude);
           State = ID;
           i = i + 9;
           //mtx.lock();
-          m_xsens_state_data->PutXsensData(&xsensor);
+          control_data_->PutXsensData(&xsensor);
           //mtx.unlock();
           break;
 

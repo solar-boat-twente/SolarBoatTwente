@@ -24,12 +24,12 @@ public:
     
     Sensor();   // Voor testen met data in een file
 
-    Sensor(DataStore * xsens_state_data, DataStore * raw_data, Control::Vlotter * vlotter);
+    Sensor(DataStore * const control_data, control::Vlotter * const vlotter);
 
     virtual ~Sensor();
 
     // rule of 5:
-    Sensor(const Sensor&)
+    Sensor(const Sensor&);
 
     Sensor operator=(const Sensor&);
 
@@ -41,16 +41,14 @@ public:
     /**
      * Get the data from the xsens and write it to the 
      */
-    void get_data();
-    //bool data_op();
+    void update_data();
 
 private:
-    // Alleen voor testen.
-    //bool data_is_op;
-    DataStore * const raw_data_;
-    DataStore *xsens_state_data_;
-    DataStore::sensor_struct * sensor_value;
-    Control::Vlotter * vlotter_;
+
+    DataStore * const control_data_;
+    control::Vlotter * const vlotter_;
+    
+    DataStore::sensor_struct * const sensor_data_;
 
 };
 }

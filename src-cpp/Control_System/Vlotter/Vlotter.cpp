@@ -12,9 +12,27 @@
 #include "../../../lib-cpp/Debugging/easy_debugging.hpp"
 
 namespace MIO{
-namespace Control{
-void Control::Vlotter::start_reading(short int delay) {
-  if(serial_->status()->status){
+namespace control{
+
+
+
+Vlotter::Vlotter(Serial * const serial) : serial_(serial){
+  start_reading();
+}
+
+Vlotter::Vlotter() : serial_(new Serial(kVlotterSerialPort)) {
+  start_reading();
+}
+
+
+Vlotter::~Vlotter() {
+  stop_reading();
+  delete serial_;
+}
+
+
+void control::Vlotter::start_reading(short int delay) {
+  if(serial_->get_status().status){
     if(!thread_active_){
       thread_active_ = true;
       M_OK<<"VLOTTER WAS STARTED ( ◞･౪･)";
@@ -27,25 +45,40 @@ void Control::Vlotter::start_reading(short int delay) {
   }  
 }
 
-float Control::Vlotter::get_angle_deg(EncoderNumber encoder) {
-  if(encoder == ENCODER_LEFT){
+void control::Vlotter::stop_reading() {
+  if(thread_active_){
+    thread_active_ = false;
+    thread_.join();
+    M_OK<<"VLOTTER HAS STOPPED READING";
+  } else {
+    M_WARN<<"VLOTTER READING WAS ALREADY STOPEED (¬_¬)";
+ }
+}
+
+
+float control::Vlotter::get_angle_rad(EncoderNumber encoder) {
+  if(encoder == EncoderNumber::ENCODER_LEFT){
     return angle_left_;
-  } else if (encoder == ENCODER_RIGHT){
+  } else if (encoder == EncoderNumber::ENCODER_RIGHT){
     std::cout<<"angle right: "<<angle_right_<<std::endl<<std::endl;
     return angle_right_;
   }
 }
 
-float Control::Vlotter::get_height_deg(EncoderNumber encoder) {
-  if (encoder == ENCODER_RIGHT){
+float control::Vlotter::get_height(EncoderNumber encoder) {
+  if (encoder == EncoderNumber::ENCODER_RIGHT){
     return height_left_;
   } else {
     return height_right_;
   }
- }
+}
+
+float Vlotter::get_roll_rad() {
+  return roll_;
+}
 
 
-void Control::Vlotter::reading_thread_(short int delay) {
+void control::Vlotter::reading_thread_(short int delay) {
   uint8_t bytes[4];
   int encoder_left;
   int encoder_right;
@@ -54,13 +87,13 @@ void Control::Vlotter::reading_thread_(short int delay) {
     encoder_left = bytes_to_int_(&(bytes[0]));
     encoder_right = bytes_to_int_(&(bytes[2]));
     
-    angle_left_ = calculate_angle_(encoder_left);
-    height_left_ = calculate_height_(PHI_0_ANGLE_LEFT-angle_left_);
+    angle_left_ = compute_angle_(encoder_left);
+    height_left_ = compute_height_(kPhiZeroAngleLeft-angle_left_);
     
-    angle_right_ = calculate_angle_(encoder_right);
-    height_right_ = calculate_height_(PHI_0_ANGLE_RIGHT-angle_right_);
+    angle_right_ = compute_angle_(encoder_right);
+    height_right_ = compute_height_(kPhiZeroAngleRight-angle_right_);
       
-    
+    roll_ = compute_roll_(height_left_, height_right_);
     std::this_thread::sleep_for(std::chrono::milliseconds(delay));
     
   }
@@ -69,10 +102,10 @@ void Control::Vlotter::reading_thread_(short int delay) {
 }
 
 
-void Control::Vlotter::read_vlotter_data_(uint8_t buffer[]) {
+void control::Vlotter::read_vlotter_data_(uint8_t buffer[]) {
   uint8_t read_bytes[8];
-  int receive_result = serial_->read_stop(read_bytes, VLOTTER_STOP_BYTES, VLOTTER_STOP_LENGTH, 8);
-  if(receive_result==VLOTTER_MSG_LENGTH){
+  int receive_result = serial_->read_stop(read_bytes, kVlotterStopBytes, kVlotterStopLength, 8);
+  if(receive_result==kVlotterMsgLength){
     memcpy(buffer, read_bytes, 4);    
   } else if (receive_result > 0){
     M_ERR<<"CONTROL WHEEL MESSAGE SIZE NOT CORRECT; SIZE EQUAL TO: "<<receive_result<<" (　ﾟдﾟ)";
@@ -80,7 +113,7 @@ void Control::Vlotter::read_vlotter_data_(uint8_t buffer[]) {
   }
 }
 
-int Control::Vlotter::bytes_to_int_(uint8_t * bytes) {
+int control::Vlotter::bytes_to_int_(uint8_t * bytes) {
   int msb = bytes[0]<<4;
   int lsb = bytes[1]>>4;
   
@@ -92,7 +125,7 @@ int Control::Vlotter::bytes_to_int_(uint8_t * bytes) {
  * @param value value between 4096 and 0 gotten from the encoder
  * @return 
  */
-float Control::Vlotter::calculate_angle_(int value) {
+float control::Vlotter::compute_angle_(int value) {
   return (float)value/4096 * 2*3.1415;
 }
 /**
@@ -101,15 +134,15 @@ float Control::Vlotter::calculate_angle_(int value) {
  * @param angle
  * @return 
  */
-float Control::Vlotter::calculate_height_(float angle) {
-    float height = 0.7 * std::cos(angle);
+float control::Vlotter::compute_height_(float angle) {
+  float height = kVlotterBeamLength * std::cos(angle);
   return height;  
- }
+}
 
-
-
-
-
+float Vlotter::compute_roll_(float height_left, float height_right) {
+  float roll = asin((height_left-height_right))*kVlotterDistance;
+  return roll;
+}
 
 }
 }
