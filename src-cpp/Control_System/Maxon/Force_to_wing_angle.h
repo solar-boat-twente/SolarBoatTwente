@@ -27,6 +27,17 @@ constexpr bool kUseXsensVelocity = false;
 
 
 class ForceToWingAngle {
+  float kMinSpeedHeight = 5.2;
+  float kMinSpeedRoll = 2.7;
+  float kMinHeight = 0.4;
+  int kLiftOfForce = 1000;
+
+  bool kControlTesting = false;
+  int kControlTestVelocity = 4;
+
+  int kRpmToMeterPerSecond = 216;
+  bool kUseXsensVelocity = false;
+  
  public:
 
     ForceToWingAngle(DataStore * const control_data);    
@@ -36,6 +47,17 @@ class ForceToWingAngle {
     void MMA(float velocity);
     
     void set_velocity(float velocity);
+    
+    ForceToWingAngle* set_lift_of_force(int force);
+    
+    ForceToWingAngle* set_lift_start_velocity(float speed);
+    
+    ForceToWingAngle* set_roll_start_velocity(float veloicty);
+    
+    ForceToWingAngle* set_heigh_pid_start(float height);
+    
+    
+    
  private:
   void calculate_inverse_matrix();
   

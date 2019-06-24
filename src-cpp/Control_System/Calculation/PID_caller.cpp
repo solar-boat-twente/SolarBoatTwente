@@ -26,7 +26,7 @@ MIO::control::PID_caller::PID_caller(DataStore * const control_data) : control_d
 MIO::control::PID_caller::~PID_caller() {
   delete pid_height;
   delete pid_pitch;
-  delete pid_pitch;
+  delete pid_roll;
   file_.close();
 }
 
@@ -36,13 +36,13 @@ void MIO::control::PID_caller::PID_in(structures::FlyMode fly_mode){
   DataStore::PIDDataTotal PIDData;
   DataStore::PIDDataSplit split_PID_data;
   
-  pid_roll->set_PID_roll(STATE2);
+  pid_roll->set_PID_roll(STATE8);
   PIDData.Force_roll = pid_roll->calculate(0, data_from_complementary_filter.Real_roll);
 
-  pid_pitch->set_PID_pitch(STATE1);            //0, val = reference, previous value
+  pid_pitch->set_PID_pitch(STATE8);            //0, val = reference, previous value
   PIDData.Force_pitch = pid_pitch->calculate(0, data_from_complementary_filter.Real_pitch);
   
-  pid_height->set_PID_height(STATE2);
+  pid_height->set_PID_height(STATE8);
   
   switch(fly_mode) {
     case NO_FLY: 
@@ -92,5 +92,9 @@ void MIO::control::PID_caller::PID_in(structures::FlyMode fly_mode){
   //Finally copy the PIDData into the DataStore object
   control_data_ -> PutPIDData(&PIDData);
 }
-    
+
+void PID_caller::set_PID_from_config(std::vector<int>& pid_roll_vector, std::vector<int>& pid_height_vector) {
+  pid_height->set_PID_from_config(pid_height_vector);
+  pid_roll->set_PID_from_config(pid_roll_vector);
+}
 

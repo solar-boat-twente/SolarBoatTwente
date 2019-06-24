@@ -7,6 +7,8 @@
 
 #ifndef _PID_H_
 #define _PID_H_
+#include <vector>
+
 
 #include "../DataStore.h"
 #include "../../../solarboattwente.h"
@@ -24,6 +26,7 @@ struct PIDValues {
 class PIDImpl {
  public:
   PIDImpl( float dt, float Kp, float Kd, float Ki );
+  
   ~PIDImpl();
   
   void update_values(float dt, float Kp, float Kd, float Ki);
@@ -63,9 +66,7 @@ class PID {
    *  \\Send force_roll to actuators
    *  \\Wait a certain dt.
    */
-  PID() {
-    pimpl = new PIDImpl(0,0,0,0);
-  };
+  PID();
   // Kp -  proportional gain
   // Ki -  Integral gain
   // Kd -  derivative gain
@@ -76,6 +77,7 @@ class PID {
   void set_PID_pitch(structures::PIDState state);
   void set_PID_height(structures::PIDState state);
 
+  void set_PID_from_config(std::vector<int> config_pid);
   // Returns the manipulated variable given a setpoint and current process value
   float calculate( float setpoint, float pv );
   ~PID();
@@ -83,9 +85,15 @@ class PID {
   PIDValues get_PID_values();
   
  private:
-  PIDImpl *pimpl;
+  PIDImpl * const pimpl;
   
   PIDValues PID_values_;
+  
+  float config_dt = 0.0125;
+  int config_P = 0;
+  int config_I = 0;
+  int config_D = 0;
+  
 
 };
 }

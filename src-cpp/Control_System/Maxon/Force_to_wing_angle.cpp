@@ -177,4 +177,27 @@ void ForceToWingAngle::set_velocity(float velocity) {
   velocity_ = velocity;
 }
 
+ForceToWingAngle* ForceToWingAngle::set_heigh_pid_start(float height) {
+  kMinHeight = height;
+  M_OK<<"SETTING HEIGHT PID START POINT TO: "<<height;
+}
+
+ForceToWingAngle* ForceToWingAngle::set_lift_of_force(int force) {
+  kLiftOfForce = force;
+  M_OK<<"SETTING LIFT OF FORCE TO: "<<force;
+
+}
+
+ForceToWingAngle* ForceToWingAngle::set_lift_start_velocity(float speed) {
+  kMinSpeedHeight = speed;
+  M_OK<<"SETTING LIFT START VELOCITY TO: "<<speed;
+}
+
+ForceToWingAngle* ForceToWingAngle::set_roll_start_velocity(float velocity) {
+  kMinSpeedRoll = velocity;
+  M_OK<<"SETTING ROLL START VELOCITY TO: "<<velocity;
+}
+
+
+
 
