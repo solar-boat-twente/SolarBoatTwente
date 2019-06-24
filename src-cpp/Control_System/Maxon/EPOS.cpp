@@ -4,7 +4,6 @@
 
 #define EPOS_DEBUG
 
-#include <time.h>
 #include <iostream>
 #include <limits>
 #include <cstring>

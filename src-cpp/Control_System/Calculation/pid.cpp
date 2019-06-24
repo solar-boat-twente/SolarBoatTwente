@@ -24,28 +24,8 @@ void PID::set_PID_roll(structures::PIDState state){
       M_INFO<<"Roll State 1 is used"; 
       break;
     case STATE2: 
-      pimpl->update_values(0.0125,21.218,1.289,48.819);  
+      pimpl->update_values(0.0125,1500,200,0);      
       M_INFO<<"Roll State 2 is used"; 
-      break;
-    case STATE3: 
-      pimpl->update_values(0.0125,414.957,-326.505,80.103); 
-      M_INFO<<"Roll State 3 is used"; 
-      break;
-    case STATE4: 
-      pimpl->update_values(0.01251,269.078,-169.860,48.055); 
-      M_INFO<<"Roll State 4 is used"; 
-      break;
-    case STATE5: 
-      pimpl->update_values(0.0125,79.228,5,0); 
-      M_INFO<<"Roll State 5 is used"; 
-      break;
-    case STATE6: 
-      pimpl->update_values(0.0125,79.228,48.055,5);      
-      M_INFO<<"Roll State 6 is used"; 
-      break;
-    case STATE7: 
-      pimpl->update_values(0.0125,5000,0,0);      
-      M_INFO<<"Roll State 7 is used"; 
       break;
 
   }       
@@ -60,7 +40,7 @@ void PID::set_PID_pitch(structures::PIDState state){
       M_INFO<<"Pitch State 1 is used";
       break;
     case STATE2:
-      pimpl->update_values(0.0125,900,200,0); 
+      pimpl->update_values(0.0125,150,35,0); 
       M_INFO<<"Pitch State 2 is used";
       break;
   }     
@@ -74,7 +54,7 @@ void PID::set_PID_height(structures::PIDState state){
       M_INFO<<"Height State 1 is used";
       break;
     case STATE2:
-      pimpl->update_values(0.0125,27000,0,0); //demping toevoegen zodat er tijd is om de achtervleugel bij te stellen
+      pimpl->update_values(0.0125,1600,100,0); //27000demping toevoegen zodat er tijd is om de achtervleugel bij te stellen
       M_INFO<<"Height State 2 is used";
       break;
     case STATE3: 

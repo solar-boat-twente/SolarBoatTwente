@@ -47,7 +47,7 @@ void MIO::control::PID_caller::PID_in(structures::FlyMode fly_mode){
       M_INFO<<"USING STATE NO_FLY";
       break;
     case FLY: 
-      PIDData.Force_height = pid_height->calculate(0.3, data_from_complementary_filter.Real_height);  
+      PIDData.Force_height = pid_height->calculate(-0.3, -data_from_complementary_filter.Real_height);  
       M_INFO<<"USING STATE FLY";
       break;
     case BRIDGE: 

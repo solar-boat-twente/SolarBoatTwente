@@ -22,11 +22,10 @@
 
 namespace MIO {
 
-constexpr int STD_CAN_DELAY  = 0; //delay between can searches in ms
-constexpr int  STD_BAUD = 250; // standard baudrate
-constexpr int  STD_BUFFER = 1;
-constexpr int  STD_ID = 257752;
-constexpr int STD_FLAG = O_RDWR;
+constexpr int kStandardCanDelay  = 0; //delay between can searches in ms
+constexpr int  kStandardCanBaudrate = 250; // standard baudrate
+constexpr int  kStandardCanBuffer = 1;
+constexpr int kStandardCanFlag = O_RDWR;
 
 
 /*
@@ -77,11 +76,7 @@ class CANbus {
     // True if the canbus has been succesfully opened
     bool open;
   };
-
-  const char STANDARD_MESSAGE[5] = {'c', 'p', 'l', '2', '5'}; //'vo
-  
-  const short int STANDARD_LENGTH = sizeof(STANDARD_MESSAGE);
-  
+ 
   struct m_canmsg_t {
     // The can message
     canmsg_t msg;
@@ -103,11 +98,11 @@ class CANbus {
    * 
    *  
    */
-  CANbus(const std::string& device_name, unsigned int buffer_size = STD_BUFFER, unsigned int baudrate = STD_BAUD, int flag = STD_FLAG);
+  CANbus(const std::string& device_name, unsigned int buffer_size = kStandardCanBuffer, unsigned int baudrate = kStandardCanBaudrate, int flag = kStandardCanFlag);
   
   virtual ~CANbus();
   
-  int open_can(int flag = STD_FLAG);
+  int open_can(int flag = kStandardCanFlag);
   
   int close_can();
   
@@ -149,7 +144,7 @@ class CANbus {
    *  -1: Start unsuccessful
    *  1: Success
    */
-  int start(short int delay = STD_CAN_DELAY);
+  int start(short int delay = kStandardCanDelay);
 
 
   /*
@@ -183,7 +178,7 @@ class CANbus {
 
   int copy_message_(canmsg_t *rx, canmsg_t *message);
 
-  void read_can_thread_(short int delay=STD_CAN_DELAY);
+  void read_can_thread_(short int delay=kStandardCanDelay);
   
   std::vector<CANbus::m_canmsg_t> received_message;
 

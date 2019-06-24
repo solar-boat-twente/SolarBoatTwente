@@ -14,7 +14,11 @@
 namespace MIO{
 namespace control{
 
-constexpr int kControlMinSpeed = 2;//5.25;//2;
+constexpr float kMinSpeedHeight = 5.2;
+constexpr float kMinSpeedRoll = 2.7;
+constexpr float kMinHeight = 0.4;
+constexpr int kLiftOfForce = 1000;
+
 constexpr bool kControlTesting = false;
 constexpr int kControlTestVelocity = 4;
 
@@ -51,7 +55,7 @@ class ForceToWingAngle {
    * @param row_inverse_matrix Row from the inverse matrix which should be used to compute the force
    * @return Force required using the inverse MMA matrix and force in N.
    */
-  float compute_force_(DataStore::PIDDataTotal &pid_forces, float row_inverse_matrix[]);
+  float compute_force_(float force_height, float force_pitch, float force_roll, float row_inverse_matrix[]);
   
   /**
    * Calculate the angle the wing should have based on the lift_coefficient, uses a 
@@ -92,9 +96,9 @@ class ForceToWingAngle {
   
   float inverse_matrix_MMA_[3][3];
   
-  static constexpr float kLeftSurface = 0.052;   //m2
-  static constexpr float kRightSurface = 0.052;       
-  static constexpr float kBackSurface = 0.054;
+  static constexpr float kLeftSurface = 0.05246193;   //m2
+  static constexpr float kRightSurface = 0.05246193;       
+  static constexpr float kBackSurface = 0.058;
   static constexpr float kDensity = 1025; //kg/m3 density salt water
   static constexpr int kLiftSlope = 5;
   static constexpr float kZeroLiftAngle = -0.08;//0.08; //-0.05236;      //radians
