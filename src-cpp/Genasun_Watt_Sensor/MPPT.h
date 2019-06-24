@@ -18,6 +18,7 @@
 #include <thread>
 #include <stdlib.h>
 #include <stdint.h>
+
 #include "../../lib-cpp/Canbus/canbus.h"
 #include "MPPT_CANIDs.hpp"
 #include "../../solarboattwente.h"
@@ -62,7 +63,7 @@ namespace PowerElectronics{
  *  mppt->set_relay_from_number(false, 8);
  *  
  */
-class MPPT{
+class MPPT_Box{
   
  public:
   
@@ -75,7 +76,7 @@ class MPPT{
    * @param start_address The Start adress where the MPPTs start writing
    * @param relay_address The address with which you can write the relays.
    */
-  MPPT(CANbus * const canbus, uint8_t number_of_mppts = 10, unsigned long start_address = CANID_MPPT_START_ADDRESS, unsigned long relay_address = CANID_MPPT_RELAY);
+  MPPT_Box(CANbus * const canbus, uint8_t number_of_mppts = 10, unsigned long start_address = CANID_MPPT_START_ADDRESS, unsigned long relay_address = CANID_MPPT_RELAY);
   
   
   /**
@@ -217,11 +218,15 @@ class MPPT_Controller{
   
   
  public:
-  MPPT_Controller(MPPT * const mppt, structures::PowerInput * power_input, structures::PowerOutput * const power_output);
+  MPPT_Controller(MPPT_Box * const m_mppt, structures::PowerInput* const m_power_input, structures::PowerOutput* const m_power_output);
   
-  int start(const int delay = STD_MPPT_DELAY);
+  int start_reading(const int delay = STD_MPPT_DELAY);
   
-  int stop();
+  int stop_reading();
+  
+  int start_writing(const int delay = STD_MPPT_DELAY);
+  
+  int stop_writing();
   
  private:
   
@@ -233,7 +238,7 @@ class MPPT_Controller{
   
   int writing_thread_(const int delay);
   
-  MPPT * const mppt;
+  MPPT_Box * const mppt;
   
   structures::PowerInput * const power_input;
   structures::PowerOutput * const power_output;
@@ -253,4 +258,3 @@ class MPPT_Controller{
 
 
 #endif /* MPPT_H */
-

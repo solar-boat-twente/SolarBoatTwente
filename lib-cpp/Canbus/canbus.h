@@ -22,11 +22,10 @@
 
 namespace MIO {
 
-#define STD_CAN_DELAY 500 //delay between can searches in ms
-#define STD_BAUD 250 // standard baudrate
-#define STD_BUFFER 100
-#define STD_ID 257752
-
+constexpr int kStandardCanDelay  = 0; //delay between can searches in ms
+constexpr int  kStandardCanBaudrate = 250; // standard baudrate
+constexpr int  kStandardCanBuffer = 1;
+constexpr int kStandardCanFlag = O_RDWR;
 
 
 /*
@@ -50,41 +49,37 @@ class CANbus {
   
  public:
   struct CanStatus {
-  // Baudrate of the CANbus in bits so 250kb/s is 250
-  unsigned int baudrate;
+    // Baudrate of the CANbus in bits so 250kb/s is 250
+    uint16_t baudrate;
 
-  // Name of the device ex: "can0", "can1" 
-  const char * device;
+    // Name of the device ex: "can0", "can1" 
+    std::string device;
 
-  // Amount of buffer left before max length of buffer is gone
-  // TODO(Sander): Implement the use of this
-  unsigned int buffer_left;
+    // Amount of buffer left before max length of buffer is gone
+    // TODO(Sander): Implement the use of this
+    uint16_t buffer_left;
 
-  // Amount the total buffer was initially set to
-  // TODO(Sander): Implemenent the use of this
-  unsigned int total_buffer;
+    // Amount the total buffer was initially set to
+    // TODO(Sander): Implemenent the use of this
+    uint16_t total_buffer;
 
-  // Amount of times something was read two time without needing to.
-  // TODO(Sander): Implement the use of this
-  unsigned int double_reads;
+    // Amount of times something was read two time without needing to.
+    // TODO(Sander): Implement the use of this
+    uint16_t double_reads;
 
-  // True if the CANbus is currently running, false otherwise
-  bool status;
+    // True if the CANbus is currently running, false otherwise
+    bool status;
   
-  // The standard file descriptor
-  int file_descriptor = -1;
+    // The standard file descriptor
+    uint16_t file_descriptor = -1;
   
-  // True if the canbus has been succesfully opened
-  bool open;
+    // True if the canbus has been succesfully opened
+    bool open;
   };
-
-  const char STANDARD_MESSAGE[5] = {'c', 'p', 'l', '2', '5'}; //'vo
-  
-  const short int STANDARD_LENGTH = sizeof(STANDARD_MESSAGE);
-  
+ 
   struct m_canmsg_t {
     // The can message
-    canmsg_t * msg;
+    canmsg_t msg;
     // Flag whether the message has been read before..
     // TRUE means it has not yet been read.
     bool FIRST_READER;
@@ -103,10 +98,11 @@ class CANbus {
    * 
    *  
    */
-  CANbus(const char * device_name, unsigned int buffer_size = STD_BUFFER, unsigned int baudrate = STD_BAUD);
+  CANbus(const std::string& device_name, unsigned int buffer_size = kStandardCanBuffer, unsigned int baudrate = kStandardCanBaudrate, int flag = kStandardCanFlag);
   
+  virtual ~CANbus();
   
-  int open_can(int flag = O_RDWR);
+  int open_can(int flag = kStandardCanFlag);
   
   int close_can();
   
@@ -138,7 +134,7 @@ class CANbus {
    *  0: Nothing written
    *  1: Success
    */
-  int write_can(canmsg_t * const message, bool force_send = false);
+  int write_can(const canmsg_t& msg, bool force_send = false);
 
 
   /*
@@ -148,7 +144,7 @@ class CANbus {
    *  -1: Start unsuccessful
    *  1: Success
    */
-  int start(short int delay = STD_CAN_DELAY);
+  int start(short int delay = kStandardCanDelay);
 
 
   /*
@@ -164,17 +160,9 @@ class CANbus {
   /*
    * Gets the status of the Canbus
    */
-  CanStatus * status();
+  CanStatus& get_status();
 
-  /**
-   * Wrapper for the private function used for testing deprecated now
-   * 
-   * @param message message to add to internal vector
-   * @return returns 1 on success -1 on failure
-   */
-  int add_message_(canmsg_t * const message);
-
-  /**
+   /**
    * Uses IOCTL
    * 
    * @param baudrate
@@ -186,15 +174,15 @@ class CANbus {
 
   int _read_CAN();
 
-  int _add_message(canmsg_t * const message);
+  int add_message_(const canmsg_t &rx);
 
-  int _copy_message(canmsg_t *rx, canmsg_t *message);
+  int copy_message_(canmsg_t *rx, canmsg_t *message);
 
-  void _read_CAN_thread(short int delay=STD_CAN_DELAY);
+  void read_can_thread_(short int delay=kStandardCanDelay);
   
   std::vector<CANbus::m_canmsg_t> received_message;
 
-  CanStatus *can_status = new CanStatus;  
+  CanStatus can_status;  
   
   int file_descriptor = -1;
   
@@ -209,4 +197,3 @@ int print_canmsg(canmsg_t * const msg);
 
 
 #endif /* CANBUS_H */
-

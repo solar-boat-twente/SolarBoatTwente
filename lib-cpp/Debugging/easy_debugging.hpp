@@ -33,10 +33,6 @@
 
 #define BOLD  "\e[1m"
 
-#define ERR(x) KRED x RST
-#define WARN(x) KYEL x RST
-#define INFO(x) KBLU x RST
-#define OK(x)   KGRN x RST
 
 #define INFO_STR "INFO"
 #define WARN_STR "WARNING"
@@ -44,11 +40,11 @@
 #define DEBUG_STR "DEBUG"
 #define OK_STR "OK"
 
-#define DEBUG_INFO  true
-#define DEBUG_WARN  true
-#define DEBUG_ERR  true
-#define DEBUG_DEBUG  true
-#define DEBUG_OK  true
+constexpr bool DEBUG_INFO = true;
+constexpr bool DEBUG_WARN = true;
+constexpr bool DEBUG_ERR = true;
+constexpr bool DEBUG_DEBUG = true;
+constexpr bool DEBUG_OK = true;
 
 //#define PRETTY_PRINT
 
@@ -100,10 +96,9 @@ class Debug
   }
   
   template<class M>
-  Debug& printArray(M arr[], int length){
+  Debug &printArray(M arr[], int length){
     for(int i = 0; i<length; i++){
-      std::cout<<std::hex<<std::showbase<<arr[i]<<" "<<std::dec;
-      printf("0x%x ",  arr[1]);
+      std::cout<<std::hex<<std::showbase<<(int)arr[i]<<" "<<std::dec;
     }
     return *this;
   }
@@ -116,6 +111,8 @@ class Debug
 //typedef  debug::Debug(__FUNCTION__, "HELLO: ", "INFO", true) MY_INFO;
 }
 #ifdef PRETTY_PRINT
+// TODO: check if this works, but operator<< may need to be const
+// constexpr debug::Debug M_INFO = debug::Debug(__PRETTY_FUNCTION__, KBLU, INFO_STR, DEBUG_INFO)
 #define M_INFO debug::Debug(__PRETTY_FUNCTION__, KBLU, INFO_STR, DEBUG_INFO)
 #define M_WARN debug::Debug(__PRETTY_FUNCTION__, KYEL, WARN_STR, DEBUG_WARN)
 #define M_ERR debug::Debug(__PRETTY_FUNCTION__, KRED, ERR_STR, DEBUG_ERR)

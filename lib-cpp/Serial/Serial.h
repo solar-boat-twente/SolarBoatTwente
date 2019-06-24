@@ -16,6 +16,7 @@
 
 #include <fcntl.h>
 #include <termios.h>
+#include <string>
 
 
 namespace MIO{
@@ -24,7 +25,6 @@ namespace MIO{
  * Example use:
  *  
  *  Serial * m_serial = new Serial(port);
- *  //TODO (sander); Implement the bottom three things
  *  // tty_old = m_serial.get_tty();
  *  // m_serial.tty_set(tty file);
  *  m_serial.start();
@@ -39,13 +39,13 @@ class Serial {
  public:
   struct SerialStatus{
     
-    char port[20];
+    std::string port;
     
     bool status;
     
     int baudrate;
     
-    termios * tty = new termios;
+    termios tty;
     
   };
  public:
@@ -56,12 +56,20 @@ class Serial {
    * @param port port name for the serial example: "/dev/ttyUSB0"
    * @param baudrate speed of the port in kbps, standard is 9600
    */
-  Serial(const char port[20], int baudrate = 9600);
+  Serial(const std::string& port, int baudrate = 9600);
    
   /**
    * Destructor for the Serial port, closes the serial port mostly
    */
   ~Serial();
+   
+  Serial(const Serial&) = delete;
+
+  Serial operator=(const Serial&) = delete;
+
+  Serial(Serial&&) = delete;
+
+  Serial& operator=(Serial&&) = delete;
       
   
   /**
@@ -85,7 +93,7 @@ class Serial {
   
   int write_byte(uint8_t byte);
   
-  SerialStatus * status(){
+  SerialStatus& get_status(){
     return serial_status;
   }
  private:
@@ -108,7 +116,7 @@ class Serial {
  */
   int apply_settings_();
   
-  SerialStatus * const serial_status = new SerialStatus; 
+  SerialStatus serial_status; 
 };
 }
 

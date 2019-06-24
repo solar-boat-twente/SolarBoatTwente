@@ -59,7 +59,7 @@ class ControlWheel{
   
   Serial * const serial_;
   
-  ControlWheelStatus * const control_wheel_status = new ControlWheelStatus;
+  ControlWheelStatus control_wheel_status;
   
   std::thread m_reading_thread_;
   
