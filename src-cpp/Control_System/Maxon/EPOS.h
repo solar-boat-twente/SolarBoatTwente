@@ -11,7 +11,7 @@
 namespace MIO{
 namespace control{
 
-constexpr int kPositionButtonQuartercountMultiplier = 6000000;//2000000;//2200000;
+constexpr int kPositionButtonQuartercountMultiplier = 3000000;//2000000;//2200000;
 
 constexpr int MIN_ANGLE_LEFT = -100000;
 constexpr int MAX_ANGLE_LEFT = 125000;

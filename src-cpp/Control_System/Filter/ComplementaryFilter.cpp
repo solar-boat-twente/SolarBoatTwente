@@ -42,5 +42,5 @@ void ComplementaryFilter::CalculateRealHeight()
    M_INFO<<"Roll front equal to: "<< roll;
    M_INFO<<"Real height: "<<real_data.Real_height<<" Real Roll: "<<real_data.Real_roll
        <<" Real Pitch: "<<real_data.Real_pitch;
-   control_data_->PutComplementaryData(&real_data);
+   control_data_->PutRealData(&real_data);
 }           

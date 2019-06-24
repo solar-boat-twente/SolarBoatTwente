@@ -226,7 +226,7 @@ void EPOS::start_position_mode(short int delay){
 }  //end of StartPositionMode 
 
 float EPOS::get_angle_from_podmeter() {
-  float button_position = (float)adam_6017->read_counter(5)/numeric_limits<uint16_t>::max() - 0.5;
+  float button_position = (float)adam_6017->read_counter(5)/numeric_limits<uint16_t>::max();
   float button_quartercounts = button_position * kPositionButtonQuartercountMultiplier;
   return button_quartercounts;
 
@@ -245,18 +245,18 @@ void EPOS::move(){
 
   switch (node_id_) {
     case 1:   //maximale hoeveelheid qc die we positief kunnen maken is 1000000 dit hoort bij 0.5 user_quartercircles //node 1 is rechts, node 2 is links
-      quartercounts = angle2quartercounts_(alphas.Wing_right, MIN_ANGLE_RIGHT, MIN_ANGLE_RIGHT) ;
-      file_<<"RIGHT: "<<node_id_<<" Alpha: "<<alphas.Wing_right <<" | Position: "<<quartercounts<<flush;
+      quartercounts = angle2quartercounts_(alphas.Wing_right, MIN_ANGLE_RIGHT, MAX_ANGLE_RIGHT) ;
+      M_INFO<<"RIGHT: "<<node_id_<<" Alpha: "<<alphas.Wing_right <<" | Position: "<<quartercounts;
       break;
       
     case 2:
-      quartercounts = angle2quartercounts_(alphas.Wing_left, MIN_ANGLE_LEFT, MIN_ANGLE_RIGHT);
-      file_<<"\tLEFT: "<<node_id_<<"Alpha: "<<alphas.Wing_left <<" | Position: "<<quartercounts<<"\n"<<flush;
+      quartercounts = angle2quartercounts_(alphas.Wing_left, MIN_ANGLE_LEFT, MAX_ANGLE_RIGHT);
+      M_INFO<<"\tLEFT: "<<node_id_<<"Alpha: "<<alphas.Wing_left <<" | Position: "<<quartercounts;
       break;
       
     case 4:
       quartercounts = quartercounts2quartercounts_(user_quatercircles, MIN_ANGLE_BACK, MAX_ANGLE_BACK);//quartercircles + ((alphas.Wing_back*180/3.1415)*125000);   //absolute positie en start direct
-      file_<<"\tBACK: "<<node_id_<<"Alpha: "<<alphas.Wing_back <<" | Position: "<<quartercounts<<"\n"<<flush;
+      M_INFO<<"\tBACK: "<<node_id_<<"Alpha: "<<alphas.Wing_back <<" | Position: "<<quartercounts;
       break;
       
     default:

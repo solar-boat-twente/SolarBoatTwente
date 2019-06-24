@@ -56,7 +56,7 @@ void ForceToWingAngle::MMA(structures::PowerInput * power_input) {
    * has to be inversed to calculate the right forces per wing. 
   */
   DataStore::PIDDataTotal pid_data =control_data_-> GetPIDData();
-  DataStore::RealData complementary_data_input =control_data_-> GetComplementaryData();
+  DataStore::RealData complementary_data_input =control_data_-> GetRealData();
   DataStore::XsensData xsense_data = control_data_->GetXsensData();
 
   DataStore::AngleWings output_wing_angles;
@@ -93,8 +93,8 @@ void ForceToWingAngle::MMA(structures::PowerInput * power_input) {
     // Force
     if(complementary_data_input.Real_height>kMinHeight){
      left_force += compute_force_(pid_data.Force_height, 0, 0, inverse_matrix_MMA_[0]);
-     right_force += compute_force_(pid_data.Force_height, 0, 0, inverse_matrix_MMA_[0]);
-     back_force += compute_force_(pid_data.Force_height, 0, 0, inverse_matrix_MMA_[0]);    
+     right_force += compute_force_(pid_data.Force_height, 0, 0, inverse_matrix_MMA_[1]);
+     back_force += compute_force_(pid_data.Force_height, 0, 0, inverse_matrix_MMA_[2]);    
     } else {
       //If the boat is not yet flying a constant force is applied to get it into the air.
       left_force += kLiftOfForce;
@@ -151,7 +151,7 @@ float ForceToWingAngle::compute_lift_coefficient_(float force, float area) {
 
 float ForceToWingAngle::compute_force_(float force_height, float force_pitch, float force_roll, float row_inverse_matrix[]) {
   
-  float force = row_inverse_matrix[0] * force_height + row_inverse_matrix[1] * force_pitch + force_roll;
+  float force = row_inverse_matrix[0] * force_height + row_inverse_matrix[1] * force_pitch + row_inverse_matrix[2] * force_roll;
 
   return force;
 

@@ -98,7 +98,7 @@ class ForceToWingAngle {
   
   static constexpr float kLeftSurface = 0.05246193;   //m2
   static constexpr float kRightSurface = 0.05246193;       
-  static constexpr float kBackSurface = 0.058;
+  static constexpr float kBackSurface = 0.058134;
   static constexpr float kDensity = 1025; //kg/m3 density salt water
   static constexpr int kLiftSlope = 5;
   static constexpr float kZeroLiftAngle = -0.08;//0.08; //-0.05236;      //radians

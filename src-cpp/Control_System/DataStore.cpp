@@ -14,12 +14,12 @@ DataStore::DataStore( ) {
 DataStore::~DataStore( ) {
       //cout << "Called destructor DataStore()" << endl;
 }
-DataStore::XsensData DataStore::GetXsensData( ) const {
+DataStore::XsensData& DataStore::GetXsensData( ) {
      //cout << "Called DataStore::GetXsensData()" << endl;
     // Return inhoud member variabele.
     return xsens_data;
 }
-DataStore::sensor_struct DataStore::GetSensorData( ) const {
+DataStore::sensor_struct& DataStore::GetSensorData( ) {
      //cout << "Called DataStore::GetSensorData()" << endl;
     // Return inhoud member variabele.
     return sensor_data;
@@ -43,29 +43,49 @@ void DataStore::PutFilteredData(FilteredData * const data3) {
     // variabele xsens_data.
     Filtered_data = *data3;
 }
-DataStore::FilteredData DataStore::GetFilteredData( ) const {
+DataStore::FilteredData& DataStore::GetFilteredData( ) {
     //cout << "Called DataStore::GetFilterData()" << endl;
     // Return inhoud member variabele.
     return Filtered_data;
 }
-void DataStore::PutComplementaryData(RealData * const data4) {
+void DataStore::PutRealData(RealData * const data4) {
      //cout << "Called DataStore::PutComplementaryData()" << endl;
     // De inhoud van waar de pointer naar wijst toekennen aan member
     // variabele xsens_data.
     Complementary_data = *data4;
 }
-DataStore::RealData DataStore::GetComplementaryData() const {
+DataStore::RealData& DataStore::GetRealData() {
     // cout << "Called DataStore::GetComplementaryData()" << endl;
     // Return inhoud member variabele.
     return Complementary_data;
 }
+ void DataStore::PutPIDSplitData(PIDDataSplit * const data){
+   PID_split_data = *data;
+ }
+
+DataStore::PIDDataSplit& DataStore::GetPIDSplitData()  {
+  return PID_split_data;
+}
+
+void DataStore::PutEposData(EposData * const data){
+  epos_data = *data;
+}
+
+
+DataStore::EposData& DataStore::GetEposData()  {
+  return epos_data;
+}
+
+
+
 void DataStore::PutPIDData(PIDDataTotal * const data5) {
      //cout << "Called DataStore::PutPIDDataTotalData()" << endl;
     // De inhoud van waar de pointer naar wijst toekennen aan member
     // variabele xsens_data.
     PID_data = *data5;
 }
-DataStore::PIDDataTotal  DataStore::GetPIDData() const {
+
+DataStore::PIDDataTotal&  DataStore::GetPIDData() {
     //cout << "Called DataStore::GetXsensData()" << endl;
     // Return inhoud member variabele.
     return PID_data;
@@ -76,7 +96,7 @@ void DataStore::PutWingData(AngleWings * const data6) {
     // variabele xsens_data.
     Wing_data = *data6;
 }
-DataStore::AngleWings  DataStore::GetWingData() const {
+DataStore::AngleWings&  DataStore::GetWingData() {
     //cout << "Called DataStore::GetWingData()" << endl;
     // Return inhoud member variabele.
     return Wing_data;
