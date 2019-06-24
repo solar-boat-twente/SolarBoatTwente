@@ -19,7 +19,8 @@ using namespace control;
 
 
 
-ForceToWingAngle::ForceToWingAngle(DataStore * const control_data) : control_data_(control_data) {
+ForceToWingAngle::ForceToWingAngle(DataStore * const control_data, PID_caller * const pid_caller) 
+  : control_data_(control_data), pid_caller_(pid_caller) {
   calculate_inverse_matrix();
 }
 
@@ -81,6 +82,7 @@ void ForceToWingAngle::MMA(structures::PowerInput * power_input) {
   
   // Once the minimal roll speed has been reachted the force should be computed for the roll
   if (velocity_>kMinSpeedRoll){    //snelheid hoger dan 2m/s
+    pid_caller_->compute_pid_roll();
      //input.Force_height = 0;
     left_force += compute_force_(0, pid_data.Force_pitch, pid_data.Force_roll, inverse_matrix_MMA_[0]);
     right_force += compute_force_(0, pid_data.Force_pitch, pid_data.Force_roll, inverse_matrix_MMA_[1]);
@@ -89,6 +91,7 @@ void ForceToWingAngle::MMA(structures::PowerInput * power_input) {
   
   // Once the kMinSpeedHeight has been reach the boat shall start trying to get into a certain angle;
   if (velocity_>kMinSpeedHeight){
+    pid_caller_->compute_pid_height();
     //When the height is larger than the mimimum height e.g. the boat is flying the Force Height should be added to the
     // Force
     if(complementary_data_input.Real_height>kMinHeight){

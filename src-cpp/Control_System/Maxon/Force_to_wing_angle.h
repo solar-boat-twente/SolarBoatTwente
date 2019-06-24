@@ -10,6 +10,7 @@
 
 #include "../DataStore.h"
 #include "../../../solarboattwente.h"
+#include "../Calculation/PID_caller.h"
 
 namespace MIO{
 namespace control{
@@ -40,7 +41,7 @@ class ForceToWingAngle {
   
  public:
 
-    ForceToWingAngle(DataStore * const control_data);    
+    ForceToWingAngle(DataStore * const control_data, PID_caller * const pid_caller);    
     
     void MMA(structures::PowerInput * power_input);   
     
@@ -115,6 +116,8 @@ class ForceToWingAngle {
   }; 
   
   DataStore * const control_data_;
+  
+  PID_caller * const pid_caller_;
   
   float inverse_matrix_MMA_[3][3];
   

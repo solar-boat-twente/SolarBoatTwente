@@ -34,7 +34,11 @@ class PID_caller {
   
   void set_PID_from_config(std::vector<int>& pid_roll, std::vector<int>& pid_height);
 
-  void PID_in(structures::FlyMode fly_mode = structures::FLY);
+  void compute_pid_roll();
+  
+  void compute_pid_height(structures::FlyMode fly_mode = structures::FLY);
+  
+  
 
   
  private:

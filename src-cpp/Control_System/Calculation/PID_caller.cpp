@@ -30,17 +30,33 @@ MIO::control::PID_caller::~PID_caller() {
   file_.close();
 }
 
-void MIO::control::PID_caller::PID_in(structures::FlyMode fly_mode){ 
+void PID_caller::compute_pid_roll() {
   DataStore::RealData data_from_complementary_filter = control_data_->GetRealData();
   
-  DataStore::PIDDataTotal PIDData;
-  DataStore::PIDDataSplit split_PID_data;
+  DataStore::PIDDataTotal PIDData = control_data_->GetPIDData();
+  DataStore::PIDDataSplit split_PID_data = control_data_->GetPIDSplitData();
   
   pid_roll->set_PID_roll(STATE8);
   PIDData.Force_roll = pid_roll->calculate(0, data_from_complementary_filter.Real_roll);
 
   pid_pitch->set_PID_pitch(STATE8);            //0, val = reference, previous value
   PIDData.Force_pitch = pid_pitch->calculate(0, data_from_complementary_filter.Real_pitch);
+  
+  split_PID_data.P_roll = pid_roll->get_PID_values().Pout;
+  split_PID_data.I_roll = pid_roll->get_PID_values().Iout;
+  split_PID_data.D_roll = pid_roll->get_PID_values().Dout;
+  
+  control_data_->PutPIDSplitData(&split_PID_data);
+
+  control_data_ -> PutPIDData(&PIDData);
+}
+
+void MIO::control::PID_caller::compute_pid_height(structures::FlyMode fly_mode){ 
+  DataStore::RealData data_from_complementary_filter = control_data_->GetRealData();
+  
+  DataStore::PIDDataSplit split_PID_data = control_data_->GetPIDSplitData();
+
+  DataStore::PIDDataTotal PIDData = control_data_->GetPIDData();
   
   pid_height->set_PID_height(STATE8);
   
@@ -71,10 +87,7 @@ void MIO::control::PID_caller::PID_in(structures::FlyMode fly_mode){
       <<"Pout: "<<pid_height->get_PID_values().Pout<<" | Iout: "<<pid_height->get_PID_values().Iout
       <<" | Dout: "<< pid_height->get_PID_values().Dout;
   
-  split_PID_data.P_roll = pid_roll->get_PID_values().Pout;
-  split_PID_data.I_roll = pid_roll->get_PID_values().Iout;
-  split_PID_data.D_roll = pid_roll->get_PID_values().Dout;
-  
+ 
   split_PID_data.P_height = pid_height->get_PID_values().Pout;
   split_PID_data.I_height = pid_height->get_PID_values().Iout;
   split_PID_data.D_height = pid_height->get_PID_values().Dout;

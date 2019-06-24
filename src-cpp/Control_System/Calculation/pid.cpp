@@ -143,7 +143,7 @@ float PIDImpl::calculate( float reference, float pv )
 
     // Proportional term
     float Pout = Kp_ * error;
-
+    
     // Integral term
     integral_ += error * dt_;
     float Iout = Ki_ * integral_;
