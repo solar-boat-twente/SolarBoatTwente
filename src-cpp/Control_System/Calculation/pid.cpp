@@ -14,6 +14,11 @@ using namespace std;
 using namespace MIO;
 using namespace control;
 using namespace structures;
+
+PID::PID() : pimpl(new PIDImpl(0,0,0,0))
+{}
+
+
 //float dt, float Kp, float Kd, float Ki, float Fc
 void PID::set_PID_roll(structures::PIDState state){
   
@@ -27,10 +32,18 @@ void PID::set_PID_roll(structures::PIDState state){
       pimpl->update_values(0.0125,1500,200,0);      
       M_INFO<<"Roll State 2 is used"; 
       break;
-
+    case STATE8:
+      pimpl->update_values(config_dt, config_P, config_D, config_I);
   }       
   //pimpl = new PIDImpl(dt,Kp,Kd,Ki);
 }
+
+void PID::set_PID_from_config(std::vector<int> config_pid) {
+  config_P = config_pid[0];
+  config_I = config_pid[1];
+  config_D = config_pid[2];
+}
+
 void PID::set_PID_pitch(structures::PIDState state){
  // k->PID_pitch=STATE5;
         
@@ -43,6 +56,8 @@ void PID::set_PID_pitch(structures::PIDState state){
       pimpl->update_values(0.0125,150,35,0); 
       M_INFO<<"Pitch State 2 is used";
       break;
+    case STATE8:
+      pimpl->update_values(config_dt, config_P, config_D, config_I);
   }     
     //pimpl = new PIDImpl(dt,Kp,Kd,Ki,Fc);
 }
@@ -72,7 +87,9 @@ void PID::set_PID_height(structures::PIDState state){
     case STATE6: 
       pimpl->update_values(0.0125,700,100,0); 
       M_INFO<<"Height State 6 is used";
-      break;
+      break; 
+    case STATE8:
+      pimpl->update_values(config_dt, config_P, config_D, config_I);
   }        
     //pimpl = new PIDImpl(dt,Kp,Kd,Ki,Fc);
 }
@@ -108,6 +125,8 @@ void PIDImpl::update_values( float dt, float Kp, float Kd, float Ki) {
   Kp_ = Kp;
   Kd_ = Kd;
   Ki_ = Ki;
+  
+  std::cout<<"USING VALUES: "<<dt_<<", "<<Kp_<<", "<<Kd_<<", "<<Ki_<<std::endl;
 }
 
 

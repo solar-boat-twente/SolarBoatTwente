@@ -75,6 +75,8 @@ class Vlotter{
   
   float get_roll_rad();
    
+  void configure(float new_phi_left, float new_phi_right);
+  
  private:
   
   void reading_thread_(short int delay);
@@ -101,11 +103,18 @@ class Vlotter{
   float height_right_; 
   
   float roll_;
+  
+  float phi_zero_left_;
+  float phi_zero_right_;
+  
+  float kPhiZeroAngleLeft = 5.97775;
+  float kPhiZeroAngleRight = 4.70765;
 };
 
 
 }
 }
+
 
 
 

@@ -4,6 +4,7 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
+      <itemPath>lib-cpp/ConfigReader/ConfigReader.hpp</itemPath>
       <itemPath>src-cpp/SolarBoat.hpp</itemPath>
       <itemPath>lib-cpp/Logging/new_logging.hpp</itemPath>
       <itemPath>solarboattwente.h</itemPath>
@@ -135,6 +136,7 @@
           <itemPath>src-cpp/Temperature_Sensor/Temperature_Sensor.hpp</itemPath>
         </logicalFolder>
       </logicalFolder>
+      <itemPath>lib-cpp/ConfigReader/ConfigReader.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
       <itemPath>lib-cpp/Logging/new_logging.cpp</itemPath>
       <itemPath>solarboattwente.cpp</itemPath>
@@ -185,6 +187,7 @@
         <linkerTool>
           <linkerLibItems>
             <linkerOptionItem>`pkg-config --libs libmodbus`</linkerOptionItem>
+            <linkerOptionItem>`pkg-config --libs libconfig++`</linkerOptionItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>
@@ -219,6 +222,16 @@
       <item path="lib-cpp/Canbus/canbus.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="lib-cpp/Canbus/canbus.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lib-cpp/ConfigReader/ConfigReader.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="lib-cpp/ConfigReader/ConfigReader.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="lib-cpp/Debugging/easy_debugging.hpp"
             ex="false"
@@ -491,6 +504,16 @@
       <item path="lib-cpp/Canbus/canbus.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="lib-cpp/Canbus/canbus.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="lib-cpp/ConfigReader/ConfigReader.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="lib-cpp/ConfigReader/ConfigReader.hpp"
+            ex="false"
+            tool="3"
+            flavor2="0">
       </item>
       <item path="lib-cpp/Debugging/easy_debugging.hpp"
             ex="false"

@@ -30,6 +30,10 @@ Vlotter::~Vlotter() {
   delete serial_;
 }
 
+void Vlotter::configure(float new_phi_left, float new_phi_right) {
+  kPhiZeroAngleLeft = new_phi_left;
+  kPhiZeroAngleRight = new_phi_right;
+}
 
 void control::Vlotter::start_reading(short int delay) {
   if(serial_->get_status().status){

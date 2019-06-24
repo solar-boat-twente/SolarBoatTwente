@@ -9,6 +9,7 @@
 #include "pid.h"
 #include "../DataStore.h"
 #include <fstream>
+#include <vector>
 
 //#include "structures.h"
 namespace MIO{
@@ -30,6 +31,8 @@ class PID_caller {
   PID_caller(const PID_caller& orig);
   
   virtual ~PID_caller();
+  
+  void set_PID_from_config(std::vector<int>& pid_roll, std::vector<int>& pid_height);
 
   void PID_in(structures::FlyMode fly_mode = structures::FLY);
 
