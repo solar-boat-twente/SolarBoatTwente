@@ -96,7 +96,7 @@ class EPOS{
     
  private:
   
-  canmsg_t create_CAN_msg(int id, int length, const uint8_t data[]);
+  canmsg_t create_CAN_msg(int id, int length, const uint8_t data[], canmsg_t& output);
 
   float angle2quartercounts_(float radians, const int min, const int max);
   
@@ -108,7 +108,7 @@ class EPOS{
   
   float get_angle_from_podmeter();
   
-  canmsg_t build_move_message_(uint8_t position_in_bytes[]);
+  canmsg_t build_move_message_(uint8_t position_in_bytes[], canmsg_t& move_message);
   
     /** puts the EPOS in shutdown state */
   canmsg_t shutdown_;

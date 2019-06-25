@@ -47,8 +47,7 @@ the output is succes or failed.
     
 can.read? 
 ----------------------------------------------------------------------------- */ 
-canmsg_t EPOS::create_CAN_msg(int id, int length, const uint8_t data[]){
-  canmsg_t output;
+canmsg_t EPOS::create_CAN_msg(int id, int length, const uint8_t data[], canmsg_t& output){
   output.id = id;
   output.length = length;
   memcpy(output.data, data, length);
@@ -85,59 +84,73 @@ EPOS::~EPOS(){
 }
 
 void EPOS::build_CAN_messages_() {
-//  shutdown_.id = 0x600 + NODE_ID;
+//  shutdown_.id = 0x600 + node_id_;
 //  shutdown_.length = 8;
 //  memcpy(shutdown_.data,kEposShutdownMessage, 8);
 //  
-//  switch_on_and_enable_.id = 0x600+NODE_ID;
+//  switch_on_and_enable_.id = 0x600+node_id_;
 //  switch_on_and_enable_.length = 8;
 //  memcpy(switch_on_and_enable_.data,kEposSwitchOnMessage, 8);
 //  
-//  get_status_word.id = 0x600+NODE_ID;
+//  get_status_word.id = 0x600+node_id_;
 //  get_status_word.length = 4;
 //  memcpy(get_status_word.data,kEposGetStatusMessage, 4);
 //  
-//  set_homing_mode_.id = 0x600+NODE_ID;
+//  set_homing_mode_.id = 0x600+node_id_;
 //  set_homing_mode_.length = 8;
 //  memcpy(&set_homing_mode_.data[0],(char*)kEposHomingModeMessage, 8);
 //  
-//  set_homing_method_positive_.id = 0x600+NODE_ID;
+//  set_homing_method_positive_.id = 0x600+node_id_;
 //  set_homing_method_positive_.length = 8;
 //  memcpy(&set_homing_method_positive_.data[0],(char*)kEposHomingPositiveMessage, 8);
 //  
-//  set_homing_method_negative_.id = 0x600+NODE_ID;
+//  set_homing_method_negative_.id = 0x600+node_id_;
 //  set_homing_method_negative_.length = 8;
 //  memcpy(&set_homing_method_negative_.data[0],(char*)kEposHomingNegativeMessage, 8);
 //  
-//  start_homing_.id = 0x600+NODE_ID;
+//  start_homing_.id = 0x600+node_id_;
 //  start_homing_.length = 8;
 //  memcpy(&start_homing_.data[0],(char*)kEposStartHomingMessage, 8);
 //  
-//  set_position_mode_.id = 0x600+NODE_ID;
+//  set_position_mode_.id = 0x600+node_id_;
 //  set_position_mode_.length = 8;
 //  memcpy(&set_position_mode_.data[0],(char*)kEposSetPositionModeMessage, 8);
 //  
-//  start_absolute_position_.id = 0x600+NODE_ID;
+//  start_absolute_position_.id = 0x600+node_id_;
 //  start_absolute_position_.length = 8;
 //  memcpy(&start_absolute_position_.data[0],(char*)kEposAbsolutePositionMessage, 8);
 //  
-//  clear_faults_.id = 0x600+NODE_ID;
+//  clear_faults_.id = 0x600+node_id_;
 //  clear_faults_.length = 8;
 //  memcpy(&clear_faults_.data[0],(char*)kEposClearFaultMessage, 8);
   
+//  
+//  shutdown_ = create_CAN_msg(write_id_, 8, kEposShutdownMessage);
+//  
+//  switch_on_and_enable_ = create_CAN_msg(write_id_, 8, kEposSwitchOnMessage);
+//  get_status_word = create_CAN_msg(write_id_, 4, kEposSwitchOnMessage);
+//  set_homing_mode_ = create_CAN_msg(write_id_, 8, kEposHomingModeMessage);
+//  set_homing_method_positive_ = create_CAN_msg(write_id_, 8, kEposHomingPositiveMessage);
+//  set_homing_method_negative_ = create_CAN_msg(write_id_, 8, kEposHomingNegativeMessage);
+//  start_homing_ = create_CAN_msg(write_id_, 8, kEposStartHomingMessage);
+//  clear_faults_ = create_CAN_msg(write_id_, 8, kEposStartHomingMessage);
+//  
+//  set_position_mode_ = create_CAN_msg(write_id_, 8, kEposSetPositionModeMessage);
+//  start_absolute_position_ = create_CAN_msg(write_id_, 8, kEposAbsolutePositionMessage);
   
-  shutdown_ = create_CAN_msg(write_id_, 8, kEposShutdownMessage);
+    
+  create_CAN_msg(write_id_, 8, kEposShutdownMessage, shutdown_);
   
-  switch_on_and_enable_ = create_CAN_msg(write_id_, 8, kEposSwitchOnMessage);
-  get_status_word = create_CAN_msg(write_id_, 4, kEposSwitchOnMessage);
-  set_homing_mode_ = create_CAN_msg(write_id_, 8, kEposHomingModeMessage);
-  set_homing_method_positive_ = create_CAN_msg(write_id_, 8, kEposHomingPositiveMessage);
-  set_homing_method_negative_ = create_CAN_msg(write_id_, 8, kEposHomingNegativeMessage);
-  start_homing_ = create_CAN_msg(write_id_, 8, kEposStartHomingMessage);
-  clear_faults_ = create_CAN_msg(write_id_, 8, kEposStartHomingMessage);
+  create_CAN_msg(write_id_, 8, kEposSwitchOnMessage, switch_on_and_enable_);
+  create_CAN_msg(write_id_, 4, kEposSwitchOnMessage, get_status_word);
+  create_CAN_msg(write_id_, 8, kEposHomingModeMessage, set_homing_mode_);
+  create_CAN_msg(write_id_, 8, kEposHomingPositiveMessage, set_homing_method_positive_);
+  create_CAN_msg(write_id_, 8, kEposHomingNegativeMessage, set_homing_method_negative_);
+  create_CAN_msg(write_id_, 8, kEposStartHomingMessage, start_homing_);
+  create_CAN_msg(write_id_, 8, kEposStartHomingMessage, clear_faults_);
   
-  set_position_mode_ = create_CAN_msg(write_id_, 8, kEposSetPositionModeMessage);
-  start_absolute_position_ = create_CAN_msg(write_id_, 8, kEposAbsolutePositionMessage);
+  create_CAN_msg(write_id_, 8, kEposSetPositionModeMessage, set_position_mode_);
+  create_CAN_msg(write_id_, 8, kEposAbsolutePositionMessage, start_absolute_position_);
 
  }
 
@@ -283,14 +296,15 @@ void EPOS::move(){
 
   four_bytes absolute_position = {(int)quartercounts};
     
-  canmsg_t move_message = build_move_message_(absolute_position.byte);
+  canmsg_t move_message;
+  build_move_message_(absolute_position.byte, move_message);
   canbus_->write_can(move_message);
 
 
   canbus_->write_can(start_absolute_position_);
 }
 
-canmsg_t EPOS::build_move_message_(uint8_t position_in_bytes[]) {
+canmsg_t EPOS::build_move_message_(uint8_t position_in_bytes[], canmsg_t& move_message) {
 
   uint8_t move_data[8];
   move_data[0] = 0x23;

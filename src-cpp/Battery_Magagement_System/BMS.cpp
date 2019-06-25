@@ -185,7 +185,7 @@ int BMS::parse_response1_(std::vector<uint8_t> &bytes, structures::PowerInput* p
     //Get all the values from the battery, look at REC API MANUAL.
     power_input->battery.state_of_charge = 0.5*bytes[0];
     power_input->battery.total_voltage = (256*bytes[1]+bytes[2])*kBmsVoltageMultiplier;
-    power_input->battery.total_current = static_cast<signed short int>((256*bytes[3]+ bytes[4]))*kBmsVoltageMultiplier; //Value has to be cast to signed int to show negative values..
+    power_input->battery.total_current = static_cast<signed short int>((256*bytes[3]+ bytes[4]))*kBmsCurrentMultiplier; //Value has to be cast to signed int to show negative values..
     power_input->battery.state_of_health = 0.5*bytes[5];
     power_input->battery.error_number = bytes[6];
     power_input->battery.error_location = bytes[7];

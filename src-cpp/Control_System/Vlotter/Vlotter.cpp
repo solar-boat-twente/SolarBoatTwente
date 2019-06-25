@@ -88,6 +88,7 @@ void control::Vlotter::reading_thread_(short int delay) {
   int encoder_right;
   while(thread_active_){
     read_vlotter_data_(bytes);
+    
     encoder_left = bytes_to_int_(&(bytes[0]));
     encoder_right = bytes_to_int_(&(bytes[2]));
     
@@ -139,6 +140,7 @@ float control::Vlotter::compute_angle_(int value) {
  * @return 
  */
 float control::Vlotter::compute_height_(float angle) {
+  std::cout<<"Calculating height using angle: "<<angle<<std::endl;
   float height = kVlotterBeamLength * std::cos(angle);
   return height;  
 }

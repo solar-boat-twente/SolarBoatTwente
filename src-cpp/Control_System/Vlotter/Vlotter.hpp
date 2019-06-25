@@ -24,11 +24,9 @@ constexpr char kVlotterStopBytes[2] = {'\r', '\n'};
 constexpr int kVlotterStopLength = 2;
 constexpr int kVlotterMsgLength = 4;
 
-constexpr int kVlotterBeamLength = 0.7;
-constexpr int kVlotterDistance = 1.3;
+constexpr float kVlotterBeamLength = 0.7;
+constexpr float kVlotterDistance = 1.3;
 
-constexpr float kPhiZeroAngleLeft = 5.97775;
-constexpr float kPhiZeroAngleRight = 4.70765;
 
 constexpr auto kVlotterSerialPort = "/dev/vlotter";
 
@@ -107,8 +105,8 @@ class Vlotter{
   float phi_zero_left_;
   float phi_zero_right_;
   
-  float kPhiZeroAngleLeft = 5.97775;
-  float kPhiZeroAngleRight = 4.70765;
+  float kPhiZeroAngleLeft = 2;
+  float kPhiZeroAngleRight = 3;
 };
 
 
