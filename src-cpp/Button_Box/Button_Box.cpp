@@ -49,8 +49,9 @@ bool ButtonBox::get_button_state(int button_number) {
     M_WARN<<"INVALID VALUE FOR BUTTON STATE, RETURNING PREVIOUS BUTTON STATE";
     return (previous_value%2==1);
   }
-  
 }
+
+
 
 ButtonBox * ButtonBoxHandler::button_box = NULL;
 bool ButtonBoxHandler::initialized = false;
@@ -80,9 +81,9 @@ int ButtonBoxHandler::stop_reading() {
 int ButtonBoxHandler::set_motor_led(bool state) {
   if(button_box!=NULL){
     if (state){
-      button_states[0] = CONTINUOUS;
+      led_states[0] = CONTINUOUS;
     } else {
-      button_states[0] = NO_LIGHT;
+      led_states[0] = NO_LIGHT;
     }
     return 1;
   } else {
@@ -95,7 +96,7 @@ int ButtonBoxHandler::set_motor_led(bool state) {
 
 int ButtonBoxHandler::set_motor_led(ButtonState state){
   if(button_box!=NULL){
-    button_states[0] = state;
+    led_states[0] = state;
   }
 }
 
@@ -103,9 +104,9 @@ int ButtonBoxHandler::set_motor_led(ButtonState state){
 int ButtonBoxHandler::set_solar_led(bool state) {
   if(button_box!=NULL){
     if (state){
-      button_states[1] = CONTINUOUS;
+      led_states[1] = CONTINUOUS;
     } else {
-      button_states[1] = NO_LIGHT;
+      led_states[1] = NO_LIGHT;
     }
     return 1;
   } else {
@@ -115,7 +116,7 @@ int ButtonBoxHandler::set_solar_led(bool state) {
 
 int ButtonBoxHandler::set_solar_led(ButtonState state) {
   if(button_box!=NULL){
-    button_states[1] = state;
+    led_states[1] = state;
   }  
  }
 
@@ -123,9 +124,9 @@ int ButtonBoxHandler::set_solar_led(ButtonState state) {
 int ButtonBoxHandler::set_battery_led(bool state) {
   if(button_box!=NULL){
     if (state){
-      button_states[2] = CONTINUOUS;
+      led_states[2] = CONTINUOUS;
     } else {
-      button_states[2] = NO_LIGHT;
+      led_states[2] = NO_LIGHT;
     }
     return 1;  
   } else {
@@ -135,7 +136,7 @@ int ButtonBoxHandler::set_battery_led(bool state) {
 
 int ButtonBoxHandler::set_battery_led(ButtonState state) {
   if(button_box!=NULL){
-    button_states[2] = state;
+    led_states[2] = state;
   }
  }
 
@@ -143,9 +144,9 @@ int ButtonBoxHandler::set_battery_led(ButtonState state) {
 int ButtonBoxHandler::set_battery_force_led(bool state) {
   if(button_box!=NULL){
     if (state){
-      button_states[3] = CONTINUOUS;
+      led_states[3] = CONTINUOUS;
     } else {
-      button_states[3] = NO_LIGHT;
+      led_states[3] = NO_LIGHT;
     }
     return 1;  
   } else {
@@ -155,7 +156,26 @@ int ButtonBoxHandler::set_battery_force_led(bool state) {
 
 int ButtonBoxHandler::set_battery_force_led(ButtonState state){
   if(button_box!=NULL){
-    button_states[3] = state;
+    led_states[3] = state;
+  }
+}
+
+int ButtonBoxHandler::set_mppts(bool state) {
+  if(button_box!=NULL){
+    if (state){
+      led_states[4] = CONTINUOUS;
+    } else {
+      led_states[4] = NO_LIGHT;
+    }
+    return 1;  
+  } else {
+    M_ERR<<"DID NOT WRITE SOLAR FORCE BATTERY BECAUSE BUTTON BOX HANDLER NOT INITIALIZED";
+  }
+}
+
+int ButtonBoxHandler::set_battery_force_led(ButtonState state){
+  if(button_box!=NULL){
+    led_states[3] = state;
   }
 }
 
@@ -178,11 +198,11 @@ int ButtonBoxHandler::reading_thread_(short int delay) {
 
 void ButtonBoxHandler::leds_thread_() {
   int counter = 0;
-  M_OK<<"STARTING BUTTON BOX READING THREAD WITH DELAY: "<<(long)SHORT_BLINK_DELAY;
+  M_OK<<"STARTING BUTTON BOX WRITING THREAD WITH DELAY: "<<(long)SHORT_BLINK_DELAY;
   while(true){
     counter++;
     for(int i = 0; i<4; i++){
-      switch (button_states[i]) {
+      switch (led_states[i]) {
         case CONTINUOUS:
           button_box->switch_led(i, true);
           if(i == 1){

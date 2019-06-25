@@ -71,6 +71,14 @@ enum ButtonState {
   BLINK_FAST
 };
 
+enum class AdamOutputs {
+  MOTOR_LED,
+  BATTERY_LED,
+  BATTERY_FOCE_LED,
+  SOLAR_LED,
+  SOLAR_PANELS
+};
+
 class ButtonBoxHandler{
   
  public:
@@ -80,17 +88,14 @@ class ButtonBoxHandler{
   
   int stop_reading();
   
-  /**
-   * 
-   * @param state
-   * @return 
-   */
+  int set_led(AdamOutputs output, ButtonState state);
+  
+  int set_led(AdamOutputs output, bool state);
+  
+  
+ private:
+  
   int set_motor_led(bool state);
-  /**
-   * 
-   * @param state
-   * @return 
-   */
   int set_motor_led(ButtonState state);
   
   int set_battery_led(bool state);
@@ -102,7 +107,8 @@ class ButtonBoxHandler{
   int set_solar_led(bool state);
   int set_solar_led(ButtonState state);
   
- private:
+  int set_mppts(bool state);
+  int set_mppts(ButtonState state);
   
   static bool initialized;
   
@@ -115,7 +121,7 @@ class ButtonBoxHandler{
   
   std::thread m_leds_thread_;
   
-  ButtonState button_states[4];
+  ButtonState led_states[5];
   
   
   void leds_thread_();

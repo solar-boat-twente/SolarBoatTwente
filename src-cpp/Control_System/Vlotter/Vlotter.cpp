@@ -146,7 +146,7 @@ float control::Vlotter::compute_height_(float angle) {
 }
 
 float Vlotter::compute_roll_(float height_left, float height_right) {
-  float roll = asin((height_left-height_right))*kVlotterDistance;
+  float roll = asin((height_right-height_left)/kVlotterDistance);
   return roll;
 }
 
