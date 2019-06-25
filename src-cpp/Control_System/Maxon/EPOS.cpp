@@ -142,12 +142,12 @@ void EPOS::build_CAN_messages_() {
   create_CAN_msg(write_id_, 8, kEposShutdownMessage, shutdown_);
   
   create_CAN_msg(write_id_, 8, kEposSwitchOnMessage, switch_on_and_enable_);
-  create_CAN_msg(write_id_, 4, kEposSwitchOnMessage, get_status_word);
+  create_CAN_msg(write_id_, 4, kEposGetStatusMessage, get_status_word);
   create_CAN_msg(write_id_, 8, kEposHomingModeMessage, set_homing_mode_);
   create_CAN_msg(write_id_, 8, kEposHomingPositiveMessage, set_homing_method_positive_);
   create_CAN_msg(write_id_, 8, kEposHomingNegativeMessage, set_homing_method_negative_);
   create_CAN_msg(write_id_, 8, kEposStartHomingMessage, start_homing_);
-  create_CAN_msg(write_id_, 8, kEposStartHomingMessage, clear_faults_);
+  create_CAN_msg(write_id_, 8, kEposClearFaultMessage, clear_faults_);
   
   create_CAN_msg(write_id_, 8, kEposSetPositionModeMessage, set_position_mode_);
   create_CAN_msg(write_id_, 8, kEposAbsolutePositionMessage, start_absolute_position_);
@@ -239,7 +239,7 @@ void EPOS::start_position_mode(short int delay){
 }  //end of StartPositionMode 
 
 float EPOS::get_angle_from_podmeter() {
-  float button_position = (float)adam_6017->read_counter(5)/numeric_limits<uint16_t>::max();
+  float button_position = (float)adam_6017->read_counter(5)/numeric_limits<uint16_t>::max() - 0.5;
   float button_quartercounts = button_position * kPositionButtonQuartercountMultiplier;
   return button_quartercounts;
 

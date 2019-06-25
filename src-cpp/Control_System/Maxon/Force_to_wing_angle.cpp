@@ -171,7 +171,7 @@ float ForceToWingAngle::compute_real_angle_(float original_angle, float pitch_co
   //When the boat has a positve pitch the angles of the wings should be to the other side
   // The zero lift angle is negative the real angle should also be lower
   float real_angle = original_angle - pitch_correction + zero_lift_angle;
-
+  return real_angle;
 }
 
 
