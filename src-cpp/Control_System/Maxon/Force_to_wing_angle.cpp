@@ -57,7 +57,7 @@ void ForceToWingAngle::MMA(structures::PowerInput * power_input) {
    * has to be inversed to calculate the right forces per wing. 
   */
   DataStore::PIDDataTotal pid_data =control_data_-> GetPIDData();
-  DataStore::RealData complementary_data_input =control_data_-> GetRealData();
+  DataStore::RealData real_data =control_data_-> GetRealData();
   DataStore::XsensData xsense_data = control_data_->GetXsensData();
 
   DataStore::AngleWings output_wing_angles;
@@ -94,7 +94,7 @@ void ForceToWingAngle::MMA(structures::PowerInput * power_input) {
     pid_caller_->compute_pid_height();
     //When the height is larger than the mimimum height e.g. the boat is flying the Force Height should be added to the
     // Force
-    if(complementary_data_input.Real_height>kMinHeight){
+    if(real_data.Real_height>kMinHeight){
      left_force += compute_force_(pid_data.Force_height, 0, 0, inverse_matrix_MMA_[0]);
      right_force += compute_force_(pid_data.Force_height, 0, 0, inverse_matrix_MMA_[1]);
      back_force += compute_force_(pid_data.Force_height, 0, 0, inverse_matrix_MMA_[2]);    
@@ -128,7 +128,7 @@ void ForceToWingAngle::MMA(structures::PowerInput * power_input) {
   float back_angle_total = compute_wing_angle_(back_lift_coefficient);
 
   //calculate the final wing angles correcting for the pitch and 0 lift angle
-  float boat_pitch = complementary_data_input.Real_pitch;
+  float boat_pitch = real_data.Real_pitch;
 
   output_wing_angles.Wing_left = compute_real_angle_(left_angle_total,boat_pitch);
   output_wing_angles.Wing_right = compute_real_angle_(right_angle_total, boat_pitch);
