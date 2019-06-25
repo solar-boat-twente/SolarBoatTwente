@@ -26,8 +26,8 @@ void Motor::parse_motor_1(uint8_t data[]) {
   
   if(values.Urange.signed_int == -1){
     M_WARN<<"CALCULATING VALUES WITHOUT USING REAL RANGES TAKING THE STANDARD RANGES!";
-    values.phase_current = (float)raw_phase_current.signed_int/32768 * STD_IRANGE;
-    values.link_voltage = (float)raw_link_voltage.signed_int/32678 * STD_URANGE;
+    values.phase_current = (float)raw_phase_current.signed_int/32768 * kMotorStandardIRange;
+    values.link_voltage = (float)raw_link_voltage.signed_int/32678 * kMotorStandardURange;
   } else {
     values.phase_current = (float)raw_phase_current.signed_int/32768 * values.Irange.unsigned_int;
     values.link_voltage = (float)raw_link_voltage.signed_int/32678 * values.Urange.unsigned_int;
@@ -45,7 +45,7 @@ void Motor::parse_motor_2(uint8_t data[]) {
   
   if(values.Urange.signed_int = -1){
     M_WARN<<"CALCULATING VALUES WITHOUT USING REAL RANGES TAKING THE STANDARD RANGES!";
-    values.motor_power = (float)raw_power.signed_int/(32768) * STD_IRANGE * STD_URANGE;
+    values.motor_power = (float)raw_power.signed_int/(32768) * kMotorStandardIRange * kMotorStandardURange;
   } else {
     values.motor_power = (float)raw_power.signed_int/(32768) * values.Irange.unsigned_int * values.Urange.unsigned_int;   
   }
@@ -72,8 +72,8 @@ void Motor::parse_supply_1(uint8_t data[]) {
   
   if(values.Urange.signed_int == -1){
     M_WARN<<"CALCULATING VALUES WITHOUT USING REAL RANGES TAKING THE STANDARD RANGES!";
-    values.supply_current = raw_current.signed_int/32768 * STD_IRANGE;
-    values.supply_voltage = raw_voltage.signed_int/32678 * STD_URANGE;
+    values.supply_current = raw_current.signed_int/32768 * kMotorStandardIRange;
+    values.supply_voltage = raw_voltage.signed_int/32678 * kMotorStandardURange;
   } else {
     values.supply_current = raw_current.signed_int/32768 * values.Irange.unsigned_int;
     values.supply_voltage = raw_voltage.signed_int/32678 * values.Urange.unsigned_int;

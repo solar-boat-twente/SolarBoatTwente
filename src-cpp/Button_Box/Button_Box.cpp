@@ -12,7 +12,6 @@ using namespace std;
 
 using namespace MIO::UI;
 
-/** TO DO: MAKE SURE THAT THIS STARTS AT FALSE ON START UP (STORE FIRST VALUE)*/
 ButtonBox::ButtonBox(ADAM * const adam): m_adam(adam) {
   for(int i = 0; i<4; i++){
     initial_button_states[i] = get_button_state(i);
@@ -173,9 +172,9 @@ int ButtonBoxHandler::set_mppts(bool state) {
   }
 }
 
-int ButtonBoxHandler::set_battery_force_led(ButtonState state){
+int ButtonBoxHandler::set_mppts(ButtonState state){
   if(button_box!=NULL){
-    led_states[3] = state;
+    led_states[4] = state;
   }
 }
 
@@ -201,19 +200,13 @@ void ButtonBoxHandler::leds_thread_() {
   M_OK<<"STARTING BUTTON BOX WRITING THREAD WITH DELAY: "<<(long)SHORT_BLINK_DELAY;
   while(true){
     counter++;
-    for(int i = 0; i<4; i++){
+    for(int i = 0; i<5; i++){
       switch (led_states[i]) {
         case CONTINUOUS:
           button_box->switch_led(i, true);
-          if(i == 1){
-            button_box->switch_led(4, true);
-          }
           break;
         case NO_LIGHT:
           button_box->switch_led(i, false);
-          if(i==1){
-            button_box->switch_led(4, false);
-          }
           break;
         case BLINK_FAST:
           button_box->switch_led(i, !button_box->output_button_states[i]);
