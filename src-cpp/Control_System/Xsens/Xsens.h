@@ -45,6 +45,8 @@ struct XsensParser{
   bool Succesfull_received;
   };
 
+  
+  constexpr float kPitchCorrection = -1.5;
 //struct XsensData{
 //  float roll;
 //  float yaw;

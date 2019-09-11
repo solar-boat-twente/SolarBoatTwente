@@ -5,12 +5,13 @@
  */
 
 #include "ConfigReader.hpp"
-
+#include <iostream>
 using namespace libconfig;
 using namespace MIO;
 
 ConfigReader::ConfigReader(const std::string& config_file_name) {
-  cfg_.readFile(config_file_name);
+  file_name = config_file_name;
+  cfg_.readFile(file_name);
   
 }
 
@@ -40,6 +41,10 @@ float ConfigReader::get_float_data(ConfigFloats config) {
     case ConfigFloats::VLOTTER_RIGHT:
       vlotter.lookupValue("zero_angle_right", value);
       return value;
+      
+    case ConfigFloats::ZERO_LIFT_ANGLE:
+      control.lookupValue("zero_lift_angle", value);
+      return value;      
   }
 }
 
@@ -71,6 +76,18 @@ int ConfigReader::get_int_data(ConfigInts config) {
 
 std::vector<int> ConfigReader::get_height_states() {
   const Setting& root = cfg_.getRoot();
+  const Setting& pid_height = root["control"]["pid_height"];
+  
+  std::vector<int> output;
+  output.push_back(pid_height[0]);
+  output.push_back(pid_height[1]);
+  output.push_back(pid_height[2]);
+  
+  return output;
+}
+
+std::vector<int> ConfigReader::get_roll_states() {
+  const Setting& root = cfg_.getRoot();
   const Setting& pid_roll = root["control"]["pid_roll"];
   
   std::vector<int> output;
@@ -81,17 +98,38 @@ std::vector<int> ConfigReader::get_height_states() {
   return output;
 }
 
-std::vector<int> ConfigReader::get_roll_states() {
+std::vector<float> ConfigReader::get_function_parameters(){
+  cfg_.readFile(file_name);
   const Setting& root = cfg_.getRoot();
-  const Setting& pid_roll = root["control"]["pid_height"];
-  
-  std::vector<int> output;
-  output.push_back(pid_roll[0]);
-  output.push_back(pid_roll[1]);
-  output.push_back(pid_roll[2]);
-  
+  std::vector<float> output;
+
+  if (root.exists("control")){
+    const Setting& control = root["control"];
+
+    std::vector<float> output;
+    float a_left;
+    float b_left;
+    float a_right;
+    float b_right;
+
+    control.lookupValue("a_left", a_left);
+    control.lookupValue("b_left", b_left);
+    control.lookupValue("a_right", a_right);
+    control.lookupValue("b_right", b_right);
+
+    output.push_back(a_left);
+    output.push_back(b_left);
+    output.push_back(a_right);
+    output.push_back(b_right);
+    return output;
+  } else {
+    std::cout<<"Canceled output"<<std::endl;
+  }
   return output;
+
+  
 }
+
 
 
 

@@ -171,8 +171,8 @@ class Vlotter{
   
   /*constant angles which can only be modified in the configuration method*/
   //TODO: make these constant and define in the constructor --> Use a vlotter builder class
-  float kPhiZeroAngleLeft = 2;
-  float kPhiZeroAngleRight = 3;
+  float kPhiZeroAngleLeft = 2.41441;//5.510;
+  float kPhiZeroAngleRight = 1.34986;//1.20721;
 };
 
 

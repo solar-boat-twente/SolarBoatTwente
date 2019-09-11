@@ -66,7 +66,7 @@ void MIO::control::PID_caller::compute_pid_height(structures::FlyMode fly_mode){
       M_INFO<<"USING STATE NO_FLY";
       break;
     case FLY: 
-      PIDData.Force_height = pid_height->calculate(0.3, data_from_complementary_filter.Real_height);  
+      PIDData.Force_height = pid_height->calculate(0.24, data_from_complementary_filter.Real_height);  
       M_INFO<<"USING STATE FLY";
       break;
     case BRIDGE: 
@@ -110,4 +110,13 @@ void PID_caller::set_PID_from_config(std::vector<int>& pid_roll_vector, std::vec
   pid_height->set_PID_from_config(pid_height_vector);
   pid_roll->set_PID_from_config(pid_roll_vector);
 }
+
+void PID_caller::reset_integral_height() {
+  pid_height->reset_integral();
+}
+
+void PID_caller::reset_integral_roll() {
+  pid_roll->reset_integral();
+}
+
 

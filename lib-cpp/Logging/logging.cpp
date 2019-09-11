@@ -37,6 +37,22 @@ INITIALIZE_EASYLOGGINGPP
 void Logger::write_struct_user_power(const structures::PowerInput *power_input_ptr, const structures::PowerOutput *power_output_ptr, const structures::UserInput *user_input_ptr){
     //std::string testing_func;
     //testing_func = append_array_to_csv_format(power_input_ptr->battery.cel_voltages);
+  
+  std::string fly_mode_string;
+  switch (user_input_ptr->steer.fly_mode){
+    case  structures::FLY:
+      fly_mode_string = '3';
+      break;
+    case structures::NO_FLY:
+      fly_mode_string = '2';
+      break;
+    case structures::BRIDGE:
+      fly_mode_string = '1';
+      break;
+    case structures::SLALOM:
+      fly_mode_string = '4';
+      break;
+  }
     std::cerr <<std::dec<< "," << power_input_ptr->battery.cel_voltages[0] << "," << power_input_ptr->battery.cel_voltages[1] << "," << power_input_ptr->battery.cel_voltages[2] << "," << power_input_ptr->battery.cel_voltages[3] 
            << "," << power_input_ptr->battery.cel_voltages[4] << "," << power_input_ptr->battery.cel_voltages[5] << "," << power_input_ptr->battery.cel_voltages[6] << "," << power_input_ptr->battery.cel_voltages[7] 
            << "," << power_input_ptr->battery.cel_voltages[8] << "," << power_input_ptr->battery.cel_voltages[9] << "," << power_input_ptr->battery.cel_voltages[10] << "," << power_input_ptr->battery.cel_voltages[11] 
@@ -66,12 +82,12 @@ void Logger::write_struct_user_power(const structures::PowerInput *power_input_p
            << "," << power_output_ptr->throttle << "," << (int)power_output_ptr->motor_state << "," << (int)power_output_ptr->contractor_control 
            << ","<< (int)power_output_ptr->balancing_control
         
-           <<","<< user_input_ptr ->control.PID_roll <<","<< user_input_ptr ->control.PID_pitch <<","<< user_input_ptr ->control.PID_height 
+           <<","<< user_input_ptr ->control.roll <<","<< user_input_ptr ->control.PID_pitch <<","<< user_input_ptr ->control.PID_height 
         
            <<","<< user_input_ptr ->buttons.battery_on <<","<< user_input_ptr ->buttons.force_battery <<","<< user_input_ptr ->buttons.motor_on
            <<","<< user_input_ptr ->buttons.solar_on
         
-           << ","<< user_input_ptr->steer.raw_throttle << "," << user_input_ptr->steer.fly_mode << "," << user_input_ptr->steer.reverse
+           << ","<< user_input_ptr->steer.raw_throttle << "," << fly_mode_string << "," << user_input_ptr->steer.reverse
             
            << ","<< power_input_ptr->battery.total_voltage << ","<< power_input_ptr->battery.total_current <<","<< power_input_ptr->driver.driver_on
             <<","<< power_input_ptr->driver.error_word.unsigned_int <<","<< power_input_ptr->driver.low_priority_limiter.unsigned_int << ","<< power_output_ptr->real_throttle;

@@ -11,7 +11,7 @@
 using namespace MIO;
 using namespace PowerElectronics;
 
-Motor::Motor(CANbus* driver_can, int read_flag): driver_can_(driver_can), read_flag_(read_flag){
+Motor::Motor(CANbus* const driver_can, int read_flag): driver_can_(driver_can), read_flag_(read_flag){
   M_OK<<"MOTOR INITIALIZED";
 }
 
@@ -106,7 +106,6 @@ bool Motor::update_data_from_driver() {
   canmsg_t buffer;
   watchdog = false;
   for (int i = 0; i<8; i++){
-    
     if((read_flag_>>i)%2){
       M_INFO<<"TRUE FOR I = "<<i<<" read_flag_: "<<read_flag_;
       switch (i){

@@ -1,6 +1,8 @@
 #include <time.h>
 #include <algorithm>
 #include <sys/ioctl.h>
+#include <iomanip>
+
 
 #include "solarboattwente.h"
 
@@ -29,6 +31,7 @@ const int SPEED_CORRECTION_FACTOR = 100; //value between 0 and 100, set correct 
 int kSwitchMotorModeThrottle = 220; //value between 0 and 1024;
 
 constexpr bool kSetSwitchThottle = true;
+constexpr float kStijnTax = 0.95;
 
 using namespace std;
 using namespace MIO;
@@ -87,7 +90,7 @@ DataStore * control_data = new DataStore();
 RawDataFilter * raw_data_filter = new RawDataFilter(control_data);
 ComplementaryFilter * complementary_filter = new ComplementaryFilter(control_data, vlotter);
 PID_caller * pid_caller = new PID_caller(control_data);
-ForceToWingAngle * force_to_wing = new ForceToWingAngle(control_data, pid_caller);
+ForceToWingAngle * force_to_wing = new ForceToWingAngle(control_data, pid_caller, vlotter); //pid_caller
 
 Serial * serial_xsens = new Serial("/dev/xsense", 9600);
 xsens::Xsens * xsens_object = new xsens::Xsens(control_data);
@@ -128,6 +131,7 @@ void blink_leds(){
   button_box->set_battery_led(UI::BLINK_SLOW);
   button_box->set_motor_led(UI::BLINK_SLOW);
   button_box->set_solar_led(UI::BLINK_SLOW);
+  button_box->set_mppts(UI::NO_LIGHT);
 }
 
 void stop_leds(){
@@ -142,17 +146,21 @@ void update_leds(){
   static UI::ButtonState previous_solar_led_state = BLINK_SLOW;
   static UI::ButtonState previous_battery_led_state = BLINK_SLOW;
   static UI::ButtonState previous_force_led_state = BLINK_SLOW;
+  static UI::ButtonState previous_solar_state = NO_LIGHT;
   
   UI::ButtonState solar_led_state;
   UI::ButtonState battery_led_state;
   UI::ButtonState force_led_state;
+  UI::ButtonState solar_state;
   
   if(user_input->buttons.solar_on){
     //canbus_driver->write_can(mppt_on);
     solar_led_state = CONTINUOUS;
+    solar_state = CONTINUOUS;
   } else {
     //canbus_driver->write_can(mppt_off);
     solar_led_state = NO_LIGHT;
+    solar_state = NO_LIGHT;
   }
    
   if(user_input->buttons.force_battery){
@@ -186,6 +194,11 @@ void update_leds(){
   if(force_led_state!=previous_force_led_state) {
     button_box->set_battery_force_led(force_led_state);
     previous_force_led_state = force_led_state;
+  }
+  
+  if(solar_state!=previous_solar_state) {
+    button_box->set_mppts(solar_state);
+    previous_solar_state = solar_state;
   }
 }
 
@@ -239,6 +252,9 @@ void generate_driver_message(canmsg_t & driver_tx, int speed, int throttle_switc
     if (speed/32>throttle_switch)
       motor_mode = 2;
   }
+  
+  speed = speed * kStijnTax;
+  
   driver_tx.id = 0xcf;
   driver_tx.length = 4;
   driver_tx.data[0] = 0;
@@ -262,15 +278,15 @@ double seconds_since_start(time_t start){
 
 void write_to_screen(){
   //Write power data to the control structure for reading it on the screen.
-  logging_control_data->real_roll=power_input->battery.total_current*power_input->battery.total_voltage*-1/10;
-  logging_control_data->real_height=power_input->battery.state_of_charge;
-  if (logging_control_data->real_roll<0){
-    logging_control_data->real_roll = -logging_control_data->real_roll;  
+  logging_control_data->real_roll=abs(power_input->battery.total_current*power_input->battery.total_voltage/10);
+  user_input->control.roll = abs(motor->values.motor_power/10);
+  float back_wing = abs(control_data->GetEposData().back_angle/20000)+50;
+  if(back_wing<100 && back_wing>0){
+    logging_control_data->real_height=back_wing;
+  } else {
+    logging_control_data->real_height = 50;
   }
-  logging_control_data->xsens.speed = (float)get_speed()/32768 * 100;
-  if(logging_control_data->xsens.speed<0){
-    logging_control_data->xsens.speed = -logging_control_data->xsens.speed;
-  }
+  logging_control_data->xsens.speed = abs((float)get_speed()/32768 * 100);
   if(motor->values.driver_temp!=255){
     power_input->driver.driver_temp = motor->values.driver_temp;
   } else {
@@ -278,9 +294,51 @@ void write_to_screen(){
   }
   
   power_input->driver.motor_temp = max<float>(temp_sens->get_core_temp_1(),temp_sens->get_core_temp_2());
-  power_input->battery.max_temp = temp_sens->get_temp_zone();
+  telemetry_data->advised_speed = abs(control_data->GetXsensData().velocity_magnitude * 3.6);
+  
+  switch(control_data->GetEposData().fly_mode_state){
+    case 1:
+      user_input->steer.fly_mode = structures::BRIDGE;
+      break;
+      
+    case 2:
+      user_input->steer.fly_mode = structures::NO_FLY;
+      break;   
+      
+    case 3:
+      user_input->steer.fly_mode = structures::FLY;
+      break; 
+      
+    case 4: 
+      user_input->steer.fly_mode = structures::SLALOM;
+      break;
+    
+    default:
+      user_input->steer.fly_mode = structures::BRIDGE;
+  }
+  
   screen_threads->writeUserPower(power_input, power_output, user_input, 0, 1);
   screen_threads->writeControlData(logging_control_data,0,1);
+  screen_threads->writeTelemInput(telemetry_data, 0, 1);
+}
+
+void print_epos_readable(ofstream& readable_file, DataStore::EposData &epos_data){
+  readable_file<<setw(15)<<left<<"LEFT"<<setw(15)<<left<<"RIGHT"<<setw(15)<<left<<"BACK"<<"\n"
+      <<setw(15)<<left<<epos_data.left_force<<setw(15)<<left<<epos_data.right_force<<setw(15)<<left<<epos_data.back_force<<"\n"
+      <<setw(15)<<left<<epos_data.left_angle<<setw(15)<<left<<epos_data.right_angle<<setw(15)<<left<<epos_data.back_angle<<"\n"
+      <<setw(15)<<left<<epos_data.left_quartercounts<<setw(15)<<left<<epos_data.right_quartercounts<<setw(15)<<left<<epos_data.back_quartercounts<<"\n"
+      <<"\n"<<flush;
+}
+
+void print_general_logging(ofstream& logging_file, DataStore::EposData &epos_data, DataStore::PIDDataSplit &split_data, DataStore::PIDDataTotal &total_data, DataStore::RealData real_data, long now){
+  logging_file<<to_string(now)<<","<<epos_data.left_angle<<", "<<","<<epos_data.right_angle<<","<<epos_data.back_angle
+      <<","<<epos_data.left_quartercounts<<","<<epos_data.right_quartercounts<<","<<epos_data.back_quartercounts
+      <<","<<real_data.Real_height<<","<<real_data.Real_pitch<<","<<real_data.Real_roll 
+      <<","<<split_data.P_roll<<","<<split_data.I_roll<<","<<split_data.D_roll<<","<<total_data.Force_roll
+      <<","<<split_data.P_height<<","<<split_data.I_height<<","<<split_data.D_height<<","<<total_data.Force_height
+      <<","<<(int)motor->values.driver_temp<<","<<motor->values.link_voltage<<","<<motor->values.phase_current<<","<<motor->values.motor_power<<","<<motor->values.rotor_speed
+      <<","<<power_input->driver.motor_speed/216<<","<<motor->values.supply_current<<","<<motor->values.supply_voltage<<","<<motor->values.torque<<","<<(int)get_speed()<<","<<power_input->battery.max_temp << ","<<power_input->battery.total_current << ","<<power_input->battery.total_voltage << ","
+      <<power_input->battery.state_of_charge << ","<<user_input->steer.raw_throttle<<","<<control_data->GetXsensData().velocity_magnitude<<"\n"<<flush;
 }
 
 void sensor_thread(){
@@ -301,21 +359,7 @@ void controlsystem(){
   typedef std::chrono::milliseconds mls;
     /* -----------------------------------------------------------------------------
   All three motors are going to home.
-  ----------------------------------------------------------------------------- */    
-  maxon_left->start_homing(true,100);
-  maxon_right->start_homing(true,100);
-  maxon_back->start_homing(false,100);
-
-  maxon_right->check_homing();
-  maxon_left->check_homing();
-  maxon_back->check_homing();
-
-  /* -----------------------------------------------------------------------------
-  All three motors are going in the startpositionmode.
-  ----------------------------------------------------------------------------- */    
-  maxon_right->start_position_mode(100);
-  maxon_left->start_position_mode(100);
-  maxon_back->start_position_mode(100);
+  ----------------------------------------------------------------------------- */ 
   
   std::vector<int> roll_states = config_reader->get_roll_states();
   std::vector<int> height_states = config_reader->get_height_states();
@@ -323,9 +367,33 @@ void controlsystem(){
   force_to_wing->set_heigh_pid_start(config_reader->get_float_data(ConfigFloats::HEIGHT_SET_POINT))
       ->set_lift_of_force(config_reader->get_int_data(ConfigInts::LIFT_OF_FORCE))
       ->set_lift_start_velocity(config_reader->get_float_data(ConfigFloats::LIFT_OF_SPEED))
-      ->set_roll_start_velocity(config_reader->get_float_data(ConfigFloats::ROLL_START_SPEED));
+      ->set_roll_start_velocity(config_reader->get_float_data(ConfigFloats::ROLL_START_SPEED))
+      ->set_zero_lift(config_reader->get_float_data(ConfigFloats::ZERO_LIFT_ANGLE));
+  
   
   pid_caller->set_PID_from_config(roll_states, height_states);
+  ofstream epos_read_file;
+  epos_read_file.open("/root/logfiles/epos_read_data.txt");
+  
+  maxon_left->start_homing(true,100);
+  maxon_right->start_homing(true,100);
+  //maxon_back->start_homing(false,100);
+
+  maxon_right->check_homing();
+  epos_read_file<<"HOMING DONE RIGHT"<<"\n"<<flush;
+  maxon_left->check_homing();
+  epos_read_file<<"HOMING DONE LEFT"<<"\n"<<flush;
+  //maxon_back->check_homing();
+  epos_read_file<<"HOMING DONE BACK"<<"\n"<<flush;
+
+  /* -----------------------------------------------------------------------------
+  All three motors are going in the startpositionmode.
+  ----------------------------------------------------------------------------- */    
+  maxon_right->start_position_mode(100);
+  maxon_left->start_position_mode(100);
+  //maxon_back->start_position_mode(100);
+  
+
   //Need to reopen the vlotter to make it work on startup (clears the buffer somehow)
   Serial * m_serial = new Serial("/dev/vlotter");
   control::Vlotter m_vlotter(m_serial);
@@ -338,14 +406,25 @@ void controlsystem(){
   DataStore::RealData real_data = control_data->GetRealData();
   DataStore::PIDDataSplit pid_data_split = control_data->GetPIDSplitData();
   DataStore::PIDDataTotal pid_total_data = control_data->GetPIDData();
+  DataStore::XsensData xsens_data = control_data->GetXsensData();
   
   time_t start = time(nullptr);
 
   int current_day = (int)((start - 1559347200)/3600/24) + 1;
-  std::string control_read_file_name = "/root/logfiles/control_log_" + to_string(current_day) + ".csv";
+  std::string control_read_file_name = "/root/logfiles/pd_read_data.txt";
+  std::string complete_log_file_name = "/root/logfiles/complete_log_" + to_string(current_day) + ".csv";
   
   ofstream control_readable_file;
   control_readable_file.open(control_read_file_name);
+  
+  ofstream complete_log_file;
+  complete_log_file.open(complete_log_file_name, std::ios::app);
+ 
+
+  
+  int counter_logging = 0;
+  
+  time_t now;
   while (true) {
     std::chrono::high_resolution_clock::time_point t1= std::chrono::high_resolution_clock::now();
     sensor->update_data();
@@ -357,18 +436,31 @@ void controlsystem(){
       
       maxon_right->move();
       maxon_left->move(); 
-      maxon_back->move();
+     //maxon_back->move();
       counter_control_front = 5;
-      
       epos_data = control_data->GetEposData();
       real_data = control_data->GetRealData();
       pid_data_split = control_data->GetPIDSplitData();
       pid_total_data = control_data->GetPIDData();
+      xsens_data = control_data->GetXsensData();
+      now = time(nullptr)-1559347200;
+      print_general_logging(complete_log_file, epos_data, pid_data_split, pid_total_data, real_data, now);
       
-      control_readable_file<<"ROLL: "<<real_data.Real_roll*180/3.14<<" | PITCH: "<<real_data.Real_pitch*180/3.14<<" HEIGHT: "<<real_data.Real_height<<"\n"
-          <<"P: "<<pid_data_split.P_roll<<" | I: "<<pid_data_split.I_roll<<" | D: "<<pid_data_split.D_roll<<" = " <<pid_total_data.Force_roll<<"\n"
-          <<"P: "<<pid_data_split.P_height<<" | I: "<<pid_data_split.I_height<<" | D: "<<pid_data_split.D_height<<" = " <<pid_total_data.Force_height<<"\n"
-          <<"\n"<<flush;
+      if(counter_logging>5){
+        counter_logging = 0;
+
+
+        control_readable_file<<"ROLL: "<<real_data.Real_roll*180/3.14<<" | PITCH: "<<real_data.Real_pitch*180/3.14<<" | HEIGHT: "<<real_data.Real_height<<" | VELOCITY: "<<power_input->driver.motor_speed/290<<"\n"
+            <<"P: "<<pid_data_split.P_roll<<" | I: "<<pid_data_split.I_roll<<" | D: "<<pid_data_split.D_roll<<" = " <<pid_total_data.Force_roll<<"\n"
+            <<"P: "<<pid_data_split.P_height<<" | I: "<<pid_data_split.I_height<<" | D: "<<pid_data_split.D_height<<" = " <<pid_total_data.Force_height<<"\n"
+            <<"Using function left: " << pid_data_split.a_left <<"x + "<<pid_data_split.b_left<<"\n"
+            <<"Using function right: " << pid_data_split.a_right <<"x + "<<pid_data_split.b_right<<"\n"
+            <<"\n"<<flush;   
+
+        print_epos_readable(epos_read_file, epos_data);
+
+      }
+      counter_logging++;
     }
 //    if (counter_control_back == 0){ //achtervleugel op 10 Hz
 //      filter->FilterIt();
@@ -414,25 +506,21 @@ int main(int argc, const char** argv) {
    
   //Initiate the two files for logging
    
-  std::string general_file_name;
+  std::string general_read_file_name;
   /*For changing the log file name every new run*/
   int current_day = (int)((start - 1559347200)/3600/24) + 1;
-  general_file_name = "/root/logfiles/general_log_" + to_string(current_day) + ".csv";
+  general_read_file_name = "/root/logfiles/general_read.csv";
   
-  std::string control_log_file_name = "/root/logfiles/control_log_" + to_string(current_day) + ".csv";
   
-  ofstream general_file;
-  general_file.open(general_file_name, std::ios::app);
-  
-  ofstream control_log_file;
-  control_log_file.open(control_log_file_name, std::ios::app);
+  ofstream general_read_file;
+  general_read_file.open(general_read_file_name);
   
   
   int loop_counter = 0;
   //buffers for driver data;
   bool motor_state = false;
   
-  //Wait for a button to be pressed
+////  Wait for a button to be pressed
   while(!(user_input->buttons.battery_on||user_input->buttons.solar_on)){
     this_thread::sleep_for(chrono::milliseconds(100));
   }
@@ -442,9 +530,9 @@ int main(int argc, const char** argv) {
   while (true){
     
     t1 = std::chrono::high_resolution_clock::now();
-
+    now = time(nullptr);
     loop_counter++;
-    this_thread::sleep_for(chrono::milliseconds(50));
+    this_thread::sleep_for(chrono::milliseconds(25));
 
     //Get current speed and update driver_tx
     generate_driver_message(driver_tx, get_speed(), motor_switch_mode_throttle);    
@@ -469,9 +557,13 @@ int main(int argc, const char** argv) {
  
       
       power_input->driver.motor_speed = (float)motor->values.rotor_speed;
-      general_file<<start-1559347200<<","<<motor_state<<","<<seconds_since_start(start)<<","<<(int)motor->values.driver_temp<<","<<motor->values.link_voltage<<","<<motor->values.phase_current<<","<<motor->values.motor_power<<","<<motor->values.rotor_speed
-          <<","<<power_input->driver.motor_speed/216<<","<<motor->values.supply_current<<","<<motor->values.supply_voltage<<","<<motor->values.torque<<","<<(int)motor->values.motor_mode<<","<<(int)get_speed()<<","<<seconds_since_start(start)<<","<<power_input->battery.max_temp << ","<<power_input->battery.total_current << ","<<power_input->battery.total_voltage << ","
-          <<power_input->battery.state_of_charge << ","<<user_input->steer.raw_throttle<<"\n"<<flush;
+      
+      general_read_file<<"TEMP:  DRIVER: "<<(int)motor->values.driver_temp<<" | BAT: "<<power_input->battery.max_temp<<"| CORE: "<<power_input->driver.motor_temp<<"\n"
+          <<"MOTOR: POWER: "<<motor->values.motor_power<<" | V: "<<motor->values.link_voltage<<" | I: "<<motor->values.phase_current<<"| RPM: "<<motor->values.rotor_speed<<" | LIM_H: "<<motor->values.low_priority_limiter.unsigned_int<<" | LIM_H"<<(int)motor->values.high_priority_limiter<<"\n"
+          <<"BAT: V: "<<power_input->battery.total_voltage<<" | I"<<power_input->battery.total_current<<" | POWER: "<<power_input->battery.total_current*power_input->battery.total_voltage<< " | SOC: "<<power_input->battery.state_of_charge<<"\n"
+          <<"VELOCITY: RPM: "<<power_input->driver.motor_speed/force_to_wing->kRpmToMeterPerSecond<<" | Xsens: "<<control_data->GetXsensData().velocity_magnitude<<" | THR: "<<user_input->steer.raw_throttle<<"\n"
+          <<"SOLAR ENERGY: "<<motor->values.motor_power+power_input->battery.total_current*power_input->battery.total_voltage + 60<<" | CONTACTOR: "<<power_input->battery.contactor_status<<" | MOT STATE: "<<motor_state<<"\n"
+          <<"\n"<<flush;
 
       write_to_screen();
     } 

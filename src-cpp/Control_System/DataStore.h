@@ -5,6 +5,7 @@
 #ifndef _DATASTORE_H_
 #define _DATASTORE_H_
 
+#include <vector>
 //#include <string>
 
 class DataStore {
@@ -46,7 +47,13 @@ class DataStore {
     
     float P_roll;
     float I_roll;
-    float D_roll;    
+    float D_roll;  
+    
+    float a_left = -0.65;
+    float b_left = 0.3;
+    float a_right = -0.65;
+    float b_right = 0.3;
+    
   };
 
   struct AngleWings {
@@ -66,16 +73,22 @@ class DataStore {
     float velocity_y;
     float velocity_z;
     float latitude;
-    float longitude;            
+    float longitude;
+    float velocity_magnitude;
   };
   
   struct EposData{
+    float left_force;
+    float right_force;
+    float back_force;
     float left_quartercounts;
     float right_quartercounts;
     float back_quartercounts;
     float left_angle;
     float right_angle;
     float back_angle;
+    int fly_mode_state;
+
   };
   
   DataStore();

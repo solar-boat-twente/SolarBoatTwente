@@ -11,18 +11,19 @@
 namespace MIO{
 namespace control{
 
-constexpr int kPositionButtonQuartercountMultiplier = 2000000;//2000000;//2200000;
+constexpr int kPositionButtonQuartercountMultiplier = 3400000;//2000000;//2200000;
 
-constexpr int MIN_ANGLE_LEFT = -100000;
-constexpr int MAX_ANGLE_LEFT = 125000;
+constexpr int MIN_ANGLE_LEFT = -180000;
+constexpr int MAX_ANGLE_LEFT = 80000;
 
-constexpr int MIN_ANGLE_RIGHT = -100000;
-constexpr int MAX_ANGLE_RIGHT = 125000;
+constexpr int MIN_ANGLE_RIGHT = -80000;
+constexpr int MAX_ANGLE_RIGHT = 80000;
 
-constexpr int MIN_ANGLE_BACK = -1000000;//-2000000;
-constexpr int MAX_ANGLE_BACK = 1000000;//1100000;
+constexpr int MIN_ANGLE_BACK = -500000;//-2000000;
+constexpr int MAX_ANGLE_BACK = 2400000;//1600000;
 
-constexpr int kQuartercountMultiplier = 10000;
+constexpr int kQuartercountMultiplierRight = 10479; //maximale hoek die de vleugel maakt bij homen is 20.6 en minimum 3.9 graden. Dit bij 175000 qc
+constexpr int kQuartercountMultiplierLeft = 10479;
 
 constexpr uint16_t kStandardHomingWaitTime = 1500;
 constexpr uint16_t kStandardPositionModeWaitTime = 1000;
@@ -98,7 +99,7 @@ class EPOS{
   
   canmsg_t create_CAN_msg(int id, int length, const uint8_t data[], canmsg_t& output);
 
-  float angle2quartercounts_(float radians, const int min, const int max);
+  float angle2quartercounts_(float radians, const int min, const int max, int kQuartercountMultiplier);
   
   float quartercounts2quartercounts_(float quartercounts, const int min, const int max);
   

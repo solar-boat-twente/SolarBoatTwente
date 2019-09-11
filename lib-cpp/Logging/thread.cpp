@@ -389,7 +389,7 @@ void *ThreadWriteTelemInputData(void *ptr)
         if (TelemInputToLogfile == 1) // only needs to write if the command is given
         {
             //strcpy(tempString, OutputString); // copies data from WriteString function
-            pthread_mutex_lock(&mutex4);
+            pthread_mutex_lock(&mutex3);
          
            
             telem_input_logger.write_struct_telemetry_input(gl_telemetry_input_ptr);
@@ -409,13 +409,13 @@ void *ThreadWriteTelemInputData(void *ptr)
         }
         if (TelemInputToPython == 1) // only needs to write if the command is given
         {
-            pthread_mutex_lock(&mutex4);
+            pthread_mutex_lock(&mutex3);
             freopen(pipe_telem_input_to_python, "w", stderr);
             telem_input_pipe.write_struct_telemetry_input(gl_telemetry_input_ptr);
             fclose(stderr);
             TelemInputToPython = 0;
            
-            pthread_mutex_unlock(&mutex4);
+            pthread_mutex_unlock(&mutex3);
         }
         usleep(TELEM_INPUT_WRITE_CYCLE_TIME);
     }

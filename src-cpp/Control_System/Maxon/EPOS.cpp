@@ -239,7 +239,7 @@ void EPOS::start_position_mode(short int delay){
 }  //end of StartPositionMode 
 
 float EPOS::get_angle_from_podmeter() {
-  float button_position = (float)adam_6017->read_counter(5)/numeric_limits<uint16_t>::max() - 0.5;
+  float button_position = (float)adam_6017->read_counter(5)/numeric_limits<uint16_t>::max() - 0.3;
   float button_quartercounts = button_position * kPositionButtonQuartercountMultiplier;
   return button_quartercounts;
 
@@ -250,6 +250,7 @@ void EPOS::move(){
   float quartercounts;
   
   DataStore::AngleWings alphas = control_data_->GetWingData();
+  DataStore::EposData epos_data = control_data_->GetEposData();
 
   float user_quatercircles = get_angle_from_podmeter();
 
@@ -258,27 +259,31 @@ void EPOS::move(){
 
   switch (node_id_) {
     case 1:   //maximale hoeveelheid qc die we positief kunnen maken is 1000000 dit hoort bij 0.5 user_quartercircles //node 1 is rechts, node 2 is links
-      quartercounts = angle2quartercounts_(alphas.Wing_right, MIN_ANGLE_RIGHT, MAX_ANGLE_RIGHT) ;
+      quartercounts = angle2quartercounts_(alphas.Wing_right, MIN_ANGLE_RIGHT, MAX_ANGLE_RIGHT, kQuartercountMultiplierRight) ;
       M_INFO<<"RIGHT: "<<node_id_<<" Alpha: "<<alphas.Wing_right <<" | Position: "<<quartercounts;
+      epos_data.right_angle = alphas.Wing_right;
+      epos_data.right_quartercounts = quartercounts;
       break;
       
     case 2:
-      quartercounts = angle2quartercounts_(alphas.Wing_left, MIN_ANGLE_LEFT, MAX_ANGLE_RIGHT);
+      quartercounts = angle2quartercounts_(alphas.Wing_left, MIN_ANGLE_LEFT, MAX_ANGLE_LEFT, kQuartercountMultiplierLeft);
       M_INFO<<"\tLEFT: "<<node_id_<<"Alpha: "<<alphas.Wing_left <<" | Position: "<<quartercounts;
+      epos_data.left_angle = alphas.Wing_left;
+      epos_data.left_quartercounts = quartercounts;
       break;
       
     case 4:
       quartercounts = quartercounts2quartercounts_(user_quatercircles, MIN_ANGLE_BACK, MAX_ANGLE_BACK);//quartercircles + ((alphas.Wing_back*180/3.1415)*125000);   //absolute positie en start direct
       M_INFO<<"\tBACK: "<<node_id_<<"Alpha: "<<alphas.Wing_back <<" | Position: "<<quartercounts;
+      epos_data.back_angle = alphas.Wing_back;
+      epos_data.back_angle = quartercounts;
       break;
       
     default:
       M_WARN<<"INVALID NODE!";
       break;
   }
-    
-    
-      
+        
     /* -------------------------------------------------------------------------
     Unions allow one portion of memory to be accessed as different data types. 
     Its declaration and use is similar to the one of structures, but its 
@@ -293,7 +298,8 @@ void EPOS::move(){
     The data is put in byte 4, 5, 6 and 7 and comes from the union Quaters_Union
     ------------------------------------------------------------------------- */
     //cout << "Called MOVE()" << endl;
-
+  control_data_->PutEposData(&epos_data);
+  
   four_bytes absolute_position = {(int)quartercounts};
     
   canmsg_t move_message;
@@ -337,7 +343,7 @@ float EPOS::rad2deg_(float radians) {
  * @param max The maximum amount of quartercounts (!!)
  * @return float number of quartercounts
  */
-float EPOS::angle2quartercounts_(float radians, const int min, const int max) {
+float EPOS::angle2quartercounts_(float radians, const int min, const int max, int kQuartercountMultiplier) {
   float quartercounts =  rad2deg_(radians)*kQuartercountMultiplier;
   if (quartercounts < min) {
     quartercounts = min;

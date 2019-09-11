@@ -39,7 +39,9 @@ class PID_caller {
   void compute_pid_height(structures::FlyMode fly_mode = structures::FLY);
   
   
-
+  void reset_integral_height();
+  
+  void reset_integral_roll();
   
  private:
   DataStore* const control_data_;

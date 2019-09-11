@@ -93,8 +93,7 @@ class ButtonBoxHandler{
   int set_led(AdamOutputs output, bool state);
   
   
- private:
-  
+ 
   int set_motor_led(bool state);
   int set_motor_led(ButtonState state);
   
@@ -109,7 +108,7 @@ class ButtonBoxHandler{
   
   int set_mppts(bool state);
   int set_mppts(ButtonState state);
-  
+ private: 
   static bool initialized;
   
   bool reading_state;

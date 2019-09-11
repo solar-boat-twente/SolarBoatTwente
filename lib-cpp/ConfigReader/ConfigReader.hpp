@@ -27,7 +27,8 @@ enum class ConfigFloats{
   ROLL_START_SPEED,
   HEIGHT_SET_POINT,
   VLOTTER_LEFT,
-  VLOTTER_RIGHT
+  VLOTTER_RIGHT,
+  ZERO_LIFT_ANGLE
 };
 
 enum class ConfigInts{
@@ -45,6 +46,9 @@ class ConfigReader{
   std::vector<int> get_roll_states();
 
   std::vector<int> get_height_states();
+  
+  //returns the set state of the two wings order: a left, b left a right b right
+  std::vector<float> get_function_parameters();
 
   float get_float_data(ConfigFloats config);
   
@@ -54,9 +58,8 @@ class ConfigReader{
   
   std::vector<int> config_list_to_vector_(libconfig::Setting& list);
   
+  std::string file_name;
   libconfig::Config cfg_;
 };
 }
-
-#endif /* CONFIGREADER_HPP */
-
+#endif

@@ -24,7 +24,7 @@ namespace MIO{
 namespace PowerElectronics{
 
 const int kMotorStandardURange = 100;
-const int kMotorStandardIRange = 100;
+const int kMotorStandardIRange = 600;
 
 class Motor{
  public:

@@ -70,7 +70,7 @@ int ControlWheel::parse_data_(std::vector<uint8_t>* bytes, structures::UserInput
     
     switch ((*bytes)[1]){
       case 0:
-        user_input->steer.fly_mode = structures::NO_FLY;
+        //user_input->steer.fly_mode = structures::NO_FLY;
         break;
     };
     

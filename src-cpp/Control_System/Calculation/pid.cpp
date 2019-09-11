@@ -110,13 +110,22 @@ PID::~PID() {
     delete pimpl;
 }
 
+void PID::reset_integral() {
+  pimpl->reset_integral();
+}
+
+
+
+
+
+
 
 
 /**
  * Implementation
  */
 PIDImpl::PIDImpl( float dt, float Kp, float Kd, float Ki) 
-  : dt_(dt), Kp_(Kp), Kd_(Kd), Ki_(Ki), pre_error_(0), integral_(0)
+  : dt_(dt), Kp_(Kp), Kd_(Kd), Ki_(Ki), pre_error_(0.1), integral_(0)
 {
 }
 
@@ -173,5 +182,9 @@ PIDValues PIDImpl::get_PID_values() {
 
 
 PIDImpl::~PIDImpl()
-{
+{ }
+
+void PIDImpl::reset_integral() {
+  integral_ = 0;
 }
+

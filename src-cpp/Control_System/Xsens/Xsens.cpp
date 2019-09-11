@@ -22,6 +22,7 @@
 #include <iostream>
 #include <numeric>
 #include <cassert>
+#include <complex>
 
 
 #include "../../../lib-cpp/Debugging/easy_debugging.hpp"
@@ -199,7 +200,7 @@ void xsens::Xsens::parse_data(){
           // Counter clockwise should be a positive roll!
           // Bow (Boeg) of the boat up is positive pitch!
           xsensor.roll = pointer2float(parser_->DATA + i + 2)*-1;
-          xsensor.pitch = pointer2float(parser_->DATA + i + 6)*-1; 
+          xsensor.pitch = pointer2float(parser_->DATA + i + 6)*-1 + kPitchCorrection; 
           xsensor.yaw = pointer2float(parser_->DATA + i + 10); 
           M_INFO <<"xsens roll is "<<xsensor.roll;
           M_INFO << "xsens pitch is  "<<xsensor.pitch;
@@ -224,6 +225,7 @@ void xsens::Xsens::parse_data(){
           xsensor.velocity_x = pointer2float(parser_->DATA + i + 2);
           xsensor.velocity_y = pointer2float(parser_->DATA + i + 6);
           xsensor.velocity_z = pointer2float(parser_->DATA + i + 10);
+          xsensor.velocity_magnitude = sqrt(pow(xsensor.velocity_x,2)+pow(xsensor.velocity_y,2));
           //printf("vel_x: %f\r\n", DataStruct->velocity_x);
           //printf("vel_y: %f\r\n", DataStruct->velocity_y);
           //printf("vel_z: %f\r\n", DataStruct->velocity_z);

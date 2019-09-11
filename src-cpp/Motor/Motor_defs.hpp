@@ -76,11 +76,11 @@ struct RangeReferenceData{
 };
 
 
-const int RD_SUPPLY1 = 1<<0;
-const int RD_MOTOR1 = 1<<1;
-const int RD_MOTOR2 = 1<<2;
-const int RD_DRIVERSTATE = 1<<3;
-const int RD_RANGEREF = 1<<4;
+constexpr int RD_SUPPLY1 = 1<<0;
+constexpr int RD_MOTOR1 = 1<<1;
+constexpr int RD_MOTOR2 = 1<<2;
+constexpr int RD_DRIVERSTATE = 1<<3;
+constexpr int RD_RANGEREF = 1<<4;
 
 
 }

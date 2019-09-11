@@ -62,6 +62,7 @@ void control::Vlotter::stop_reading() {
 
 float control::Vlotter::get_angle_rad(EncoderNumber encoder) {
   if(encoder == EncoderNumber::ENCODER_LEFT){
+    std::cout<<"angle left: "<<angle_left_<<std::endl<<std::endl;
     return angle_left_;
   } else if (encoder == EncoderNumber::ENCODER_RIGHT){
     std::cout<<"angle right: "<<angle_right_<<std::endl<<std::endl;
@@ -70,9 +71,11 @@ float control::Vlotter::get_angle_rad(EncoderNumber encoder) {
 }
 
 float control::Vlotter::get_height(EncoderNumber encoder) {
-  if (encoder == EncoderNumber::ENCODER_RIGHT){
+  if (encoder == EncoderNumber::ENCODER_LEFT){
+    std::cout<<"height left: "<<height_left_<<std::endl<<std::endl;
     return height_left_;
   } else {
+    std::cout<<"height right: "<<height_right_<<std::endl<<std::endl;
     return height_right_;
   }
 }

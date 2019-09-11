@@ -35,6 +35,10 @@ class PIDImpl {
   
   PIDValues get_PID_values();
   
+  void reset_integral();
+  
+  void reset_integral_roll();
+  
  private: 
   float dt_;
   float max_;
@@ -83,6 +87,10 @@ class PID {
   ~PID();
   
   PIDValues get_PID_values();
+  
+  void reset_integral();
+  
+  void reset_integral_roll();
   
  private:
   PIDImpl * const pimpl;

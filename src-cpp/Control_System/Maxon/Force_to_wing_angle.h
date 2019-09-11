@@ -11,38 +11,41 @@
 #include "../DataStore.h"
 #include "../../../solarboattwente.h"
 #include "../Calculation/PID_caller.h"
+#include "../../../lib-cpp/ConfigReader/ConfigReader.hpp"
+#include "../../Control_System/Vlotter/Vlotter.hpp"
 
 namespace MIO{
 namespace control{
 
-constexpr float kMinSpeedHeight = 5.2;
-constexpr float kMinSpeedRoll = 2.7;
-constexpr float kMinHeight = 0.4;
-constexpr int kLiftOfForce = 1000;
-
 constexpr bool kControlTesting = false;
 constexpr int kControlTestVelocity = 4;
 
-constexpr int kRpmToMeterPerSecond = 216;
-constexpr bool kUseXsensVelocity = false;
-
+constexpr float kStallAngle = 0.225;
 
 class ForceToWingAngle {
-  float kMinSpeedHeight = 5.2;
-  float kMinSpeedRoll = 2.7;
-  float kMinHeight = 0.4;
-  int kLiftOfForce = 1000;
+  
+  float kMinSpeedHeight = 100;//4.8;//5.28; Dit hebben we voor Monaco op 20 gezet omdat we niet in deze stand willen komen. 
+  float kMinSpeedRoll = 2;
+  float kMinHeight = 0.2;
+  int kLiftOfForce = 1000; 
 
   bool kControlTesting = false;
   int kControlTestVelocity = 4;
 
-  int kRpmToMeterPerSecond = 216;
-  bool kUseXsensVelocity = false;
+  bool kUseXsensVelocity = true;
+  
+  float kVelocityMultiplier = 2.0;
+
+  float kZeroLiftAngle = -0.065;//-0.06;//0.08; //-0.05236;      //radians
   
  public:
+  
+    float kRpmToMeterPerSecond = 290;//was 216 nu 290 volgens margriet
 
-    ForceToWingAngle(DataStore * const control_data, PID_caller * const pid_caller);    
+    //DataStore *const control_data, PID_caller * const pid_caller,
+    ForceToWingAngle(DataStore *const control_data,PID_caller * const pid_caller, Vlotter * vlotter);    
     
+    ~ForceToWingAngle();
     void MMA(structures::PowerInput * power_input);   
     
     void MMA(float velocity);
@@ -57,7 +60,7 @@ class ForceToWingAngle {
     
     ForceToWingAngle* set_heigh_pid_start(float height);
     
-    
+    ForceToWingAngle* set_zero_lift(float zero_lift_angle);    
     
  private:
   void calculate_inverse_matrix();
@@ -96,7 +99,7 @@ class ForceToWingAngle {
    * @param zero_lift_correction The angle at which there is 0 lift
    * @return 
    */
-  float compute_real_angle_(float original_angle, float pitch_correction, float zero_lift_correction = kZeroLiftAngle);
+  float compute_real_angle_(float original_angle, float pitch_correction, float zero_lift_correction);
   
   
   
@@ -119,6 +122,8 @@ class ForceToWingAngle {
   
   PID_caller * const pid_caller_;
   
+  Vlotter * const vlotter_;
+  
   float inverse_matrix_MMA_[3][3];
   
   static constexpr float kLeftSurface = 0.05246193;   //m2
@@ -126,9 +131,12 @@ class ForceToWingAngle {
   static constexpr float kBackSurface = 0.058134;
   static constexpr float kDensity = 1025; //kg/m3 density salt water
   static constexpr int kLiftSlope = 5;
-  static constexpr float kZeroLiftAngle = -0.08;//0.08; //-0.05236;      //radians
     
   float velocity_ = 0;
+  
+  ConfigReader * const config;
+  
+  
 };   
 }
 }
